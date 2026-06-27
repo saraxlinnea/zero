@@ -1,11 +1,16 @@
 import { useState } from "react";
+import { PHOTOS } from "./photos.js";
 
 const FONT_LINK =
   "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap";
 
 const BIRTHDAY = new Date("2024-09-16");
 
-const NICKNAMES = ["Little Zero", "Little Floof", "Little Dragon", "Little Polar Bear", "Baby Zero", "Baby Boy", "Cutie Pie", "Chicken Wing", "Mr. Zero"];
+const NICKNAMES = [
+  "Little Zero", "Little Floof", "Little Dragon", "Little Polar Bear",
+  "Baby Zero", "Baby Boy", "Cutie Pie", "Chicken Wing", "Mr. Zero",
+  "Little Cloud", "Little Boy", "Sweetie Pie", "Zerowski", "Little Bear", "Handsome boy",
+];
 
 const STAR_SIGN = {
   name: "Virgo",
@@ -124,14 +129,6 @@ function getAge(birthday) {
 function formatDate(dateStr) {
   const d = new Date(dateStr + "T12:00:00");
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-}
-
-function formatTime(t) {
-  if (!t) return "";
-  const [h, m] = t.split(":").map(Number);
-  const ampm = h >= 12 ? "PM" : "AM";
-  const hr = h % 12 || 12;
-  return `${hr}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
 const pal = {
@@ -258,6 +255,20 @@ const s = {
   logStatBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 18px", minWidth: 100 },
   logStatNum: { fontFamily: ff.display, fontSize: 26, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
   logStatLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.13em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
+  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 },
+  photoCard: { background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0, cursor: "pointer" },
+  photoImg: { width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" },
+  lightbox: {
+    position: "fixed", inset: 0, background: "rgba(28, 17, 10, 0.92)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 1000, padding: 24, cursor: "pointer",
+  },
+  lightboxImg: { maxWidth: "100%", maxHeight: "100%", objectFit: "contain", border: `2px solid ${pal.rule}` },
+  lightboxClose: {
+    position: "absolute", top: 20, right: 24,
+    fontFamily: ff.body, fontSize: 13, letterSpacing: "0.12em", textTransform: "uppercase",
+    color: pal.mastheadMuted, background: "none", border: "none", cursor: "pointer",
+  },
 };
 
 function SectionHead({ title }) {
@@ -269,162 +280,36 @@ function SectionHead({ title }) {
   );
 }
 
-function WalkLog() {
-  const today = new Date().toISOString().split("T")[0];
-  const [walks, setWalks] = useState([
-    { id: 1, date: today, time: "07:30", duration: "30", route: "Marina Green", notes: "" },
-  ]);
-  const [form, setForm] = useState({ date: today, time: "", duration: "", route: "", notes: "" });
-
-  function add() {
-    if (!form.date) return;
-    setWalks([{ id: Date.now(), ...form }, ...walks]);
-    setForm({ date: today, time: "", duration: "", route: "", notes: "" });
-  }
+function PhotoGallery() {
+  const [active, setActive] = useState(null);
+  const base = import.meta.env.BASE_URL;
 
   return (
-    <div>
-      <div style={s.logForm}>
-        <p style={s.logFormTitle}>Log a Walk</p>
-        <div style={s.formRow} className="form-row-grid">
-          <div style={s.formGroup}>
-            <label style={s.lbl}>Date</label>
-            <input style={s.inp} type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
-          </div>
-          <div style={s.formGroup}>
-            <label style={s.lbl}>Time</label>
-            <input style={s.inp} type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} />
-          </div>
-          <div style={s.formGroup}>
-            <label style={s.lbl}>Duration (min)</label>
-            <input style={s.inp} type="number" min="0" placeholder="30" value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} />
-          </div>
-          <div style={s.formGroup}>
-            <label style={s.lbl}>Route</label>
-            <input style={s.inp} type="text" placeholder="Marina Green, Crissy Field..." value={form.route} onChange={e => setForm({ ...form, route: e.target.value })} />
-          </div>
-        </div>
-        <div style={{ ...s.formGroup, marginBottom: 0 }}>
-          <label style={s.lbl}>Notes</label>
-          <textarea style={s.ta} placeholder="Encounters, mood, notable sniffs..." value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
-        </div>
-        <button style={s.addBtn} onClick={add}>+ Add Walk</button>
+    <>
+      <div style={s.photoGrid} className="photo-grid">
+        {PHOTOS.map((name) => (
+          <figure key={name} style={s.photoCard} onClick={() => setActive(name)}>
+            <img
+              style={s.photoImg}
+              src={`${base}photos/${name}`}
+              alt={`Zero — ${name.replace(/\.[^.]+$/, "")}`}
+              loading="lazy"
+            />
+          </figure>
+        ))}
       </div>
-      <div style={s.logStatRow} className="log-stat-row">
-        <div style={s.logStatBox}>
-          <div style={s.logStatNum}>{walks.length}</div>
-          <div style={s.logStatLabel}>Walks logged</div>
+      {active && (
+        <div style={s.lightbox} onClick={() => setActive(null)} role="dialog" aria-modal="true" aria-label="Photo preview">
+          <button style={s.lightboxClose} onClick={() => setActive(null)} type="button">Close</button>
+          <img
+            style={s.lightboxImg}
+            src={`${base}photos/${active}`}
+            alt={`Zero — ${active.replace(/\.[^.]+$/, "")}`}
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
-        <div style={s.logStatBox}>
-          <div style={s.logStatNum}>{walks.reduce((sum, w) => sum + (parseInt(w.duration) || 0), 0)}</div>
-          <div style={s.logStatLabel}>Total minutes</div>
-        </div>
-      </div>
-      {walks.length === 0 ? (
-        <p style={s.empty}>No walks logged yet. Zero awaits.</p>
-      ) : (
-        <div className="table-wrap"><table style={s.table}>
-          <thead>
-            <tr>
-              <th style={s.th}>Date</th>
-              <th style={s.th}>Time</th>
-              <th style={s.th}>Duration</th>
-              <th style={s.th}>Route</th>
-              <th style={s.th}>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {walks.map(w => (
-              <tr key={w.id}>
-                <td style={s.td}>{formatDate(w.date)}</td>
-                <td style={s.td}>{formatTime(w.time) || "—"}</td>
-                <td style={s.td}>{w.duration ? `${w.duration} min` : "—"}</td>
-                <td style={s.td}>{w.route || "—"}</td>
-                <td style={{ ...s.td, fontStyle: "italic", maxWidth: 200 }}>{w.notes || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table></div>
       )}
-    </div>
-  );
-}
-
-function TreatLog() {
-  const today = new Date().toISOString().split("T")[0];
-  const TYPES = ["Training treat", "Chew", "Bully stick", "Dental chew", "Snack", "Other"];
-  const [treats, setTreats] = useState([
-    { id: 1, date: today, type: "Training treat", quantity: "3", occasion: "Post-tricks session" },
-  ]);
-  const [form, setForm] = useState({ date: today, type: "Training treat", quantity: "", occasion: "" });
-
-  function add() {
-    if (!form.date) return;
-    setTreats([{ id: Date.now(), ...form }, ...treats]);
-    setForm({ date: today, type: "Training treat", quantity: "", occasion: "" });
-  }
-
-  return (
-    <div>
-      <div style={s.logForm}>
-        <p style={s.logFormTitle}>Log a Treat</p>
-        <div style={s.formRow} className="form-row-grid">
-          <div style={s.formGroup}>
-            <label style={s.lbl}>Date</label>
-            <input style={s.inp} type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
-          </div>
-          <div style={s.formGroup}>
-            <label style={s.lbl}>Type</label>
-            <select style={s.sel} value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
-              {TYPES.map(t => <option key={t}>{t}</option>)}
-            </select>
-          </div>
-          <div style={s.formGroup}>
-            <label style={s.lbl}>Quantity</label>
-            <input style={s.inp} type="number" min="1" placeholder="1" value={form.quantity} onChange={e => setForm({ ...form, quantity: e.target.value })} />
-          </div>
-          <div style={s.formGroup}>
-            <label style={s.lbl}>Occasion</label>
-            <input style={s.inp} type="text" placeholder="After tricks, just because..." value={form.occasion} onChange={e => setForm({ ...form, occasion: e.target.value })} />
-          </div>
-        </div>
-        <button style={s.addBtn} onClick={add}>+ Add Treat</button>
-      </div>
-      <div style={s.logStatRow} className="log-stat-row">
-        <div style={s.logStatBox}>
-          <div style={s.logStatNum}>{treats.length}</div>
-          <div style={s.logStatLabel}>Entries</div>
-        </div>
-        <div style={s.logStatBox}>
-          <div style={s.logStatNum}>{treats.reduce((sum, t) => sum + (parseInt(t.quantity) || 1), 0)}</div>
-          <div style={s.logStatLabel}>Total treats</div>
-        </div>
-      </div>
-      {treats.length === 0 ? (
-        <p style={s.empty}>No treats logged yet. Zero is patient.</p>
-      ) : (
-        <div className="table-wrap"><table style={s.table}>
-          <thead>
-            <tr>
-              <th style={s.th}>Date</th>
-              <th style={s.th}>Type</th>
-              <th style={s.th}>Qty</th>
-              <th style={s.th}>Occasion</th>
-            </tr>
-          </thead>
-          <tbody>
-            {treats.map(t => (
-              <tr key={t.id}>
-                <td style={s.td}>{formatDate(t.date)}</td>
-                <td style={s.td}>{t.type}</td>
-                <td style={s.td}>{t.quantity || 1}</td>
-                <td style={{ ...s.td, fontStyle: "italic" }}>{t.occasion || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table></div>
-      )}
-    </div>
+    </>
   );
 }
 
@@ -528,6 +413,7 @@ export default function App() {
           .form-row-grid { grid-template-columns: 1fr !important; }
           .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
           .log-stat-row { flex-wrap: wrap; }
+          .photo-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
       <div style={s.page}>
@@ -696,11 +582,8 @@ export default function App() {
             ))}
           </div>
 
-          <SectionHead title="Walk Log" />
-          <WalkLog />
-
-          <SectionHead title="Treat Log" />
-          <TreatLog />
+          <SectionHead title="Photographic Record" />
+          <PhotoGallery />
 
           <SectionHead title="Tick Tracker" />
           <TickTracker />
