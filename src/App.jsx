@@ -36,12 +36,27 @@ const LIKES = [
   "Going on walks",
   "Being a diva",
   "Doing tricks",
+  "Head massages",
   "Cuddling (when not too hot)",
   "Getting dirty in the ocean",
   "Bringing and receiving toys (with Ender especially)",
   "Swimming in lakes",
   "Being the best boy",
 ];
+
+const ADVENTURES = [
+  "Cross-country skiing — Nevada Nordic, Lake Tahoe",
+  "Star Lake hike — Lake Tahoe",
+  "Santa Cruz hike",
+  "San Jose hills hike",
+  "Fort Funston — South San Francisco",
+];
+
+const CUTOUTS = {
+  happyFace: "zero-happy-face.png",
+  headMassage: "zero-head-massage.png",
+  dirty: "dirty-zero.png",
+};
 
 const DISLIKES = [
   "Putting on his harness",
@@ -269,7 +284,40 @@ const s = {
     fontFamily: ff.body, fontSize: 13, letterSpacing: "0.12em", textTransform: "uppercase",
     color: pal.mastheadMuted, background: "none", border: "none", cursor: "pointer",
   },
+  mastheadLeft: { display: "flex", alignItems: "flex-end", gap: 20 },
+  mastheadCutout: {
+    width: 96, height: 96, objectFit: "contain", objectPosition: "bottom",
+    filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.35))",
+    flexShrink: 0,
+  },
+  lovesCard: { position: "relative" },
+  lovesCutout: {
+    width: "100%", maxWidth: 140, objectFit: "contain", display: "block",
+    margin: "16px auto 0", filter: "drop-shadow(0 2px 6px rgba(44,26,14,0.12))",
+  },
+  adventureGrid: {
+    display: "grid", gridTemplateColumns: "1fr auto", gap: 28, alignItems: "center",
+    background: pal.white, border: `1px solid ${pal.rule}`, padding: "28px 32px",
+  },
+  adventureList: { margin: 0, padding: 0, listStyle: "none" },
+  adventureItem: {
+    fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1,
+    padding: "9px 0", borderBottom: `1px solid rgba(201,169,122,0.2)`,
+    display: "flex", alignItems: "center", gap: 10,
+  },
+  adventureCutout: {
+    width: 180, objectFit: "contain", display: "block",
+    filter: "drop-shadow(0 3px 8px rgba(44,26,14,0.15))",
+  },
+  adventureCaption: {
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.lightBrown,
+    textAlign: "center", marginTop: 8,
+  },
 };
+
+function cutoutSrc(name) {
+  return `${import.meta.env.BASE_URL}cutouts/${name}`;
+}
 
 function SectionHead({ title }) {
   return (
@@ -414,16 +462,28 @@ export default function App() {
           .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
           .log-stat-row { flex-wrap: wrap; }
           .photo-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .masthead-left { align-items: flex-start !important; }
+          .masthead-cutout { width: 72px !important; height: 72px !important; }
+          .adventure-grid { grid-template-columns: 1fr !important; }
+          .adventure-cutout-wrap { text-align: center; }
         }
       `}</style>
       <div style={s.page}>
 
         <header style={s.masthead}>
           <div style={s.mastheadInner} className="masthead-inner">
-            <div>
-              <p style={s.siteLabel}>Specimen Record · Canine Division</p>
-              <h1 style={s.mastheadTitle} className="masthead-title">Zero</h1>
-              <p style={s.mastheadSub}>Samoyed · San Francisco, CA</p>
+            <div style={s.mastheadLeft} className="masthead-left">
+              <img
+                style={s.mastheadCutout}
+                className="masthead-cutout"
+                src={cutoutSrc(CUTOUTS.happyFace)}
+                alt="Zero — happy face"
+              />
+              <div>
+                <p style={s.siteLabel}>Specimen Record · Canine Division</p>
+                <h1 style={s.mastheadTitle} className="masthead-title">Zero</h1>
+                <p style={s.mastheadSub}>Samoyed · San Francisco, CA</p>
+              </div>
             </div>
             <div style={s.mastheadMeta} className="masthead-meta">
               <div>Born September 16, 2024</div>
@@ -521,7 +581,7 @@ export default function App() {
 
           <SectionHead title="Favorite Activities" />
           <div style={s.activitiesGrid} className="two-col-grid">
-            <div style={s.activitiesCard}>
+            <div style={{ ...s.activitiesCard, ...s.lovesCard }}>
               <p style={s.activitiesCardTitle}>Loves</p>
               {LIKES.map((item, i) => (
                 <div key={item} style={{ ...s.activityItem, borderBottom: i === LIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
@@ -529,6 +589,11 @@ export default function App() {
                   {item}
                 </div>
               ))}
+              <img
+                style={s.lovesCutout}
+                src={cutoutSrc(CUTOUTS.headMassage)}
+                alt="Zero receiving a head massage"
+              />
             </div>
             <div style={s.activitiesCard}>
               <p style={s.activitiesCardTitle}>Would rather not</p>
@@ -539,6 +604,26 @@ export default function App() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <SectionHead title="Adventure Highlights" />
+          <div style={s.adventureGrid} className="adventure-grid">
+            <ul style={s.adventureList}>
+              {ADVENTURES.map((item, i) => (
+                <li key={item} style={{ ...s.adventureItem, borderBottom: i === ADVENTURES.length - 1 ? "none" : s.adventureItem.borderBottom }}>
+                  <div style={s.activityDot} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <figure className="adventure-cutout-wrap" style={{ margin: 0 }}>
+              <img
+                style={s.adventureCutout}
+                src={cutoutSrc(CUTOUTS.dirty)}
+                alt="Zero after an adventure"
+              />
+              <figcaption style={s.adventureCaption}>Field condition: acceptable.</figcaption>
+            </figure>
           </div>
 
           <SectionHead title="Celestial Profile" />
