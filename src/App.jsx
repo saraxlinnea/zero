@@ -54,6 +54,7 @@ const ADVENTURES = [
 
 const CUTOUTS = {
   happyFace: "zero-happy-face.png",
+  running: "zero-running.png",
   headMassage: "zero-head-massage.png",
   dirty: "dirty-zero.png",
 };
@@ -131,6 +132,16 @@ const INITIAL_TICKS = [
   { id: 1, date: "2025-05-03", location: "Coastal hike, Santa Cruz", count: 12, notes: "All 12 found and removed after the hike. Zero was unperturbed." },
 ];
 
+const PAGE_MAX = 1200;
+
+const TABS = [
+  { id: "profile", label: "Profile" },
+  { id: "character", label: "Character" },
+  { id: "breed", label: "Breed" },
+  { id: "gallery", label: "Gallery" },
+  { id: "records", label: "Records" },
+];
+
 function getAge(birthday) {
   const now = new Date();
   const months =
@@ -175,7 +186,7 @@ const s = {
   page: { fontFamily: ff.body, background: pal.cream, minHeight: "100vh", color: pal.ink },
   masthead: { background: pal.masthead, color: pal.mastheadText },
   mastheadInner: {
-    maxWidth: 900, margin: "0 auto", padding: "28px 36px 24px",
+    maxWidth: PAGE_MAX, margin: "0 auto", padding: "28px 36px 24px",
     display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24,
   },
   siteLabel: {
@@ -194,18 +205,42 @@ const s = {
     textAlign: "right", fontFamily: ff.body, fontSize: 13,
     color: pal.mastheadMuted, lineHeight: 1.9,
   },
+  mastheadMetaSub: { fontSize: 12, lineHeight: 1.7 },
   mastheadRule: { borderTop: `1px solid ${pal.mastheadMuted}`, opacity: 0.3, margin: 0 },
-  main: { maxWidth: 900, margin: "0 auto", padding: "44px 36px 80px" },
+  main: { maxWidth: PAGE_MAX, margin: "0 auto", padding: "44px 36px 80px" },
   // intro blurb
   introBlock: {
     fontFamily: ff.body, fontSize: 17, color: pal.inkMuted, lineHeight: 1.85,
-    marginBottom: 40, fontStyle: "italic",
+    marginBottom: 28, fontStyle: "italic",
   },
   introStrong: { fontFamily: ff.display, fontStyle: "normal", fontWeight: 600, color: pal.darkBrown },
+  tabBar: {
+    display: "flex", gap: 0, borderBottom: `1px solid ${pal.rule}`,
+    marginBottom: 36, overflowX: "auto", WebkitOverflowScrolling: "touch",
+  },
+  tabBtn: {
+    fontFamily: ff.body, fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase",
+    color: pal.lightBrown, background: "none", border: "none",
+    borderBottom: "2px solid transparent", padding: "12px 20px", cursor: "pointer",
+    whiteSpace: "nowrap", flexShrink: 0, marginBottom: -1,
+  },
+  tabBtnActive: {
+    color: pal.darkBrown, borderBottom: `2px solid ${pal.darkBrown}`, fontWeight: 500,
+  },
+  tabPanel: { minHeight: 320 },
   secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 22, marginTop: 52 },
+  secHeadFirst: { marginTop: 0 },
   secTitle: { fontFamily: ff.display, fontSize: 22, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1 },
   secRule: { flex: 1, height: 1, background: pal.rule, opacity: 0.45, border: "none" },
-  statRow: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 32 },
+  statRow: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 0 },
+  statSection: {
+    display: "grid", gridTemplateColumns: "1fr auto", gap: 24, alignItems: "end",
+    marginBottom: 32,
+  },
+  statCutout: {
+    width: 140, height: 140, objectFit: "contain", objectPosition: "bottom",
+    filter: "drop-shadow(0 3px 10px rgba(0,0,0,0.2))",
+  },
   statBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "16px 18px" },
   statNum: { fontFamily: ff.display, fontSize: 30, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
   statLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 5 },
@@ -270,7 +305,7 @@ const s = {
   logStatBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 18px", minWidth: 100 },
   logStatNum: { fontFamily: ff.display, fontSize: 26, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
   logStatLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.13em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
-  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 },
+  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14 },
   photoCard: { background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0, cursor: "pointer" },
   photoImg: { width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" },
   lightbox: {
@@ -319,11 +354,35 @@ function cutoutSrc(name) {
   return `${import.meta.env.BASE_URL}cutouts/${name}`;
 }
 
-function SectionHead({ title }) {
+function SectionHead({ title, first = false }) {
   return (
-    <div style={s.secHead}>
+    <div style={{ ...s.secHead, ...(first ? s.secHeadFirst : {}) }}>
       <h2 style={s.secTitle}>{title}</h2>
       <hr style={s.secRule} />
+    </div>
+  );
+}
+
+function TabBar({ active, onChange }) {
+  return (
+    <div style={s.tabBar} role="tablist" aria-label="Specimen sections" className="tab-bar">
+      {TABS.map(({ id, label }) => {
+        const isActive = active === id;
+        return (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            aria-controls={`panel-${id}`}
+            id={`tab-${id}`}
+            style={{ ...s.tabBtn, ...(isActive ? s.tabBtnActive : {}) }}
+            onClick={() => onChange(id)}
+          >
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -440,6 +499,7 @@ function TickTracker() {
 }
 
 export default function App() {
+  const [tab, setTab] = useState("profile");
   const today = new Date();
   const nextBirthday = new Date(today.getFullYear(), 8, 16);
   if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1);
@@ -453,7 +513,11 @@ export default function App() {
         input, select, textarea, button { font-size: 16px !important; }
         @media (max-width: 600px) {
           .masthead-inner { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; padding: 20px 20px 18px !important; }
-          .masthead-meta { text-align: left !important; }
+          .masthead-meta { text-align: left !important; display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px 20px !important; width: 100% !important; }
+          .masthead-meta-sub { opacity: 0.65; }
+          .masthead-meta-sub:last-child { opacity: 0.55; }
+          .stat-section { grid-template-columns: 1fr !important; }
+          .stat-cutout { margin: 0 auto; width: 120px !important; height: 120px !important; }
           .masthead-title { font-size: 28px !important; }
           .main-content { padding: 28px 20px 60px !important; }
           .two-col-grid { grid-template-columns: 1fr !important; }
@@ -466,6 +530,7 @@ export default function App() {
           .masthead-cutout { width: 72px !important; height: 72px !important; }
           .adventure-grid { grid-template-columns: 1fr !important; }
           .adventure-cutout-wrap { text-align: center; }
+          .tab-bar { margin-left: -4px; }
         }
       `}</style>
       <div style={s.page}>
@@ -487,11 +552,11 @@ export default function App() {
             </div>
             <div style={s.mastheadMeta} className="masthead-meta">
               <div>Born September 16, 2024</div>
-              <div>{getAge(BIRTHDAY)}</div>
-              <div style={{ marginTop: 4, fontSize: 12, opacity: 0.65 }}>
+              <div className="masthead-meta-sub" style={s.mastheadMetaSub}>
                 {STAR_SIGN.symbol} {STAR_SIGN.name} · {CHINESE_ZODIAC.character} {CHINESE_ZODIAC.name}
               </div>
-              <div style={{ marginTop: 4, fontSize: 12, opacity: 0.55 }}>
+              <div>{getAge(BIRTHDAY)}</div>
+              <div className="masthead-meta-sub" style={s.mastheadMetaSub}>
                 {daysUntilBirthday === 0
                   ? "Happy Birthday, Zero!"
                   : `${daysUntilBirthday} days until next birthday`}
@@ -514,164 +579,194 @@ export default function App() {
             ))}.
           </p>
 
-          <SectionHead title="Vital Statistics" />
-          <div style={s.statRow} className="stat-grid">
-            <div style={s.statBox}>
-              <div style={s.statNum}>{ALL_TRICKS.length}</div>
-              <div style={s.statLabel}>Known tricks</div>
-              <div style={s.statNote}>Sit through Ambiturner</div>
-            </div>
-            <div style={s.statBox}>
-              <div style={{ ...s.statNum, fontSize: 20, paddingTop: 6 }}>8,740,000</div>
-              <div style={s.statLabel}>Known friends</div>
-              <div style={s.statNote}>All estimated living species on Earth. Zero loves everyone.</div>
-            </div>
-            <div style={s.statBox}>
-              <div style={s.statNum}>12+</div>
-              <div style={s.statLabel}>Ticks hosted</div>
-              <div style={s.statNote}>One coastal hike. He was a gracious host.</div>
-            </div>
-          </div>
+          <TabBar active={tab} onChange={setTab} />
 
-          <SectionHead title="Field Notes" />
-          <div style={s.specimenCard} className="two-col-grid">
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>Common Name</p>
-              <p style={s.fieldValue}>Zero</p>
-            </div>
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>Species</p>
-              <p style={s.fieldValue}>Samoyed</p>
-              <p style={s.fieldSub}>Canis lupus familiaris</p>
-            </div>
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>Date of Record</p>
-              <p style={s.fieldValue}>September 16, 2024</p>
-            </div>
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>Location</p>
-              <p style={s.fieldValue}>San Francisco, CA</p>
-              <p style={s.fieldSub}>Marina neighborhood</p>
-            </div>
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>Weight</p>
-              <p style={s.fieldValue}>50 lbs</p>
-            </div>
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>Coat</p>
-              <p style={s.fieldValue}>Snow-white</p>
-              <p style={s.fieldSub}>A cloud in dog form, with party pants.</p>
-            </div>
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>Eyes</p>
-              <p style={s.fieldValue}>Soulful black eyes</p>
-              <p style={s.fieldSub}>Deep, dark, and expressive. He knows exactly what he is doing with them.</p>
-            </div>
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>Social Disposition</p>
-              <p style={s.fieldValue}>Loves everyone</p>
-              <p style={s.fieldSub}>All 8.74 million known living species, without exception or reservation.</p>
-            </div>
-            <div style={s.fieldBlock}>
-              <p style={s.fieldLabel}>AKC Classification</p>
-              <p style={s.fieldValue}>Working Group</p>
-              <p style={s.fieldSub}>Bred to pull sleds and guard homes. Currently applying this ethic to the couch.</p>
-            </div>
-          </div>
-
-          <SectionHead title="Favorite Activities" />
-          <div style={s.activitiesGrid} className="two-col-grid">
-            <div style={{ ...s.activitiesCard, ...s.lovesCard }}>
-              <p style={s.activitiesCardTitle}>Loves</p>
-              {LIKES.map((item, i) => (
-                <div key={item} style={{ ...s.activityItem, borderBottom: i === LIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
-                  <div style={s.activityDot} />
-                  {item}
+          {tab === "profile" && (
+            <div style={s.tabPanel} role="tabpanel" id="panel-profile" aria-labelledby="tab-profile">
+              <SectionHead title="Vital Statistics" first />
+              <div style={s.statSection} className="stat-section">
+                <div style={s.statRow} className="stat-grid">
+                  <div style={s.statBox}>
+                    <div style={s.statNum}>{ALL_TRICKS.length}</div>
+                    <div style={s.statLabel}>Known tricks</div>
+                    <div style={s.statNote}>Sit through Ambiturner</div>
+                  </div>
+                  <div style={s.statBox}>
+                    <div style={{ ...s.statNum, fontSize: 20, paddingTop: 6 }}>8,740,000</div>
+                    <div style={s.statLabel}>Known friends</div>
+                    <div style={s.statNote}>All estimated living species on Earth. Zero loves everyone.</div>
+                  </div>
+                  <div style={s.statBox}>
+                    <div style={s.statNum}>12+</div>
+                    <div style={s.statLabel}>Ticks hosted</div>
+                    <div style={s.statNote}>One coastal hike. He was a gracious host.</div>
+                  </div>
                 </div>
-              ))}
-              <img
-                style={s.lovesCutout}
-                src={cutoutSrc(CUTOUTS.headMassage)}
-                alt="Zero receiving a head massage"
-              />
-            </div>
-            <div style={s.activitiesCard}>
-              <p style={s.activitiesCardTitle}>Would rather not</p>
-              {DISLIKES.map((item, i) => (
-                <div key={item} style={{ ...s.activityItem, borderBottom: i === DISLIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
-                  <div style={s.dislikeDot} />
-                  {item}
+                <img
+                  style={s.statCutout}
+                  className="stat-cutout"
+                  src={cutoutSrc(CUTOUTS.running)}
+                  alt="Zero running"
+                />
+              </div>
+
+              <SectionHead title="Field Notes" />
+              <div style={s.specimenCard} className="two-col-grid">
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>Common Name</p>
+                  <p style={s.fieldValue}>Zero</p>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <SectionHead title="Adventure Highlights" />
-          <div style={s.adventureGrid} className="adventure-grid">
-            <ul style={s.adventureList}>
-              {ADVENTURES.map((item, i) => (
-                <li key={item} style={{ ...s.adventureItem, borderBottom: i === ADVENTURES.length - 1 ? "none" : s.adventureItem.borderBottom }}>
-                  <div style={s.activityDot} />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <figure className="adventure-cutout-wrap" style={{ margin: 0 }}>
-              <img
-                style={s.adventureCutout}
-                src={cutoutSrc(CUTOUTS.dirty)}
-                alt="Zero after an adventure"
-              />
-              <figcaption style={s.adventureCaption}>Field condition: acceptable.</figcaption>
-            </figure>
-          </div>
-
-          <SectionHead title="Celestial Profile" />
-          <div style={s.zodiacGrid} className="two-col-grid">
-            <div style={s.zodiacCard}>
-              <div style={s.zodiacSymbol}>{STAR_SIGN.symbol}</div>
-              <h3 style={s.zodiacName}>{STAR_SIGN.name}</h3>
-              <p style={s.zodiacBlurb}>{STAR_SIGN.blurb}</p>
-            </div>
-            <div style={s.zodiacCard}>
-              <div style={{ ...s.zodiacSymbol, fontFamily: ff.body }}>
-                {CHINESE_ZODIAC.character}
-                <span style={{ fontSize: 14, color: pal.lightBrown, marginLeft: 10, fontFamily: ff.body, fontStyle: "italic" }}>
-                  {CHINESE_ZODIAC.pinyin}
-                </span>
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>Species</p>
+                  <p style={s.fieldValue}>Samoyed</p>
+                  <p style={s.fieldSub}>Canis lupus familiaris</p>
+                </div>
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>Date of Record</p>
+                  <p style={s.fieldValue}>September 16, 2024</p>
+                </div>
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>Location</p>
+                  <p style={s.fieldValue}>San Francisco, CA</p>
+                  <p style={s.fieldSub}>Marina neighborhood</p>
+                </div>
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>Weight</p>
+                  <p style={s.fieldValue}>50 lbs</p>
+                </div>
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>Coat</p>
+                  <p style={s.fieldValue}>Snow-white</p>
+                  <p style={s.fieldSub}>A cloud in dog form, with party pants.</p>
+                </div>
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>Eyes</p>
+                  <p style={s.fieldValue}>Soulful black eyes</p>
+                  <p style={s.fieldSub}>Deep, dark, and expressive. He knows exactly what he is doing with them.</p>
+                </div>
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>Social Disposition</p>
+                  <p style={s.fieldValue}>Loves everyone</p>
+                  <p style={s.fieldSub}>All 8.74 million known living species, without exception or reservation.</p>
+                </div>
+                <div style={s.fieldBlock}>
+                  <p style={s.fieldLabel}>AKC Classification</p>
+                  <p style={s.fieldValue}>Working Group</p>
+                  <p style={s.fieldSub}>Bred to pull sleds and guard homes. Currently applying this ethic to the couch.</p>
+                </div>
               </div>
-              <h3 style={s.zodiacName}>{CHINESE_ZODIAC.name}</h3>
-              <p style={s.zodiacBlurb}>{CHINESE_ZODIAC.blurb}</p>
+
+              <SectionHead title="Favorite Activities" />
+              <div style={s.activitiesGrid} className="two-col-grid">
+                <div style={{ ...s.activitiesCard, ...s.lovesCard }}>
+                  <p style={s.activitiesCardTitle}>Loves</p>
+                  {LIKES.map((item, i) => (
+                    <div key={item} style={{ ...s.activityItem, borderBottom: i === LIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
+                      <div style={s.activityDot} />
+                      {item}
+                    </div>
+                  ))}
+                  <img
+                    style={s.lovesCutout}
+                    src={cutoutSrc(CUTOUTS.headMassage)}
+                    alt="Zero receiving a head massage"
+                  />
+                </div>
+                <div style={s.activitiesCard}>
+                  <p style={s.activitiesCardTitle}>Would rather not</p>
+                  {DISLIKES.map((item, i) => (
+                    <div key={item} style={{ ...s.activityItem, borderBottom: i === DISLIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
+                      <div style={s.dislikeDot} />
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <SectionHead title="Adventure Highlights" />
+              <div style={s.adventureGrid} className="adventure-grid">
+                <ul style={s.adventureList}>
+                  {ADVENTURES.map((item, i) => (
+                    <li key={item} style={{ ...s.adventureItem, borderBottom: i === ADVENTURES.length - 1 ? "none" : s.adventureItem.borderBottom }}>
+                      <div style={s.activityDot} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <figure className="adventure-cutout-wrap" style={{ margin: 0 }}>
+                  <img
+                    style={s.adventureCutout}
+                    src={cutoutSrc(CUTOUTS.dirty)}
+                    alt="Zero after an adventure"
+                  />
+                  <figcaption style={s.adventureCaption}>Field condition: acceptable.</figcaption>
+                </figure>
+              </div>
             </div>
-          </div>
+          )}
 
-          <SectionHead title="About the Samoyed" />
-          <div style={s.factsGrid} className="two-col-grid">
-            {SAMOYED_FACTS.map(f => (
-              <div key={f.label} style={s.factCard}>
-                <p style={s.factLabel}>{f.label}</p>
-                <p style={s.factValue}>{f.value}</p>
-                <p style={s.factDetail}>{f.detail}</p>
+          {tab === "character" && (
+            <div style={s.tabPanel} role="tabpanel" id="panel-character" aria-labelledby="tab-character">
+              <SectionHead title="Celestial Profile" first />
+              <div style={s.zodiacGrid} className="two-col-grid">
+                <div style={s.zodiacCard}>
+                  <div style={s.zodiacSymbol}>{STAR_SIGN.symbol}</div>
+                  <h3 style={s.zodiacName}>{STAR_SIGN.name}</h3>
+                  <p style={s.zodiacBlurb}>{STAR_SIGN.blurb}</p>
+                </div>
+                <div style={s.zodiacCard}>
+                  <div style={{ ...s.zodiacSymbol, fontFamily: ff.body }}>
+                    {CHINESE_ZODIAC.character}
+                    <span style={{ fontSize: 14, color: pal.lightBrown, marginLeft: 10, fontFamily: ff.body, fontStyle: "italic" }}>
+                      {CHINESE_ZODIAC.pinyin}
+                    </span>
+                  </div>
+                  <h3 style={s.zodiacName}>{CHINESE_ZODIAC.name}</h3>
+                  <p style={s.zodiacBlurb}>{CHINESE_ZODIAC.blurb}</p>
+                </div>
               </div>
-            ))}
-          </div>
 
-          <SectionHead title="Repertoire" />
-          <div style={s.tricksGrid}>
-            {ALL_TRICKS.map((trick, i) => (
-              <div key={trick.name} style={s.trickCard}>
-                <p style={s.trickNum}>No. {String(i + 1).padStart(2, "0")}</p>
-                <p style={s.trickName}>{trick.name}</p>
-                {trick.note && <p style={s.trickNote}>{trick.note}</p>}
+              <SectionHead title="Repertoire" />
+              <div style={s.tricksGrid}>
+                {ALL_TRICKS.map((trick, i) => (
+                  <div key={trick.name} style={s.trickCard}>
+                    <p style={s.trickNum}>No. {String(i + 1).padStart(2, "0")}</p>
+                    <p style={s.trickName}>{trick.name}</p>
+                    {trick.note && <p style={s.trickNote}>{trick.note}</p>}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
-          <SectionHead title="Photographic Record" />
-          <PhotoGallery />
+          {tab === "breed" && (
+            <div style={s.tabPanel} role="tabpanel" id="panel-breed" aria-labelledby="tab-breed">
+              <SectionHead title="About the Samoyed" first />
+              <div style={s.factsGrid} className="two-col-grid">
+                {SAMOYED_FACTS.map(f => (
+                  <div key={f.label} style={s.factCard}>
+                    <p style={s.factLabel}>{f.label}</p>
+                    <p style={s.factValue}>{f.value}</p>
+                    <p style={s.factDetail}>{f.detail}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <SectionHead title="Tick Tracker" />
-          <TickTracker />
+          {tab === "gallery" && (
+            <div style={s.tabPanel} role="tabpanel" id="panel-gallery" aria-labelledby="tab-gallery">
+              <SectionHead title="Photographic Record" first />
+              <PhotoGallery />
+            </div>
+          )}
+
+          {tab === "records" && (
+            <div style={s.tabPanel} role="tabpanel" id="panel-records" aria-labelledby="tab-records">
+              <SectionHead title="Tick Tracker" first />
+              <TickTracker />
+            </div>
+          )}
 
         </main>
       </div>
