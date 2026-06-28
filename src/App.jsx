@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PHOTOS } from "./photos.js";
 
 const FONT_LINK =
@@ -7,9 +7,9 @@ const FONT_LINK =
 const BIRTHDAY = new Date("2024-09-16");
 
 const NICKNAMES = [
-  "Little Zero", "Little Floof", "Little Dragon", "Little Polar Bear",
+  "Zerowski", "Little Zero", "Little Floof", "Little Dragon", "Little Polar Bear",
   "Baby Zero", "Baby Boy", "Cutie Pie", "Chicken Wing", "Mr. Zero",
-  "Little Cloud", "Little Boy", "Sweetie Pie", "Zerowski", "Little Bear", "Handsome boy",
+  "Little Cloud", "Little Boy", "Sweetie Pie", "Little Bear", "Handsome boy", "Little Lamb",
 ];
 
 const STAR_SIGN = {
@@ -141,6 +141,16 @@ const TABS = [
   { id: "gallery", label: "Gallery" },
   { id: "records", label: "Records" },
 ];
+
+function getLiveAge(birthday) {
+  const diff = Date.now() - birthday.getTime();
+  return {
+    days: Math.floor(diff / 86_400_000),
+    hours: Math.floor((diff / 3_600_000) % 24),
+    minutes: Math.floor((diff / 60_000) % 60),
+    seconds: Math.floor((diff / 1_000) % 60),
+  };
+}
 
 function getAge(birthday) {
   const now = new Date();
@@ -348,6 +358,11 @@ const s = {
     fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.lightBrown,
     textAlign: "center", marginTop: 8,
   },
+  ageGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 0 },
+  ageBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "18px 14px", textAlign: "center" },
+  ageNum: { fontFamily: ff.display, fontSize: 28, fontWeight: 700, color: pal.darkBrown, lineHeight: 1, fontVariantNumeric: "tabular-nums" },
+  ageLabel: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 6 },
+  ageNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13, color: pal.inkMuted, marginTop: 14, lineHeight: 1.6 },
 };
 
 function cutoutSrc(name) {
@@ -359,6 +374,36 @@ function SectionHead({ title, first = false }) {
     <div style={{ ...s.secHead, ...(first ? s.secHeadFirst : {}) }}>
       <h2 style={s.secTitle}>{title}</h2>
       <hr style={s.secRule} />
+    </div>
+  );
+}
+
+function LiveAgeCounter() {
+  const [age, setAge] = useState(() => getLiveAge(BIRTHDAY));
+
+  useEffect(() => {
+    const id = setInterval(() => setAge(getLiveAge(BIRTHDAY)), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const units = [
+    { value: age.days, label: "Days" },
+    { value: age.hours, label: "Hours" },
+    { value: age.minutes, label: "Minutes" },
+    { value: age.seconds, label: "Seconds" },
+  ];
+
+  return (
+    <div>
+      <div style={s.ageGrid} className="age-grid">
+        {units.map(u => (
+          <div key={u.label} style={s.ageBox}>
+            <div style={s.ageNum}>{u.value.toLocaleString()}</div>
+            <div style={s.ageLabel}>{u.label}</div>
+          </div>
+        ))}
+      </div>
+      <p style={s.ageNote}>Precise elapsed time since September 16, 2024. Zero has been on Earth for every second of it.</p>
     </div>
   );
 }
@@ -531,6 +576,7 @@ export default function App() {
           .adventure-grid { grid-template-columns: 1fr !important; }
           .adventure-cutout-wrap { text-align: center; }
           .tab-bar { margin-left: -4px; }
+          .age-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
       <div style={s.page}>
@@ -592,9 +638,9 @@ export default function App() {
                     <div style={s.statNote}>Sit through Ambiturner</div>
                   </div>
                   <div style={s.statBox}>
-                    <div style={{ ...s.statNum, fontSize: 20, paddingTop: 6 }}>8,740,000</div>
-                    <div style={s.statLabel}>Known friends</div>
-                    <div style={s.statNote}>All estimated living species on Earth. Zero loves everyone.</div>
+                    <div style={{ ...s.statNum, fontSize: 18, paddingTop: 8 }}>20 quintillion</div>
+                    <div style={s.statLabel}>Living animals (est.)</div>
+                    <div style={s.statNote}>Mostly insects and roundworms. Zero intends to meet every one.</div>
                   </div>
                   <div style={s.statBox}>
                     <div style={s.statNum}>12+</div>
@@ -647,7 +693,7 @@ export default function App() {
                 <div style={s.fieldBlock}>
                   <p style={s.fieldLabel}>Social Disposition</p>
                   <p style={s.fieldValue}>Loves everyone</p>
-                  <p style={s.fieldSub}>All 8.74 million known living species, without exception or reservation.</p>
+                  <p style={s.fieldSub}>20 quintillion living animals, without exception or reservation. He is working through the list.</p>
                 </div>
                 <div style={s.fieldBlock}>
                   <p style={s.fieldLabel}>AKC Classification</p>
@@ -707,7 +753,10 @@ export default function App() {
 
           {tab === "character" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-character" aria-labelledby="tab-character">
-              <SectionHead title="Celestial Profile" first />
+              <SectionHead title="Time on Earth" first />
+              <LiveAgeCounter />
+
+              <SectionHead title="Celestial Profile" />
               <div style={s.zodiacGrid} className="two-col-grid">
                 <div style={s.zodiacCard}>
                   <div style={s.zodiacSymbol}>{STAR_SIGN.symbol}</div>
