@@ -1,5 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PHOTOS } from "./photos.js";
+import { getMoonPhaseInfo } from "./moon.js";
+import { getDailyForecast, formatForecastDate } from "./forecasts.js";
+import { ASPIRATIONS, SAMOYED_HISTORY, ADVENTURE_GROUPS, ADVENTURE_PINS } from "./content.js";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const FONT_LINK =
   "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap";
@@ -42,14 +47,6 @@ const LIKES = [
   "Bringing and receiving toys (with Ender especially)",
   "Swimming in lakes",
   "Being the best boy",
-];
-
-const ADVENTURES = [
-  "Cross-country skiing — Nevada Nordic, Lake Tahoe",
-  "Star Lake hike — Lake Tahoe",
-  "Santa Cruz hike",
-  "San Jose hills hike",
-  "Fort Funston — South San Francisco",
 ];
 
 const CUTOUTS = {
@@ -344,12 +341,16 @@ const s = {
     display: "grid", gridTemplateColumns: "1fr auto", gap: 28, alignItems: "center",
     background: pal.white, border: `1px solid ${pal.rule}`, padding: "28px 32px",
   },
-  adventureList: { margin: 0, padding: 0, listStyle: "none" },
-  adventureItem: {
-    fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1,
-    padding: "9px 0", borderBottom: `1px solid rgba(201,169,122,0.2)`,
-    display: "flex", alignItems: "center", gap: 10,
+  adventureGroups: { display: "flex", flexDirection: "column", gap: 12 },
+  adventureGroupLabel: {
+    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase",
+    color: pal.lightBrown, margin: "0 0 4px",
   },
+  adventureList: { margin: 0, paddingLeft: 18, listStyle: "disc" },
+  adventureItem: {
+    fontFamily: ff.body, fontSize: 14.5, color: pal.inkMuted, lineHeight: 1.35, padding: "3px 0",
+  },
+  adventureItemDetail: { color: pal.lightBrown, fontStyle: "italic" },
   adventureCutout: {
     width: 180, objectFit: "contain", display: "block",
     filter: "drop-shadow(0 3px 8px rgba(44,26,14,0.15))",
@@ -363,6 +364,25 @@ const s = {
   ageNum: { fontFamily: ff.display, fontSize: 28, fontWeight: 700, color: pal.darkBrown, lineHeight: 1, fontVariantNumeric: "tabular-nums" },
   ageLabel: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 6 },
   ageNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13, color: pal.inkMuted, marginTop: 14, lineHeight: 1.6 },
+  proseCard: {
+    background: pal.white, border: `1px solid ${pal.rule}`, padding: "24px 28px",
+    fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.85,
+  },
+  proseParagraph: { margin: "0 0 16px" },
+  moonGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
+  moonIllum: { fontFamily: ff.body, fontSize: 12, color: pal.lightBrown, fontStyle: "italic", marginTop: 6 },
+  forecastCard: {
+    background: pal.white, border: `1px solid ${pal.rule}`, padding: "24px 28px",
+    borderLeft: `3px solid ${pal.accentLight}`,
+  },
+  forecastDate: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 12 },
+  forecastText: { fontFamily: ff.display, fontSize: 18, color: pal.darkBrown, lineHeight: 1.55, margin: 0, fontStyle: "italic" },
+  forecastNote: { fontFamily: ff.body, fontSize: 13, color: pal.inkMuted, marginTop: 14, lineHeight: 1.6, fontStyle: "italic" },
+  aspirationItem: { marginBottom: 20 },
+  aspirationTitle: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
+  aspirationDetail: { fontFamily: ff.body, fontSize: 14.5, color: pal.inkMuted, lineHeight: 1.75, margin: 0 },
+  adventureMap: { height: 320, width: "100%", border: `1px solid ${pal.rule}`, marginTop: 18, zIndex: 0 },
+  historyBlock: { marginBottom: 28 },
 };
 
 function cutoutSrc(name) {
@@ -406,6 +426,100 @@ function LiveAgeCounter() {
       <p style={s.ageNote}>Precise elapsed time since September 16, 2024. Zero has been on Earth for every second of it.</p>
     </div>
   );
+}
+
+function LunarRecord() {
+  const birthMoon = getMoonPhaseInfo(BIRTHDAY);
+  const todayMoon = getMoonPhaseInfo(new Date());
+
+  function MoonCard({ label, date, info }) {
+    return (
+      <div style={s.zodiacCard}>
+        <div style={s.zodiacSymbol}>{info.symbol}</div>
+        <p style={s.fieldLabel}>{label}</p>
+        <h3 style={s.zodiacName}>{info.name}</h3>
+        <p style={s.moonIllum}>{date} · {info.illumination}% illuminated</p>
+        <p style={s.zodiacBlurb}>{info.meaning}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={s.moonGrid} className="two-col-grid">
+      <MoonCard label="At birth" date="September 16, 2024" info={birthMoon} />
+      <MoonCard label="Today" date={new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} info={todayMoon} />
+    </div>
+  );
+}
+
+function DailyFieldForecast() {
+  const forecast = getDailyForecast(new Date());
+  return (
+    <div style={s.forecastCard}>
+      <p style={s.forecastDate}>Daily field forecast · {formatForecastDate()}</p>
+      <p style={s.forecastText}>"{forecast}"</p>
+      <p style={s.forecastNote}>Issued for Virgo specimens and Wood Dragons operating in the Marina district.</p>
+    </div>
+  );
+}
+
+function Aspirations() {
+  return (
+    <div style={s.proseCard}>
+      {ASPIRATIONS.map((item, i) => (
+        <div key={item.title} style={{ ...s.aspirationItem, marginBottom: i === ASPIRATIONS.length - 1 ? 0 : 20 }}>
+          <p style={s.aspirationTitle}>{item.title}</p>
+          <p style={s.aspirationDetail}>{item.detail}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SamoyedHistory() {
+  return (
+    <div style={{ ...s.proseCard, ...s.historyBlock }}>
+      {SAMOYED_HISTORY.map((paragraph, i) => (
+        <p key={i} style={{ ...s.proseParagraph, marginBottom: i === SAMOYED_HISTORY.length - 1 ? 0 : 16 }}>{paragraph}</p>
+      ))}
+    </div>
+  );
+}
+
+function AdventureMap() {
+  const mapRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+
+    const map = L.map(containerRef.current, { scrollWheelZoom: false }).setView([37.2, -121.8], 8);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    ADVENTURE_PINS.forEach((pin) => {
+      L.circleMarker([pin.lat, pin.lng], {
+        radius: 8,
+        fillColor: pal.midBrown,
+        color: pal.darkBrown,
+        weight: 2,
+        fillOpacity: 0.95,
+      })
+        .bindPopup(`<strong>${pin.name}</strong><br>${pin.detail}`)
+        .addTo(map);
+    });
+
+    mapRef.current = map;
+    setTimeout(() => map.invalidateSize(), 100);
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  return <div ref={containerRef} style={s.adventureMap} className="adventure-map" aria-label="Map of Zero's adventures" />;
 }
 
 function TabBar({ active, onChange }) {
@@ -577,7 +691,10 @@ export default function App() {
           .adventure-cutout-wrap { text-align: center; }
           .tab-bar { margin-left: -4px; }
           .age-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .adventure-map { height: 260px !important; }
         }
+        .leaflet-container { font-family: 'EB Garamond', Georgia, serif; }
+        .leaflet-popup-content-wrapper { border-radius: 0; border: 1px solid #C9A97A; }
       `}</style>
       <div style={s.page}>
 
@@ -731,14 +848,21 @@ export default function App() {
 
               <SectionHead title="Adventure Highlights" />
               <div style={s.adventureGrid} className="adventure-grid">
-                <ul style={s.adventureList}>
-                  {ADVENTURES.map((item, i) => (
-                    <li key={item} style={{ ...s.adventureItem, borderBottom: i === ADVENTURES.length - 1 ? "none" : s.adventureItem.borderBottom }}>
-                      <div style={s.activityDot} />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <div style={s.adventureGroups}>
+                  {ADVENTURE_GROUPS.map((group, gi) => (
+                      <div key={group.type}>
+                        <p style={{ ...s.adventureGroupLabel, marginTop: gi === 0 ? 0 : 4 }}>{group.type}</p>
+                        <ul style={s.adventureList}>
+                          {group.items.map((item) => (
+                            <li key={item.name} style={s.adventureItem}>
+                              {item.name}
+                              <span style={s.adventureItemDetail}> — {item.detail}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                </div>
                 <figure className="adventure-cutout-wrap" style={{ margin: 0 }}>
                   <img
                     style={s.adventureCutout}
@@ -748,6 +872,7 @@ export default function App() {
                   <figcaption style={s.adventureCaption}>Field condition: acceptable.</figcaption>
                 </figure>
               </div>
+              <AdventureMap />
             </div>
           )}
 
@@ -775,6 +900,15 @@ export default function App() {
                 </div>
               </div>
 
+              <SectionHead title="Lunar Record" />
+              <LunarRecord />
+
+              <SectionHead title="Daily Field Forecast" />
+              <DailyFieldForecast />
+
+              <SectionHead title="Aspirations" />
+              <Aspirations />
+
               <SectionHead title="Repertoire" />
               <div style={s.tricksGrid}>
                 {ALL_TRICKS.map((trick, i) => (
@@ -790,7 +924,10 @@ export default function App() {
 
           {tab === "breed" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-breed" aria-labelledby="tab-breed">
-              <SectionHead title="About the Samoyed" first />
+              <SectionHead title="Historical Record" first />
+              <SamoyedHistory />
+
+              <SectionHead title="About the Samoyed" />
               <div style={s.factsGrid} className="two-col-grid">
                 {SAMOYED_FACTS.map(f => (
                   <div key={f.label} style={s.factCard}>
