@@ -9,6 +9,7 @@
     "photos": "bash scripts/convert-photos.sh"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
