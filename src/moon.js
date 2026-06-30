@@ -5,50 +5,58 @@ export const MOON_PHASES = [
   {
     name: "New Moon",
     symbol: "🌑",
-    meaning:
-      "A quiet reset. Zero naps with strategic intent, conserving energy for the next great sniffing campaign.",
+    what: "The sky is darkest, with hardly any moon visible.",
+    why: "Less light often means calmer days. Good for resting and recharging.",
+    favors: "Naps, couch time, gentle cuddles (if not too hot), and easy walks around the Marina.",
   },
   {
     name: "Waxing Crescent",
     symbol: "🌒",
-    meaning:
-      "Momentum builds. Zero approaches new routes with optimism and an unusually confident tail carriage.",
+    what: "A thin crescent is growing. Light is coming back.",
+    why: "Energy starts to build. Zero gets curious about new smells and routes.",
+    favors: "Exploring new blocks, saying hi to friends, and trying a slightly longer walk.",
   },
   {
     name: "First Quarter",
     symbol: "🌓",
-    meaning:
-      "Decisive energy. Zero chooses a direction at every fork in the trail and refuses to reconsider.",
+    what: "Half the moon is lit, a clear halfway point.",
+    why: "A decisive kind of day. Zero picks a direction and commits.",
+    favors: "Trails with forks, pick-a-path hikes, and confident leash leading.",
   },
   {
     name: "Waxing Gibbous",
     symbol: "🌔",
-    meaning:
-      "Refinement phase. Zero rehearses tricks, polishes his smile, and audits his friend list.",
+    what: "Almost full. The moon is bright and still building.",
+    why: "More light usually means more alertness. He is gearing up, not winding down.",
+    favors: "Tricks (sit, spin, bow chica wow wow), looking handsome, and showing off on walks.",
   },
   {
     name: "Full Moon",
     symbol: "🌕",
-    meaning:
-      "Peak visibility. Zero is convinced the entire room assembled to admire him. He is correct.",
+    what: "The brightest night of the cycle.",
+    why: "Lots of dogs feel extra social and alert when the moon is full, Zero included.",
+    favors: "Meeting people and dogs, play time, being a little extra dramatic, and Fort Funston-level enthusiasm.",
   },
   {
     name: "Waning Gibbous",
     symbol: "🌖",
-    meaning:
-      "Generous aftermath. Zero shares toys, belly rubs, and unsolicited life advice with everyone.",
+    what: "Still bright, but the moon is starting to shrink.",
+    why: "High energy, but softer, good for sharing attention instead of hoarding it.",
+    favors: "Tug with Ender, sharing toys, head massages, and guardian check-ins with Kaan and Melina.",
   },
   {
     name: "Last Quarter",
     symbol: "🌗",
-    meaning:
-      "Release and review. Zero forgives the harness, the blow dryer, and yesterday's bath.",
+    what: "Half lit again, on the way down.",
+    why: "A good day to let small annoyances go, including the harness and yesterday's bath.",
+    favors: "Forgiving the blow dryer, shorter grooming sessions, and forgiving walks.",
   },
   {
     name: "Waning Crescent",
     symbol: "🌘",
-    meaning:
-      "Restorative stillness. Zero prefers the couch, soft light, and quiet supervision of his household.",
+    what: "A thin fading crescent before the next new moon.",
+    why: "Low-key days. Zero saves his big adventures for later.",
+    favors: "Couch, soft light, quiet supervision at home, and short Marina loops over big hikes.",
   },
 ];
 
