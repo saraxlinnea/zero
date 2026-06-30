@@ -1,33 +1,28 @@
-export const ASPIRATIONS = [
+export const ASPIRATION_GROUPS = [
   {
-    title: "Adventures without end",
-    detail: "Zero hopes to go on adventures all the time, in every season, at every opportunity.",
+    group: "Out and about",
+    items: [
+      { title: "More adventures", detail: "Hikes, trips, and new smells — always." },
+      { title: "Cross-country travel", detail: "Come on road trips whenever possible, ideally with a window seat." },
+      { title: "Better swimming", detail: "Get strong enough to cross lakes and rivers without looking panicked." },
+    ],
   },
   {
-    title: "More friends at home",
-    detail: "He wants more animal friends under the same roof and more people friends who hang out with him properly.",
+    group: "Home & friends",
+    items: [
+      { title: "More friends at home", detail: "More animals under the same roof and more people who hang out properly." },
+      { title: "Play time, always", detail: "Play is not a reward. It is the baseline." },
+    ],
   },
   {
-    title: "Guardian of the household",
-    detail: "Zero likes being a caretaker. He hopes to see Ender, Kaan, and Melina more often so he can help them become good adults.",
-  },
-  {
-    title: "More hikes",
-    detail: "More trails, more elevation, more sniffing. The specimen record should never run out of new ground.",
-  },
-  {
-    title: "Cross-country travel",
-    detail: "He wants to join cross-country trips whenever possible, ideally in a seat with a view.",
-  },
-  {
-    title: "Play time, always",
-    detail: "Play is not a reward. It is a baseline condition for a well-regulated Samoyed.",
-  },
-  {
-    title: "Better swimming",
-    detail: "Zero wants to become a stronger swimmer so he can cross more lakes and rivers with confidence and style.",
+    group: "Family",
+    items: [
+      { title: "See Ender, Kaan, and Melina more", detail: "Help them grow up right. Zero takes guardian duty seriously." },
+    ],
   },
 ];
+
+export const ASPIRATIONS = ASPIRATION_GROUPS.flatMap((g) => g.items);
 
 export const SAMOYED_HISTORY = [
   "For thousands of years, Samoyeds worked beside the Samoyedic peoples of Siberia: herding reindeer, pulling sleds across the Arctic, and sleeping close to humans on the coldest nights. Their warmth was not metaphorical. It was measured in survival.",
@@ -38,6 +33,7 @@ export const SAMOYED_HISTORY = [
 export const ADVENTURE_GROUPS = [
   {
     type: "Top Walks",
+    accent: "#7A9B76",
     items: [
       { name: "Marina Green", detail: "Marina district, San Francisco" },
       { name: "Crissy Field", detail: "Presidio waterfront, San Francisco" },
@@ -46,6 +42,7 @@ export const ADVENTURE_GROUPS = [
   },
   {
     type: "Hikes",
+    accent: "#D4956A",
     items: [
       { name: "Star Lake", detail: "Lake Tahoe" },
       { name: "Wilder Ranch", detail: "Santa Cruz" },
@@ -55,6 +52,7 @@ export const ADVENTURE_GROUPS = [
   },
   {
     type: "Cross-country",
+    accent: "#6B8FA3",
     items: [
       { name: "Nevada Nordic", detail: "Lake Tahoe" },
     ],
@@ -62,12 +60,12 @@ export const ADVENTURE_GROUPS = [
 ];
 
 export const ADVENTURE_PINS = [
-  { name: "Marina Green", lat: 37.804, lng: -122.437, detail: "Marina district" },
-  { name: "Crissy Field", lat: 37.804, lng: -122.465, detail: "Presidio waterfront" },
-  { name: "Marshall Beach", lat: 37.788, lng: -122.483, detail: "Lands End" },
-  { name: "Star Lake", lat: 38.879, lng: -120.04, detail: "Lake Tahoe" },
-  { name: "Wilder Ranch", lat: 36.972, lng: -122.074, detail: "Santa Cruz" },
-  { name: "Waterfall Loop", lat: 37.159, lng: -121.785, detail: "Uvas Canyon County Park" },
-  { name: "Fort Funston", lat: 37.715, lng: -122.501, detail: "South San Francisco" },
-  { name: "Nevada Nordic", lat: 39.314, lng: -120.162, detail: "Lake Tahoe" },
+  { name: "Marina Green", lat: 37.804, lng: -122.437, detail: "Marina district", accent: "#7A9B76" },
+  { name: "Crissy Field", lat: 37.804, lng: -122.465, detail: "Presidio waterfront", accent: "#7A9B76" },
+  { name: "Marshall Beach", lat: 37.788, lng: -122.483, detail: "Lands End", accent: "#7A9B76" },
+  { name: "Star Lake", lat: 38.879, lng: -120.04, detail: "Lake Tahoe", accent: "#D4956A" },
+  { name: "Wilder Ranch", lat: 36.972, lng: -122.074, detail: "Santa Cruz", accent: "#D4956A" },
+  { name: "Waterfall Loop", lat: 37.159, lng: -121.785, detail: "Uvas Canyon County Park", accent: "#D4956A" },
+  { name: "Fort Funston", lat: 37.715, lng: -122.501, detail: "South San Francisco", accent: "#D4956A" },
+  { name: "Nevada Nordic", lat: 39.314, lng: -120.162, detail: "Lake Tahoe", accent: "#6B8FA3" },
 ];

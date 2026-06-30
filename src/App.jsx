@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { PHOTOS } from "./photos.js";
-import { getMoonPhaseInfo } from "./moon.js";
-import { getDailyForecast, formatForecastDate } from "./forecasts.js";
-import { ASPIRATIONS, SAMOYED_HISTORY, ADVENTURE_GROUPS, ADVENTURE_PINS } from "./content.js";
+import { ASPIRATION_GROUPS, SAMOYED_HISTORY, ADVENTURE_GROUPS, ADVENTURE_PINS } from "./content.js";
+import CosmosTab from "./CosmosTab.jsx";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -12,24 +11,30 @@ const FONT_LINK =
 const BIRTHDAY = new Date("2024-09-16");
 
 const NICKNAMES = [
-  "Zerowski", "Little Zero", "Little Floof", "Little Dragon", "Little Polar Bear",
-  "Baby Zero", "Baby Boy", "Cutie Pie", "Chicken Wing", "Mr. Zero",
-  "Little Cloud", "Little Boy", "Sweetie Pie", "Little Bear", "Handsome boy", "Little Lamb",
+  "Little Zero", "Little Floof", "Little Dragon", "Little Polar Bear",
+  "Little Cloud", "Little Boy", "Little Bear", "Little Lamb",
+  "Little Sherlock", "Little Investigative Journalist",
+  "Baby Zero", "Baby Boy",
+  "Zerowski", "Mr. Zero", "Cutie Pie", "Sweetie Pie", "Chicken Wing", "Handsome boy",
 ];
 
 const STAR_SIGN = {
   name: "Virgo",
   symbol: "♍",
-  blurb:
-    "Born under Virgo, Zero approaches every walk with the precision of a field researcher, nose to the ground, cataloguing each scent with methodical devotion. Virgos are loyal, attentive, and quietly industrious. He may appear to be simply sniffing a fire hydrant, but he is, in fact, conducting a thorough peer review.",
+  paragraphs: [
+    "Zero was born September 16, a Virgo. Earth sign, supposedly neat and devoted to routine. He has strong feelings about which side of the street smells right and treats the same hydrant like a standing appointment.",
+    "Mercury rules Virgo, which here means alert barking, sustained eye contact, and noticeable silence if you forget to praise him. He likes a day with a shape: walk, breakfast, nap, a little supervision of the household. He will love a stranger on the sidewalk and still regard the blow dryer as an insult. Picky is the wrong word. He has standards.",
+  ],
 };
 
 const CHINESE_ZODIAC = {
   name: "Wood Dragon",
   character: "龍",
   pinyin: "lóng",
-  blurb:
-    "The Wood Dragon is charismatic, confident, and perpetually convinced that the entire room has gathered specifically to admire him. He is correct. Wood Dragons are generous in spirit and vigorous in play. Zero embodies this sign fully: he enters every space like a visiting dignitary and accepts belly rubs as tribute.",
+  paragraphs: [
+    "Zero was born in 2024, the Year of the Wood Dragon: confident, a little theatrical, and fairly sure the room got better when he arrived. Hard to argue.",
+    "Wood Dragons are meant to bring growth and big energy. Zero brings fluff and a fixed position on the important issues: more walks, more friends, more lakes, and playtime counted as a need, not a treat. He does not guard the house so much as run it. Visitors are welcome. They should be ready to admire him.",
+  ],
 };
 
 const LIKES = [
@@ -129,11 +134,12 @@ const INITIAL_TICKS = [
   { id: 1, date: "2025-05-03", location: "Coastal hike, Santa Cruz", count: 12, notes: "All 12 found and removed after the hike. Zero was unperturbed." },
 ];
 
-const PAGE_MAX = 1200;
+const PAGE_MAX = 1320;
 
 const TABS = [
   { id: "profile", label: "Profile" },
   { id: "character", label: "Character" },
+  { id: "cosmos", label: "Cosmos" },
   { id: "breed", label: "Breed" },
   { id: "gallery", label: "Gallery" },
   { id: "records", label: "Records" },
@@ -164,6 +170,17 @@ function formatDate(dateStr) {
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
+function formatPhotoTaken(iso) {
+  return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+function sortPhotosByTaken(newestFirst) {
+  return [...PHOTOS].sort((a, b) => {
+    const diff = new Date(b.taken) - new Date(a.taken);
+    return newestFirst ? diff : -diff;
+  });
+}
+
 const pal = {
   masthead: "#2C1A0E",
   mastheadText: "#F5ECD7",
@@ -182,6 +199,9 @@ const pal = {
   tickRedLight: "#F0DADA",
   tickBorder: "#C0A0A0",
   dislikeRed: "#8B3A2A",
+  walkGreen: "#7A9B76",
+  hikeTerracotta: "#D4956A",
+  xcBlue: "#6B8FA3",
 };
 
 const ff = {
@@ -213,8 +233,12 @@ const s = {
     color: pal.mastheadMuted, lineHeight: 1.9,
   },
   mastheadMetaSub: { fontSize: 12, lineHeight: 1.7 },
+  mastheadLink: {
+    background: "none", border: "none", padding: 0, margin: 0, cursor: "pointer",
+    font: "inherit", color: "inherit", textAlign: "inherit", lineHeight: "inherit",
+  },
   mastheadRule: { borderTop: `1px solid ${pal.mastheadMuted}`, opacity: 0.3, margin: 0 },
-  main: { maxWidth: PAGE_MAX, margin: "0 auto", padding: "44px 36px 80px" },
+  main: { maxWidth: PAGE_MAX, width: "100%", margin: "0 auto", padding: "40px 36px 80px" },
   // intro blurb
   introBlock: {
     fontFamily: ff.body, fontSize: 17, color: pal.inkMuted, lineHeight: 1.85,
@@ -232,36 +256,62 @@ const s = {
     whiteSpace: "nowrap", flexShrink: 0, marginBottom: -1,
   },
   tabBtnActive: {
-    color: pal.darkBrown, borderBottom: `2px solid ${pal.darkBrown}`, fontWeight: 500,
+    color: pal.darkBrown, borderBottom: `2px solid ${pal.accentLight}`, fontWeight: 500,
+  },
+  tabBtnCosmosActive: {
+    color: "#1A1428", borderBottom: "2px solid #9B8AB8", fontWeight: 500,
   },
   tabPanel: { minHeight: 320 },
   secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 22, marginTop: 52 },
   secHeadFirst: { marginTop: 0 },
   secTitle: { fontFamily: ff.display, fontSize: 22, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1 },
+  secStamp: { fontFamily: ff.display, fontSize: 14, color: pal.accentLight, lineHeight: 1, flexShrink: 0 },
   secRule: { flex: 1, height: 1, background: pal.rule, opacity: 0.45, border: "none" },
-  statRow: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 0 },
-  statSection: {
-    display: "grid", gridTemplateColumns: "1fr auto", gap: 24, alignItems: "end",
-    marginBottom: 32,
+  profileStatsCol: { display: "flex", flexDirection: "column", minHeight: "100%" },
+  profileRightCol: { display: "flex", flexDirection: "column", gap: 16, minWidth: 0 },
+  profileAsideLabel: {
+    fontFamily: ff.display, fontSize: 15, fontWeight: 600, color: pal.darkBrown,
+    margin: "0 0 12px", letterSpacing: "0.02em",
   },
-  statCutout: {
-    width: 140, height: 140, objectFit: "contain", objectPosition: "bottom",
-    filter: "drop-shadow(0 3px 10px rgba(0,0,0,0.2))",
+  statCard: {
+    background: pal.white, border: `1px solid ${pal.rule}`,
+    padding: "16px 18px", flex: 1, display: "flex", flexDirection: "column",
   },
-  statBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "16px 18px" },
+  statAsideStack: { display: "flex", flexDirection: "column", gap: 10, flex: 1 },
+  statBox: { background: pal.parchment, border: `1px solid ${pal.rule}`, padding: "12px 14px" },
+  statBoxLink: { cursor: "pointer", transition: "border-color 0.15s" },
+  statCutoutFlow: {
+    width: "100%", maxWidth: 130, height: "auto", objectFit: "contain", objectPosition: "bottom center",
+    display: "block", marginTop: "auto", paddingTop: 14,
+    filter: "drop-shadow(0 3px 8px rgba(44,26,14,0.18))",
+  },
   statNum: { fontFamily: ff.display, fontSize: 30, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
   statLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 5 },
   statNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.inkMuted, marginTop: 4, lineHeight: 1.4 },
   specimenCard: {
-    background: pal.white, border: `1px solid ${pal.rule}`,
-    padding: "30px 34px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 48px",
+    background: pal.parchment, border: `1px solid ${pal.rule}`,
+    padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px",
   },
   fieldLabel: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 2 },
-  fieldValue: { fontFamily: ff.display, fontSize: 17, color: pal.darkBrown, fontWeight: 600, margin: 0, lineHeight: 1.3 },
-  fieldSub: { fontFamily: ff.body, fontStyle: "italic", fontSize: 14, color: pal.inkMuted, lineHeight: 1.6, marginTop: 3 },
-  fieldBlock: { marginBottom: 24 },
-  dividerFull: { gridColumn: "1 / -1", borderTop: `1px solid ${pal.rule}`, opacity: 0.4, margin: "4px 0 22px" },
-  // activities
+  fieldValue: { fontFamily: ff.display, fontSize: 16, color: pal.darkBrown, fontWeight: 600, margin: 0, lineHeight: 1.3 },
+  fieldSub: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12.5, color: pal.inkMuted, lineHeight: 1.3, marginTop: 2 },
+  fieldBlock: { marginBottom: 0 },
+  galleryPreview: {
+    display: "block", width: "100%", textAlign: "left", cursor: "pointer",
+    background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 16px",
+  },
+  galleryPreviewLabel: {
+    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase",
+    color: pal.lightBrown, margin: "0 0 10px",
+  },
+  galleryPreviewGrid: {
+    display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8,
+  },
+  galleryPreviewImg: { width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" },
+  galleryPreviewLink: {
+    fontFamily: ff.body, fontSize: 13, fontStyle: "italic", color: pal.midBrown,
+    display: "block", marginTop: 10,
+  },
   activitiesGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
   activitiesCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "22px 26px" },
   activitiesCardTitle: { fontFamily: ff.display, fontSize: 17, fontWeight: 600, color: pal.darkBrown, margin: "0 0 14px" },
@@ -272,11 +322,6 @@ const s = {
   },
   activityDot: { width: 5, height: 5, background: pal.accentLight, flexShrink: 0 },
   dislikeDot: { width: 5, height: 5, background: pal.dislikeRed, flexShrink: 0 },
-  zodiacGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
-  zodiacCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "24px 28px" },
-  zodiacSymbol: { fontFamily: ff.display, fontSize: 40, color: pal.accentLight, lineHeight: 1, marginBottom: 8 },
-  zodiacName: { fontFamily: ff.display, fontSize: 20, fontWeight: 700, color: pal.darkBrown, margin: "0 0 10px" },
-  zodiacBlurb: { fontFamily: ff.body, fontSize: 14.5, color: pal.inkMuted, lineHeight: 1.8, margin: 0 },
   factsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 },
   factCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "16px 20px" },
   factLabel: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 3 },
@@ -312,7 +357,7 @@ const s = {
   logStatBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 18px", minWidth: 100 },
   logStatNum: { fontFamily: ff.display, fontSize: 26, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
   logStatLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.13em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
-  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14 },
+  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 },
   photoCard: { background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0, cursor: "pointer" },
   photoImg: { width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" },
   lightbox: {
@@ -332,14 +377,28 @@ const s = {
     filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.35))",
     flexShrink: 0,
   },
-  lovesCard: { position: "relative" },
+  lovesCard: { position: "relative", background: pal.parchment, overflow: "hidden" },
+  lovesList: { position: "relative" },
   lovesCutout: {
-    width: "100%", maxWidth: 140, objectFit: "contain", display: "block",
-    margin: "16px auto 0", filter: "drop-shadow(0 2px 6px rgba(44,26,14,0.12))",
+    position: "absolute", right: -4, bottom: 0, width: 88, maxHeight: "78%",
+    objectFit: "contain", objectPosition: "bottom right", pointerEvents: "none",
+    filter: "drop-shadow(0 2px 6px rgba(44,26,14,0.12))",
   },
-  adventureGrid: {
-    display: "grid", gridTemplateColumns: "1fr auto", gap: 28, alignItems: "center",
-    background: pal.white, border: `1px solid ${pal.rule}`, padding: "28px 32px",
+  adventureCard: {
+    display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(180px, 220px)",
+    gap: 20, alignItems: "stretch",
+    background: pal.parchment, border: `1px solid ${pal.rule}`, padding: "18px 22px",
+  },
+  adventureGroupBlock: { paddingLeft: 12, marginBottom: 4 },
+  adventureFigure: {
+    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end",
+    minHeight: "100%",
+  },
+  adventureFigureImg: {
+    width: "100%", height: "100%", flex: 1, minHeight: 0,
+    objectFit: "contain", objectPosition: "bottom center",
+    filter: "drop-shadow(0 3px 8px rgba(44,26,14,0.15))",
+    transform: "scale(1.2)", transformOrigin: "bottom center",
   },
   adventureGroups: { display: "flex", flexDirection: "column", gap: 12 },
   adventureGroupLabel: {
@@ -351,13 +410,9 @@ const s = {
     fontFamily: ff.body, fontSize: 14.5, color: pal.inkMuted, lineHeight: 1.35, padding: "3px 0",
   },
   adventureItemDetail: { color: pal.lightBrown, fontStyle: "italic" },
-  adventureCutout: {
-    width: 180, objectFit: "contain", display: "block",
-    filter: "drop-shadow(0 3px 8px rgba(44,26,14,0.15))",
-  },
   adventureCaption: {
-    fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.lightBrown,
-    textAlign: "center", marginTop: 8,
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 11, color: pal.lightBrown,
+    textAlign: "center", lineHeight: 1.3, margin: "8px 0 0", flexShrink: 0,
   },
   ageGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 0 },
   ageBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "18px 14px", textAlign: "center" },
@@ -369,21 +424,36 @@ const s = {
     fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.85,
   },
   proseParagraph: { margin: "0 0 16px" },
-  moonGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
-  moonIllum: { fontFamily: ff.body, fontSize: 12, color: pal.lightBrown, fontStyle: "italic", marginTop: 6 },
-  forecastCard: {
-    background: pal.white, border: `1px solid ${pal.rule}`, padding: "24px 28px",
-    borderLeft: `3px solid ${pal.accentLight}`,
+  aspirationGroupLabel: {
+    fontFamily: ff.display, fontSize: 14, fontWeight: 600, color: pal.midBrown,
+    margin: "0 0 8px", letterSpacing: "0.02em",
   },
-  forecastDate: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 12 },
-  forecastText: { fontFamily: ff.display, fontSize: 18, color: pal.darkBrown, lineHeight: 1.55, margin: 0, fontStyle: "italic" },
-  forecastNote: { fontFamily: ff.body, fontSize: 13, color: pal.inkMuted, marginTop: 14, lineHeight: 1.6, fontStyle: "italic" },
+  aspirationGroupBlock: { marginBottom: 18 },
+  photoCaption: {
+    fontFamily: ff.body, fontSize: 11, color: pal.lightBrown, fontStyle: "italic",
+    padding: "6px 8px", margin: 0, textAlign: "center",
+  },
+  gallerySortRow: {
+    display: "flex", justifyContent: "flex-end", marginBottom: 16,
+  },
+  gallerySortBtn: {
+    fontFamily: ff.body, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase",
+    color: pal.midBrown, background: pal.white, border: `1px solid ${pal.rule}`,
+    padding: "8px 14px", cursor: "pointer",
+  },
   aspirationItem: { marginBottom: 20 },
   aspirationTitle: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
   aspirationDetail: { fontFamily: ff.body, fontSize: 14.5, color: pal.inkMuted, lineHeight: 1.75, margin: 0 },
-  adventureMap: { height: 320, width: "100%", border: `1px solid ${pal.rule}`, marginTop: 18, zIndex: 0 },
+  adventureMap: { height: 380, width: "100%", border: `1px solid ${pal.rule}`, marginTop: 24, zIndex: 0 },
   historyBlock: { marginBottom: 28 },
 };
+
+function statKeyActivate(e, fn) {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    fn();
+  }
+}
 
 function cutoutSrc(name) {
   return `${import.meta.env.BASE_URL}cutouts/${name}`;
@@ -392,9 +462,79 @@ function cutoutSrc(name) {
 function SectionHead({ title, first = false }) {
   return (
     <div style={{ ...s.secHead, ...(first ? s.secHeadFirst : {}) }}>
+      <span style={s.secStamp} aria-hidden="true">✦</span>
       <h2 style={s.secTitle}>{title}</h2>
       <hr style={s.secRule} />
     </div>
+  );
+}
+
+function GalleryPreview({ onOpenGallery }) {
+  const base = import.meta.env.BASE_URL;
+  const preview = sortPhotosByTaken(true).slice(0, 4);
+
+  return (
+    <button type="button" style={s.galleryPreview} className="gallery-preview" onClick={onOpenGallery}>
+      <p style={s.galleryPreviewLabel}>Photographic record</p>
+      <div style={s.galleryPreviewGrid} className="gallery-preview-grid">
+        {preview.map(({ file }) => (
+          <img
+            key={file}
+            style={s.galleryPreviewImg}
+            src={`${base}photos/${file}`}
+            alt=""
+          />
+        ))}
+      </div>
+      <span style={s.galleryPreviewLink}>View full gallery →</span>
+    </button>
+  );
+}
+
+function VitalStatsColumn({ onTabChange, totalTicks }) {
+  return (
+    <aside className="profile-stats-col" style={s.profileStatsCol}>
+      <p style={s.profileAsideLabel}>Vital Statistics</p>
+      <div style={s.statCard} className="stat-card">
+        <div style={s.statAsideStack}>
+          <div
+            style={{ ...s.statBox, ...s.statBoxLink }}
+            className="stat-box-link"
+            role="button"
+            tabIndex={0}
+            onClick={() => onTabChange("character")}
+            onKeyDown={(e) => statKeyActivate(e, () => onTabChange("character"))}
+          >
+            <div style={s.statNum}>{ALL_TRICKS.length}</div>
+            <div style={s.statLabel}>Known tricks</div>
+            <div style={s.statNote}>Sit through Ambiturner · see Repertoire</div>
+          </div>
+          <div style={s.statBox}>
+            <div style={{ ...s.statNum, fontSize: 18, paddingTop: 6 }}>20 quintillion</div>
+            <div style={s.statLabel}>Friends</div>
+            <div style={s.statNote}>Est. all living animals on Earth. Mostly insects and roundworms. Zero intends to meet every one.</div>
+          </div>
+          <div
+            style={{ ...s.statBox, ...s.statBoxLink }}
+            className="stat-box-link"
+            role="button"
+            tabIndex={0}
+            onClick={() => onTabChange("records")}
+            onKeyDown={(e) => statKeyActivate(e, () => onTabChange("records"))}
+          >
+            <div style={s.statNum}>{totalTicks}</div>
+            <div style={s.statLabel}>Ticks hosted</div>
+            <div style={s.statNote}>One coastal hike · see Tick Tracker</div>
+          </div>
+        </div>
+        <img
+          style={s.statCutoutFlow}
+          className="stat-cutout-flow"
+          src={cutoutSrc(CUTOUTS.running)}
+          alt="Zero running"
+        />
+      </div>
+    </aside>
   );
 }
 
@@ -428,48 +568,18 @@ function LiveAgeCounter() {
   );
 }
 
-function LunarRecord() {
-  const birthMoon = getMoonPhaseInfo(BIRTHDAY);
-  const todayMoon = getMoonPhaseInfo(new Date());
-
-  function MoonCard({ label, date, info }) {
-    return (
-      <div style={s.zodiacCard}>
-        <div style={s.zodiacSymbol}>{info.symbol}</div>
-        <p style={s.fieldLabel}>{label}</p>
-        <h3 style={s.zodiacName}>{info.name}</h3>
-        <p style={s.moonIllum}>{date} · {info.illumination}% illuminated</p>
-        <p style={s.zodiacBlurb}>{info.meaning}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div style={s.moonGrid} className="two-col-grid">
-      <MoonCard label="At birth" date="September 16, 2024" info={birthMoon} />
-      <MoonCard label="Today" date={new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} info={todayMoon} />
-    </div>
-  );
-}
-
-function DailyFieldForecast() {
-  const forecast = getDailyForecast(new Date());
-  return (
-    <div style={s.forecastCard}>
-      <p style={s.forecastDate}>Daily field forecast · {formatForecastDate()}</p>
-      <p style={s.forecastText}>"{forecast}"</p>
-      <p style={s.forecastNote}>Issued for Virgo specimens and Wood Dragons operating in the Marina district.</p>
-    </div>
-  );
-}
-
 function Aspirations() {
   return (
-    <div style={s.proseCard}>
-      {ASPIRATIONS.map((item, i) => (
-        <div key={item.title} style={{ ...s.aspirationItem, marginBottom: i === ASPIRATIONS.length - 1 ? 0 : 20 }}>
-          <p style={s.aspirationTitle}>{item.title}</p>
-          <p style={s.aspirationDetail}>{item.detail}</p>
+    <div style={{ ...s.proseCard, background: pal.parchment }}>
+      {ASPIRATION_GROUPS.map((group, gi) => (
+        <div key={group.group} style={{ ...s.aspirationGroupBlock, marginBottom: gi === ASPIRATION_GROUPS.length - 1 ? 0 : 18 }}>
+          <p style={s.aspirationGroupLabel}>{group.group}</p>
+          {group.items.map((item, ii) => (
+            <div key={item.title} style={{ ...s.aspirationItem, marginBottom: ii === group.items.length - 1 ? 0 : 12 }}>
+              <p style={s.aspirationTitle}>{item.title}</p>
+              <p style={s.aspirationDetail}>{item.detail}</p>
+            </div>
+          ))}
         </div>
       ))}
     </div>
@@ -501,7 +611,7 @@ function AdventureMap() {
     ADVENTURE_PINS.forEach((pin) => {
       L.circleMarker([pin.lat, pin.lng], {
         radius: 8,
-        fillColor: pal.midBrown,
+        fillColor: pin.accent || pal.midBrown,
         color: pal.darkBrown,
         weight: 2,
         fillOpacity: 0.95,
@@ -535,7 +645,12 @@ function TabBar({ active, onChange }) {
             aria-selected={isActive}
             aria-controls={`panel-${id}`}
             id={`tab-${id}`}
-            style={{ ...s.tabBtn, ...(isActive ? s.tabBtnActive : {}) }}
+            className={id === "cosmos" ? "tab-btn-cosmos" : undefined}
+            style={{
+              ...s.tabBtn,
+              ...(isActive && id === "cosmos" ? s.tabBtnCosmosActive : {}),
+              ...(isActive && id !== "cosmos" ? s.tabBtnActive : {}),
+            }}
             onClick={() => onChange(id)}
           >
             {label}
@@ -548,29 +663,45 @@ function TabBar({ active, onChange }) {
 
 function PhotoGallery() {
   const [active, setActive] = useState(null);
+  const [newestFirst, setNewestFirst] = useState(true);
   const base = import.meta.env.BASE_URL;
+  const sorted = sortPhotosByTaken(newestFirst);
+  const activePhoto = sorted.find((p) => p.file === active);
 
   return (
     <>
-      <div style={s.photoGrid} className="photo-grid">
-        {PHOTOS.map((name) => (
-          <figure key={name} style={s.photoCard} onClick={() => setActive(name)}>
-            <img
-              style={s.photoImg}
-              src={`${base}photos/${name}`}
-              alt={`Zero — ${name.replace(/\.[^.]+$/, "")}`}
-              loading="lazy"
-            />
-          </figure>
-        ))}
+      <div style={s.gallerySortRow}>
+        <button
+          type="button"
+          style={s.gallerySortBtn}
+          onClick={() => setNewestFirst((v) => !v)}
+        >
+          {newestFirst ? "Newest first" : "Oldest first"}
+        </button>
       </div>
-      {active && (
+      <div style={s.photoGrid} className="photo-grid">
+        {sorted.map(({ file, taken }) => {
+          const caption = formatPhotoTaken(taken);
+          return (
+            <figure key={file} style={s.photoCard} onClick={() => setActive(file)}>
+              <img
+                style={s.photoImg}
+                src={`${base}photos/${file}`}
+                alt={`Zero, ${caption}`}
+                loading="lazy"
+              />
+              <figcaption style={s.photoCaption}>{caption}</figcaption>
+            </figure>
+          );
+        })}
+      </div>
+      {active && activePhoto && (
         <div style={s.lightbox} onClick={() => setActive(null)} role="dialog" aria-modal="true" aria-label="Photo preview">
           <button style={s.lightboxClose} onClick={() => setActive(null)} type="button">Close</button>
           <img
             style={s.lightboxImg}
             src={`${base}photos/${active}`}
-            alt={`Zero — ${active.replace(/\.[^.]+$/, "")}`}
+            alt={`Zero, ${formatPhotoTaken(activePhoto.taken)}`}
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -579,12 +710,11 @@ function PhotoGallery() {
   );
 }
 
-function TickTracker() {
+function TickTracker({ incidents, setIncidents }) {
   const today = new Date().toISOString().split("T")[0];
-  const [incidents, setIncidents] = useState(INITIAL_TICKS);
   const [form, setForm] = useState({ date: today, location: "", count: "", notes: "" });
   const [showForm, setShowForm] = useState(false);
-  const totalTicks = incidents.reduce((sum, i) => sum + (parseInt(i.count) || 0), 0);
+  const totalTicks = incidents.reduce((sum, i) => sum + (parseInt(i.count, 10) || 0), 0);
 
   function add() {
     if (!form.date) return;
@@ -659,10 +789,17 @@ function TickTracker() {
 
 export default function App() {
   const [tab, setTab] = useState("profile");
+  const [tickIncidents, setTickIncidents] = useState(INITIAL_TICKS);
+  const totalTicks = tickIncidents.reduce((sum, i) => sum + (parseInt(i.count, 10) || 0), 0);
   const today = new Date();
   const nextBirthday = new Date(today.getFullYear(), 8, 16);
   if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1);
   const daysUntilBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+
+  function handleTabChange(id) {
+    setTab(id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   return (
     <>
@@ -670,31 +807,56 @@ export default function App() {
       <style>{`
         * { box-sizing: border-box; }
         input, select, textarea, button { font-size: 16px !important; }
+        @media (min-width: 901px) {
+          .profile-top-row {
+            display: grid;
+            grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+            gap: 28px;
+            align-items: stretch;
+          }
+          .facts-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+        @media (max-width: 900px) {
+          .profile-top-row { display: flex; flex-direction: column; gap: 24px; }
+          .profile-stats-col { order: -1; }
+          .gallery-preview-grid { grid-template-columns: repeat(4, 1fr) !important; }
+        }
         @media (max-width: 600px) {
           .masthead-inner { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; padding: 20px 20px 18px !important; }
           .masthead-meta { text-align: left !important; display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px 20px !important; width: 100% !important; }
           .masthead-meta-sub { opacity: 0.65; }
           .masthead-meta-sub:last-child { opacity: 0.55; }
-          .stat-section { grid-template-columns: 1fr !important; }
-          .stat-cutout { margin: 0 auto; width: 120px !important; height: 120px !important; }
           .masthead-title { font-size: 28px !important; }
           .main-content { padding: 28px 20px 60px !important; }
           .two-col-grid { grid-template-columns: 1fr !important; }
-          .stat-grid { grid-template-columns: 1fr 1fr !important; }
+          .specimen-card { grid-template-columns: 1fr !important; gap: 10px !important; padding: 14px 16px !important; }
+          .gallery-preview-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .form-row-grid { grid-template-columns: 1fr !important; }
           .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
           .log-stat-row { flex-wrap: wrap; }
           .photo-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .masthead-left { align-items: flex-start !important; }
           .masthead-cutout { width: 72px !important; height: 72px !important; }
-          .adventure-grid { grid-template-columns: 1fr !important; }
-          .adventure-cutout-wrap { text-align: center; }
+          .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
+          .loves-cutout { width: 68px !important; max-height: 72% !important; }
           .tab-bar { margin-left: -4px; }
           .age-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .adventure-map { height: 260px !important; }
         }
+        .stat-box-link:hover { border-color: ${pal.accentLight} !important; }
+        .gallery-preview:hover { border-color: ${pal.accentLight}; }
         .leaflet-container { font-family: 'EB Garamond', Georgia, serif; }
         .leaflet-popup-content-wrapper { border-radius: 0; border: 1px solid #C9A97A; }
+        .cosmos-panel::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-image: radial-gradient(circle, rgba(155, 138, 184, 0.28) 1px, transparent 1px);
+          background-size: 52px 52px;
+          opacity: 0.35;
+          pointer-events: none;
+        }
+        .tab-btn-cosmos[aria-selected="true"] { border-bottom-color: #9B8AB8 !important; color: #1A1428 !important; }
       `}</style>
       <div style={s.page}>
 
@@ -715,9 +877,13 @@ export default function App() {
             </div>
             <div style={s.mastheadMeta} className="masthead-meta">
               <div>Born September 16, 2024</div>
-              <div className="masthead-meta-sub" style={s.mastheadMetaSub}>
+              <button
+                type="button"
+                style={{ ...s.mastheadMetaSub, ...s.mastheadLink }}
+                onClick={() => handleTabChange("cosmos")}
+              >
                 {STAR_SIGN.symbol} {STAR_SIGN.name} · {CHINESE_ZODIAC.character} {CHINESE_ZODIAC.name}
-              </div>
+              </button>
               <div>{getAge(BIRTHDAY)}</div>
               <div className="masthead-meta-sub" style={s.mastheadMetaSub}>
                 {daysUntilBirthday === 0
@@ -742,100 +908,70 @@ export default function App() {
             ))}.
           </p>
 
-          <TabBar active={tab} onChange={setTab} />
+          <TabBar active={tab} onChange={handleTabChange} />
 
           {tab === "profile" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-profile" aria-labelledby="tab-profile">
-              <SectionHead title="Vital Statistics" first />
-              <div style={s.statSection} className="stat-section">
-                <div style={s.statRow} className="stat-grid">
-                  <div style={s.statBox}>
-                    <div style={s.statNum}>{ALL_TRICKS.length}</div>
-                    <div style={s.statLabel}>Known tricks</div>
-                    <div style={s.statNote}>Sit through Ambiturner</div>
-                  </div>
-                  <div style={s.statBox}>
-                    <div style={{ ...s.statNum, fontSize: 18, paddingTop: 8 }}>20 quintillion</div>
-                    <div style={s.statLabel}>Living animals (est.)</div>
-                    <div style={s.statNote}>Mostly insects and roundworms. Zero intends to meet every one.</div>
-                  </div>
-                  <div style={s.statBox}>
-                    <div style={s.statNum}>12+</div>
-                    <div style={s.statLabel}>Ticks hosted</div>
-                    <div style={s.statNote}>One coastal hike. He was a gracious host.</div>
-                  </div>
-                </div>
-                <img
-                  style={s.statCutout}
-                  className="stat-cutout"
-                  src={cutoutSrc(CUTOUTS.running)}
-                  alt="Zero running"
-                />
-              </div>
+              <div className="profile-top-row">
+                <VitalStatsColumn onTabChange={handleTabChange} totalTicks={totalTicks} />
 
-              <SectionHead title="Field Notes" />
-              <div style={s.specimenCard} className="two-col-grid">
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>Common Name</p>
-                  <p style={s.fieldValue}>Zero</p>
-                </div>
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>Species</p>
-                  <p style={s.fieldValue}>Samoyed</p>
-                  <p style={s.fieldSub}>Canis lupus familiaris</p>
-                </div>
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>Date of Record</p>
-                  <p style={s.fieldValue}>September 16, 2024</p>
-                </div>
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>Location</p>
-                  <p style={s.fieldValue}>San Francisco, CA</p>
-                  <p style={s.fieldSub}>Marina neighborhood</p>
-                </div>
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>Weight</p>
-                  <p style={s.fieldValue}>50 lbs</p>
-                </div>
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>Coat</p>
-                  <p style={s.fieldValue}>Snow-white</p>
-                  <p style={s.fieldSub}>A cloud in dog form, with party pants.</p>
-                </div>
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>Eyes</p>
-                  <p style={s.fieldValue}>Soulful black eyes</p>
-                  <p style={s.fieldSub}>Deep, dark, and expressive. He knows exactly what he is doing with them.</p>
-                </div>
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>Social Disposition</p>
-                  <p style={s.fieldValue}>Loves everyone</p>
-                  <p style={s.fieldSub}>20 quintillion living animals, without exception or reservation. He is working through the list.</p>
-                </div>
-                <div style={s.fieldBlock}>
-                  <p style={s.fieldLabel}>AKC Classification</p>
-                  <p style={s.fieldValue}>Working Group</p>
-                  <p style={s.fieldSub}>Bred to pull sleds and guard homes. Currently applying this ethic to the couch.</p>
+                <div className="profile-right-col" style={s.profileRightCol}>
+                  <SectionHead title="Field Notes" first />
+                  <div style={s.specimenCard} className="specimen-card">
+                    <div style={s.fieldBlock}>
+                      <p style={s.fieldLabel}>Species</p>
+                      <p style={s.fieldValue}>Samoyed</p>
+                      <p style={s.fieldSub}>Canis lupus familiaris</p>
+                    </div>
+                    <div style={s.fieldBlock}>
+                      <p style={s.fieldLabel}>Location</p>
+                      <p style={s.fieldValue}>San Francisco, CA</p>
+                      <p style={s.fieldSub}>Marina neighborhood</p>
+                    </div>
+                    <div style={s.fieldBlock}>
+                      <p style={s.fieldLabel}>Birth date</p>
+                      <p style={s.fieldValue}>September 16, 2024</p>
+                    </div>
+                    <div style={s.fieldBlock}>
+                      <p style={s.fieldLabel}>Coat</p>
+                      <p style={s.fieldValue}>Snow-white</p>
+                      <p style={s.fieldSub}>A cloud in dog form, with party pants.</p>
+                    </div>
+                    <div style={s.fieldBlock}>
+                      <p style={s.fieldLabel}>Weight</p>
+                      <p style={s.fieldValue}>50 lbs</p>
+                    </div>
+                    <div style={s.fieldBlock}>
+                      <p style={s.fieldLabel}>Eyes</p>
+                      <p style={s.fieldValue}>Soulful black eyes</p>
+                      <p style={s.fieldSub}>Deep, dark, and expressive. He knows exactly what he is doing with them.</p>
+                    </div>
+                  </div>
+                  <GalleryPreview onOpenGallery={() => handleTabChange("gallery")} />
                 </div>
               </div>
 
               <SectionHead title="Favorite Activities" />
               <div style={s.activitiesGrid} className="two-col-grid">
-                <div style={{ ...s.activitiesCard, ...s.lovesCard }}>
+                <div style={{ ...s.activitiesCard, ...s.lovesCard }} className="loves-card">
                   <p style={s.activitiesCardTitle}>Loves</p>
-                  {LIKES.map((item, i) => (
-                    <div key={item} style={{ ...s.activityItem, borderBottom: i === LIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
-                      <div style={s.activityDot} />
-                      {item}
-                    </div>
-                  ))}
+                  <div style={s.lovesList} className="loves-list">
+                    {LIKES.map((item, i) => (
+                      <div key={item} style={{ ...s.activityItem, borderBottom: i === LIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
+                        <div style={s.activityDot} />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
                   <img
                     style={s.lovesCutout}
+                    className="loves-cutout"
                     src={cutoutSrc(CUTOUTS.headMassage)}
-                    alt="Zero receiving a head massage"
+                    alt=""
+                    aria-hidden="true"
                   />
                 </div>
-                <div style={s.activitiesCard}>
+                <div style={{ ...s.activitiesCard, background: pal.white }}>
                   <p style={s.activitiesCardTitle}>Would rather not</p>
                   {DISLIKES.map((item, i) => (
                     <div key={item} style={{ ...s.activityItem, borderBottom: i === DISLIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
@@ -847,25 +983,29 @@ export default function App() {
               </div>
 
               <SectionHead title="Adventure Highlights" />
-              <div style={s.adventureGrid} className="adventure-grid">
+              <div style={s.adventureCard} className="adventure-card">
                 <div style={s.adventureGroups}>
                   {ADVENTURE_GROUPS.map((group, gi) => (
-                      <div key={group.type}>
-                        <p style={{ ...s.adventureGroupLabel, marginTop: gi === 0 ? 0 : 4 }}>{group.type}</p>
-                        <ul style={s.adventureList}>
-                          {group.items.map((item) => (
-                            <li key={item.name} style={s.adventureItem}>
-                              {item.name}
-                              <span style={s.adventureItemDetail}> — {item.detail}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                    <div
+                      key={group.type}
+                      style={{ ...s.adventureGroupBlock, borderLeft: `3px solid ${group.accent}`, marginTop: gi === 0 ? 0 : 8 }}
+                    >
+                      <p style={{ ...s.adventureGroupLabel, marginTop: 0 }}>{group.type}</p>
+                      <ul style={s.adventureList}>
+                        {group.items.map((item) => (
+                          <li key={item.name} style={s.adventureItem}>
+                            {item.name}
+                            <span style={s.adventureItemDetail}> — {item.detail}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
-                <figure className="adventure-cutout-wrap" style={{ margin: 0 }}>
+                <figure style={s.adventureFigure} className="adventure-figure">
                   <img
-                    style={s.adventureCutout}
+                    style={s.adventureFigureImg}
+                    className="adventure-figure-img"
                     src={cutoutSrc(CUTOUTS.dirty)}
                     alt="Zero after an adventure"
                   />
@@ -878,48 +1018,27 @@ export default function App() {
 
           {tab === "character" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-character" aria-labelledby="tab-character">
-              <SectionHead title="Time on Earth" first />
-              <LiveAgeCounter />
-
-              <SectionHead title="Celestial Profile" />
-              <div style={s.zodiacGrid} className="two-col-grid">
-                <div style={s.zodiacCard}>
-                  <div style={s.zodiacSymbol}>{STAR_SIGN.symbol}</div>
-                  <h3 style={s.zodiacName}>{STAR_SIGN.name}</h3>
-                  <p style={s.zodiacBlurb}>{STAR_SIGN.blurb}</p>
-                </div>
-                <div style={s.zodiacCard}>
-                  <div style={{ ...s.zodiacSymbol, fontFamily: ff.body }}>
-                    {CHINESE_ZODIAC.character}
-                    <span style={{ fontSize: 14, color: pal.lightBrown, marginLeft: 10, fontFamily: ff.body, fontStyle: "italic" }}>
-                      {CHINESE_ZODIAC.pinyin}
-                    </span>
-                  </div>
-                  <h3 style={s.zodiacName}>{CHINESE_ZODIAC.name}</h3>
-                  <p style={s.zodiacBlurb}>{CHINESE_ZODIAC.blurb}</p>
-                </div>
-              </div>
-
-              <SectionHead title="Lunar Record" />
-              <LunarRecord />
-
-              <SectionHead title="Daily Field Forecast" />
-              <DailyFieldForecast />
-
-              <SectionHead title="Aspirations" />
-              <Aspirations />
-
-              <SectionHead title="Repertoire" />
+              <SectionHead title="Repertoire" first />
               <div style={s.tricksGrid}>
                 {ALL_TRICKS.map((trick, i) => (
-                  <div key={trick.name} style={s.trickCard}>
+                  <div key={trick.name} style={{ ...s.trickCard, background: i % 2 === 0 ? pal.white : pal.parchment }}>
                     <p style={s.trickNum}>No. {String(i + 1).padStart(2, "0")}</p>
                     <p style={s.trickName}>{trick.name}</p>
                     {trick.note && <p style={s.trickNote}>{trick.note}</p>}
                   </div>
                 ))}
               </div>
+
+              <SectionHead title="Time on Earth" />
+              <LiveAgeCounter />
+
+              <SectionHead title="Aspirations" />
+              <Aspirations />
             </div>
+          )}
+
+          {tab === "cosmos" && (
+            <CosmosTab starSign={STAR_SIGN} chineseZodiac={CHINESE_ZODIAC} />
           )}
 
           {tab === "breed" && (
@@ -929,8 +1048,8 @@ export default function App() {
 
               <SectionHead title="About the Samoyed" />
               <div style={s.factsGrid} className="two-col-grid">
-                {SAMOYED_FACTS.map(f => (
-                  <div key={f.label} style={s.factCard}>
+                {SAMOYED_FACTS.map((f, i) => (
+                  <div key={f.label} style={{ ...s.factCard, background: i % 2 === 0 ? pal.white : pal.parchment }}>
                     <p style={s.factLabel}>{f.label}</p>
                     <p style={s.factValue}>{f.value}</p>
                     <p style={s.factDetail}>{f.detail}</p>
@@ -943,14 +1062,16 @@ export default function App() {
           {tab === "gallery" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-gallery" aria-labelledby="tab-gallery">
               <SectionHead title="Photographic Record" first />
-              <PhotoGallery />
+              <div style={{ background: pal.parchment, border: `1px solid ${pal.rule}`, padding: "20px 22px" }}>
+                <PhotoGallery />
+              </div>
             </div>
           )}
 
           {tab === "records" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-records" aria-labelledby="tab-records">
               <SectionHead title="Tick Tracker" first />
-              <TickTracker />
+              <TickTracker incidents={tickIncidents} setIncidents={setTickIncidents} />
             </div>
           )}
 
