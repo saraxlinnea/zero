@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { PHOTOS } from "./photos.js";
+import { GALLERY_PHOTOS, PLAY_SEQUENCE } from "./photos.js";
 import { ASPIRATION_GROUPS, SAMOYED_HISTORY, ADVENTURE_GROUPS, ADVENTURE_PINS } from "./content.js";
 import CosmosTab from "./CosmosTab.jsx";
+import { setFootprintMode, clearFootprints } from "./footprint-system.js";
+import { TAB_FOOTPRINT_MODES } from "./footprint-modes.js";
+import LayerShell from "./cinematic/LayerShell.jsx";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -67,6 +70,7 @@ const DISLIKES = [
   "Getting washed",
   "Being alone",
   "Cuddling when too hot",
+  "Being around a vacuum",
 ];
 
 const SAMOYED_FACTS = [
@@ -123,11 +127,14 @@ const SAMOYED_FACTS = [
 const ALL_TRICKS = [
   { name: "Sit", note: null },
   { name: "Down", note: null },
-  { name: "Shake a Paw", note: null },
+  { name: "Shake a Paw", note: "also other paw" },
   { name: "Circus", note: null },
-  { name: "Bow", note: "also known as Bow Chica Wow Wow" },
+  { name: "Bow Chica Wow Wow", note: "aka take a bow" },
   { name: "Spin", note: null },
-  { name: "Reverse Spin", note: "also known as Ambiturner" },
+  { name: "Ambiturner", note: "aka reverse spin" },
+  { name: "Bang", note: "aka play dead" },
+  { name: "Stop", note: null },
+  { name: "Go", note: "aka freedom time to run" },
 ];
 
 const INITIAL_TICKS = [
@@ -174,8 +181,8 @@ function formatPhotoTaken(iso) {
   return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
-function sortPhotosByTaken(newestFirst) {
-  return [...PHOTOS].sort((a, b) => {
+function sortPhotosByTaken(newestFirst, list = GALLERY_PHOTOS) {
+  return [...list].sort((a, b) => {
     const diff = new Date(b.taken) - new Date(a.taken);
     return newestFirst ? diff : -diff;
   });
@@ -202,6 +209,7 @@ const pal = {
   walkGreen: "#7A9B76",
   hikeTerracotta: "#D4956A",
   xcBlue: "#6B8FA3",
+  navy: "#22314F",
 };
 
 const ff = {
@@ -265,7 +273,7 @@ const s = {
   secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 22, marginTop: 52 },
   secHeadFirst: { marginTop: 0 },
   secTitle: { fontFamily: ff.display, fontSize: 22, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1 },
-  secStamp: { fontFamily: ff.display, fontSize: 14, color: pal.accentLight, lineHeight: 1, flexShrink: 0 },
+  secStamp: { fontFamily: ff.display, fontSize: 14, color: pal.navy, lineHeight: 1, flexShrink: 0 },
   secRule: { flex: 1, height: 1, background: pal.rule, opacity: 0.45, border: "none" },
   profileStatsCol: { display: "flex", flexDirection: "column", minHeight: "100%" },
   profileRightCol: { display: "flex", flexDirection: "column", gap: 16, minWidth: 0 },
@@ -328,9 +336,35 @@ const s = {
   factValue: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
   factDetail: { fontFamily: ff.body, fontSize: 13.5, color: pal.inkMuted, lineHeight: 1.7, margin: 0 },
   tricksGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 },
-  trickCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 18px" },
+  tricksGridTwoCol: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 },
+  repertoireRow: {
+    display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: 24, alignItems: "stretch", marginBottom: 32,
+  },
+  repertoireTricks: { minWidth: 0 },
+  playSequenceCard: {
+    background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0,
+    height: "100%", display: "flex", flexDirection: "column", alignSelf: "stretch",
+  },
+  playSequenceFrame: {
+    position: "relative", background: pal.parchment, overflow: "hidden",
+    flexShrink: 0, margin: "0 auto",
+  },
+  playSequenceImg: {
+    position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
+    transition: "opacity 0.2s ease",
+  },
+  playSequenceCaption: {
+    fontFamily: ff.body, fontSize: 11, color: pal.lightBrown, fontStyle: "italic",
+    padding: "8px 10px", margin: 0, textAlign: "center", lineHeight: 1.5,
+  },
+  playSequenceLabel: {
+    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase",
+    color: pal.accentLight, padding: "10px 10px 0", margin: 0, textAlign: "center",
+  },
+  trickCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "13px 16px" },
   trickNum: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.14em", color: pal.accentLight, textTransform: "uppercase", marginBottom: 3 },
-  trickName: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, margin: 0 },
+  trickName: { fontFamily: ff.display, fontSize: 15.5, fontWeight: 600, color: pal.darkBrown, margin: 0 },
   trickNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12.5, color: pal.lightBrown, margin: "3px 0 0" },
   tickBanner: {
     background: pal.tickRedLight,
@@ -359,7 +393,8 @@ const s = {
   logStatLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.13em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
   photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 },
   photoCard: { background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0, cursor: "pointer" },
-  photoImg: { width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" },
+  photoFrame: { width: "100%", aspectRatio: "1", background: pal.parchment, position: "relative", overflow: "hidden" },
+  photoImg: { width: "100%", height: "100%", aspectRatio: "1", objectFit: "cover", display: "block" },
   lightbox: {
     position: "fixed", inset: 0, background: "rgba(28, 17, 10, 0.92)",
     display: "flex", alignItems: "center", justifyContent: "center",
@@ -380,7 +415,7 @@ const s = {
   lovesCard: { position: "relative", background: pal.parchment, overflow: "hidden" },
   lovesList: { position: "relative" },
   lovesCutout: {
-    position: "absolute", right: -4, bottom: 0, width: 88, maxHeight: "78%",
+    position: "absolute", right: -8, bottom: 0, width: 140, maxHeight: "88%",
     objectFit: "contain", objectPosition: "bottom right", pointerEvents: "none",
     filter: "drop-shadow(0 2px 6px rgba(44,26,14,0.12))",
   },
@@ -494,7 +529,7 @@ function GalleryPreview({ onOpenGallery }) {
 function VitalStatsColumn({ onTabChange, totalTicks }) {
   return (
     <aside className="profile-stats-col" style={s.profileStatsCol}>
-      <p style={s.profileAsideLabel}>Vital Statistics</p>
+      <SectionHead title="Vital Statistics" first />
       <div style={s.statCard} className="stat-card">
         <div style={s.statAsideStack}>
           <div
@@ -507,7 +542,7 @@ function VitalStatsColumn({ onTabChange, totalTicks }) {
           >
             <div style={s.statNum}>{ALL_TRICKS.length}</div>
             <div style={s.statLabel}>Known tricks</div>
-            <div style={s.statNote}>Sit through Ambiturner · see Repertoire</div>
+            <div style={s.statNote}>Sit through Go · see Repertoire</div>
           </div>
           <div style={s.statBox}>
             <div style={{ ...s.statNum, fontSize: 18, paddingTop: 6 }}>20 quintillion</div>
@@ -632,6 +667,94 @@ function AdventureMap() {
   return <div ref={containerRef} style={s.adventureMap} className="adventure-map" aria-label="Map of Zero's adventures" />;
 }
 
+function PlaySequence({ frameSize }) {
+  const base = import.meta.env.BASE_URL;
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (PLAY_SEQUENCE.length <= 1) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % PLAY_SEQUENCE.length);
+    }, 420);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!PLAY_SEQUENCE.length) return null;
+
+  const frameStyle = frameSize
+    ? { ...s.playSequenceFrame, width: frameSize, height: frameSize }
+    : s.playSequenceFrame;
+
+  return (
+    <figure style={s.playSequenceCard} className="play-sequence">
+      <p style={s.playSequenceLabel}>At play</p>
+      <div style={frameStyle} className="play-sequence-frame">
+        {PLAY_SEQUENCE.map(({ file }, i) => (
+          <img
+            key={file}
+            src={`${base}photos/${file}`}
+            alt={i === index ? "Zero at play" : ""}
+            aria-hidden={i !== index}
+            style={{
+              ...s.playSequenceImg,
+              opacity: i === index ? 1 : 0,
+              zIndex: i === index ? 1 : 0,
+            }}
+          />
+        ))}
+      </div>
+      <figcaption style={s.playSequenceCaption}>
+        March 15, 2026 · play session
+      </figcaption>
+    </figure>
+  );
+}
+
+const PLAY_CHROME_HEIGHT = 58;
+
+function RepertoireBlock() {
+  const tricksRef = useRef(null);
+  const [frameSize, setFrameSize] = useState(null);
+
+  useEffect(() => {
+    const el = tricksRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const h = el.offsetHeight;
+      setFrameSize(Math.max(140, h - PLAY_CHROME_HEIGHT));
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  return (
+    <div style={s.repertoireRow} className="repertoire-row">
+      <div ref={tricksRef} style={s.repertoireTricks} className="repertoire-tricks">
+        <div style={s.tricksGridTwoCol} className="tricks-grid-two-col">
+          {ALL_TRICKS.map((trick, i) => (
+            <div key={trick.name} style={{ ...s.trickCard, background: i % 2 === 0 ? pal.white : pal.parchment }}>
+              <p style={s.trickNum}>No. {String(i + 1).padStart(2, "0")}</p>
+              <p style={s.trickName}>{trick.name}</p>
+              {trick.note && <p style={s.trickNote}>{trick.note}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+      <PlaySequence frameSize={frameSize} />
+    </div>
+  );
+}
+
 function TabBar({ active, onChange }) {
   return (
     <div style={s.tabBar} role="tablist" aria-label="Specimen sections" className="tab-bar">
@@ -661,12 +784,71 @@ function TabBar({ active, onChange }) {
   );
 }
 
+function LazyGalleryPhoto({ file, taken, base, onOpen }) {
+  const ref = useRef(null);
+  const [showSrc, setShowSrc] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const caption = formatPhotoTaken(taken);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setShowSrc(true); },
+      { rootMargin: "320px 0px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <figure ref={ref} style={s.photoCard} onClick={() => onOpen(file)}>
+      <div style={s.photoFrame}>
+        {showSrc && (
+          <img
+            style={{ ...s.photoImg, opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease" }}
+            src={`${base}photos/${file}`}
+            alt={`Zero, ${caption}`}
+            decoding="async"
+            onLoad={() => setLoaded(true)}
+          />
+        )}
+      </div>
+      <figcaption style={s.photoCaption}>{caption}</figcaption>
+    </figure>
+  );
+}
+
+const GALLERY_BATCH = 12;
+
 function PhotoGallery() {
   const [active, setActive] = useState(null);
   const [newestFirst, setNewestFirst] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(GALLERY_BATCH);
+  const sentinelRef = useRef(null);
   const base = import.meta.env.BASE_URL;
   const sorted = sortPhotosByTaken(newestFirst);
   const activePhoto = sorted.find((p) => p.file === active);
+  const visible = sorted.slice(0, visibleCount);
+
+  useEffect(() => {
+    setVisibleCount(GALLERY_BATCH);
+  }, [newestFirst]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || visibleCount >= sorted.length) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount((c) => Math.min(c + GALLERY_BATCH, sorted.length));
+        }
+      },
+      { rootMargin: "480px 0px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [visibleCount, sorted.length]);
 
   return (
     <>
@@ -680,20 +862,18 @@ function PhotoGallery() {
         </button>
       </div>
       <div style={s.photoGrid} className="photo-grid">
-        {sorted.map(({ file, taken }) => {
-          const caption = formatPhotoTaken(taken);
-          return (
-            <figure key={file} style={s.photoCard} onClick={() => setActive(file)}>
-              <img
-                style={s.photoImg}
-                src={`${base}photos/${file}`}
-                alt={`Zero, ${caption}`}
-                loading="lazy"
-              />
-              <figcaption style={s.photoCaption}>{caption}</figcaption>
-            </figure>
-          );
-        })}
+        {visible.map(({ file, taken }) => (
+          <LazyGalleryPhoto
+            key={file}
+            file={file}
+            taken={taken}
+            base={base}
+            onOpen={setActive}
+          />
+        ))}
+        {visibleCount < sorted.length && (
+          <div ref={sentinelRef} style={{ gridColumn: "1 / -1", height: 4 }} aria-hidden="true" />
+        )}
       </div>
       {active && activePhoto && (
         <div style={s.lightbox} onClick={() => setActive(null)} role="dialog" aria-modal="true" aria-label="Photo preview">
@@ -798,11 +978,17 @@ export default function App() {
 
   function handleTabChange(id) {
     setTab(id);
+    clearFootprints();
+    setFootprintMode(TAB_FOOTPRINT_MODES[id] ?? "default");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  useEffect(() => {
+    setFootprintMode(TAB_FOOTPRINT_MODES[tab] ?? "default");
+  }, [tab]);
+
   return (
-    <>
+    <LayerShell mood={tab}>
       <link rel="stylesheet" href={FONT_LINK} />
       <style>{`
         * { box-sizing: border-box; }
@@ -835,6 +1021,10 @@ export default function App() {
           .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
           .log-stat-row { flex-wrap: wrap; }
           .photo-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .repertoire-row { grid-template-columns: 1fr !important; }
+          .repertoire-tricks { max-width: none !important; }
+          .play-sequence { max-width: 100%; width: 100%; margin: 0 auto; height: auto !important; }
+          .play-sequence-frame { max-width: min(100%, 360px) !important; width: min(100%, 360px) !important; height: auto !important; aspect-ratio: 1 / 1 !important; }
           .masthead-left { align-items: flex-start !important; }
           .masthead-cutout { width: 72px !important; height: 72px !important; }
           .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
@@ -858,7 +1048,7 @@ export default function App() {
         }
         .tab-btn-cosmos[aria-selected="true"] { border-bottom-color: #9B8AB8 !important; color: #1A1428 !important; }
       `}</style>
-      <div style={s.page}>
+      <div style={s.page} className="page-shell page-shell--layered">
 
         <header style={s.masthead}>
           <div style={s.mastheadInner} className="masthead-inner">
@@ -1019,15 +1209,7 @@ export default function App() {
           {tab === "character" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-character" aria-labelledby="tab-character">
               <SectionHead title="Repertoire" first />
-              <div style={s.tricksGrid}>
-                {ALL_TRICKS.map((trick, i) => (
-                  <div key={trick.name} style={{ ...s.trickCard, background: i % 2 === 0 ? pal.white : pal.parchment }}>
-                    <p style={s.trickNum}>No. {String(i + 1).padStart(2, "0")}</p>
-                    <p style={s.trickName}>{trick.name}</p>
-                    {trick.note && <p style={s.trickNote}>{trick.note}</p>}
-                  </div>
-                ))}
-              </div>
+              <RepertoireBlock />
 
               <SectionHead title="Time on Earth" />
               <LiveAgeCounter />
@@ -1077,6 +1259,6 @@ export default function App() {
 
         </main>
       </div>
-    </>
+    </LayerShell>
   );
 }

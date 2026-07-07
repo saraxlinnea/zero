@@ -1,1 +1,6 @@
 node_modules/
+dist/
+Photos/
+.DS_Store
+cutout-photos/
+AGENTS.md

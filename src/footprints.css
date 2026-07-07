@@ -1,0 +1,61 @@
+#footprint-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.footprint {
+  position: absolute;
+  width: 26px;
+  height: 30px;
+  pointer-events: none;
+  will-change: opacity, transform;
+  transform-origin: center center;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0;
+  animation: footprint-stamp 0.35s ease-out forwards;
+}
+
+@keyframes footprint-stamp {
+  from {
+    opacity: 0;
+    transform: scale(calc(var(--fp-scale, 1) * 0.88)) rotate(var(--fp-rot, 0deg));
+  }
+  to {
+    opacity: var(--fp-peak-opacity, 0.32);
+    transform: scale(var(--fp-scale, 1)) rotate(var(--fp-rot, 0deg));
+  }
+}
+
+.footprint-default {
+  --fp-peak-opacity: 0.32;
+  background-image: url("/zero/footprints/paw.png");
+}
+
+.footprint-palmistry {
+  --fp-peak-opacity: 0.38;
+  background-image: url("/zero/footprints/paw.png");
+  filter: drop-shadow(0 0 5px rgba(155, 138, 184, 0.55));
+}
+
+.footprint-tracker {
+  --fp-peak-opacity: 0.28;
+  background-image: url("/zero/footprints/paw.png");
+}
+
+.footprint-map {
+  --fp-peak-opacity: 0.3;
+  background-image: url("/zero/footprints/paw.png");
+  filter: sepia(0.35) hue-rotate(55deg) saturate(0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footprint {
+    animation: none;
+    opacity: var(--fp-peak-opacity, 0.28);
+  }
+}
