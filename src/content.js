@@ -2,7 +2,7 @@ export const ASPIRATION_GROUPS = [
   {
     group: "Out and about",
     items: [
-      { title: "More adventures", detail: "Hikes, trips, and new smells — always." },
+      { title: "More adventures", detail: "Hikes, trips, and new smells. Always." },
       { title: "Cross-country travel", detail: "Come on road trips whenever possible, ideally with a window seat." },
       { title: "Better swimming", detail: "Get strong enough to cross lakes and rivers without looking panicked." },
     ],
@@ -11,7 +11,7 @@ export const ASPIRATION_GROUPS = [
     group: "Home & friends",
     items: [
       { title: "More friends at home", detail: "More animals under the same roof and more people who hang out properly." },
-      { title: "Play time, always", detail: "Play is not a reward. It is the baseline." },
+      { title: "Play time, always", detail: "Play is not a reward. It is the point." },
     ],
   },
   {
@@ -27,7 +27,7 @@ export const ASPIRATIONS = ASPIRATION_GROUPS.flatMap((g) => g.items);
 export const SAMOYED_HISTORY = [
   "For thousands of years, Samoyeds worked beside the Samoyedic peoples of Siberia: herding reindeer, pulling sleds across the Arctic, and sleeping close to humans on the coldest nights. Their warmth was not metaphorical. It was measured in survival.",
   "In the late nineteenth and early twentieth centuries, the breed reached explorers and mapmakers. Samoyeds pulled sleds on polar expeditions, including Fridtjof Nansen's Arctic journey, where their endurance and temperament were treated as equipment as vital as any compass.",
-  "Today the Samoyed remains a working dog in spirit if not always in employment. Zero upholds this lineage from San Francisco: he applies Arctic diligence to Marina walks, expedition-level enthusiasm to Fort Funston, and the same ancient conviction that every room has gathered to admire him. He is not wrong.",
+  "Today the Samoyed remains a working dog in spirit if not always in employment. Zero upholds this lineage from San Francisco: he applies Arctic diligence to Marina walks, expedition-level enthusiasm to Fort Funston, and the same ancient conviction that every room has gathered to admire him.",
 ];
 
 export const ADVENTURE_GROUPS = [

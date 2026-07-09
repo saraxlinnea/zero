@@ -1,5 +1,6 @@
 import { getMoonPhaseInfo } from "./moon.js";
 import { getDailyForecast, formatForecastDate } from "./forecasts.js";
+import { getDailySkyNote } from "./sky.js";
 import {
   PAW_LINES,
   getDailyPawLine,
@@ -202,12 +203,16 @@ function CosmosDailyDispatch() {
   const today = new Date();
   const forecast = getDailyForecast(today);
   const moon = getMoonPhaseInfo(today);
+  const sky = getDailySkyNote(today);
   return (
     <div style={cs.heroCard}>
       <p style={cs.heroDate}>Today Zero might… · {formatForecastDate(today)}</p>
       <p style={cs.heroText}>{forecast}</p>
       <p style={cs.heroNote}>
-        Today's moon: {moon.name} ({moon.symbol}). {moon.favors}
+        Today's moon: {moon.name} ({moon.symbol}). {moon.what} {moon.why} Zero might favor: {moon.favors}
+      </p>
+      <p style={cs.heroNote}>
+        Sky note: {sky.planet} {sky.placement}. {sky.mood}
       </p>
     </div>
   );

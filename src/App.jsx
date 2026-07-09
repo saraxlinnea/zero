@@ -25,8 +25,8 @@ const STAR_SIGN = {
   name: "Virgo",
   symbol: "♍",
   paragraphs: [
-    "Zero was born September 16, a Virgo. Earth sign, supposedly neat and devoted to routine. He has strong feelings about which side of the street smells right and treats the same hydrant like a standing appointment.",
-    "Mercury rules Virgo, which here means alert barking, sustained eye contact, and noticeable silence if you forget to praise him. He likes a day with a shape: walk, breakfast, nap, a little supervision of the household. He will love a stranger on the sidewalk and still regard the blow dryer as an insult. Picky is the wrong word. He has standards.",
+    "Zero was born September 16, a Virgo. Earth sign, neat about routine when it suits him. He has strong feelings about which side of the street smells right and treats the same hydrant like a standing appointment.",
+    "Mercury rules Virgo, which here means alert barking, sustained eye contact, and noticeable silence if you forget to praise him. He likes a day with a shape: walk, breakfast, nap, a little watching over the household. He will love a stranger on the sidewalk and still regard the blow dryer as an insult. He has standards.",
   ],
 };
 
@@ -71,6 +71,7 @@ const DISLIKES = [
   "Being alone",
   "Cuddling when too hot",
   "Being around a vacuum",
+  "Eating plain kibble",
 ];
 
 const SAMOYED_FACTS = [
@@ -275,7 +276,7 @@ const s = {
   secTitle: { fontFamily: ff.display, fontSize: 22, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1 },
   secStamp: { fontFamily: ff.display, fontSize: 14, color: pal.navy, lineHeight: 1, flexShrink: 0 },
   secRule: { flex: 1, height: 1, background: pal.rule, opacity: 0.45, border: "none" },
-  profileStatsCol: { display: "flex", flexDirection: "column", minHeight: "100%" },
+  profileStatsCol: { display: "flex", flexDirection: "column" },
   profileRightCol: { display: "flex", flexDirection: "column", gap: 16, minWidth: 0 },
   profileAsideLabel: {
     fontFamily: ff.display, fontSize: 15, fontWeight: 600, color: pal.darkBrown,
@@ -283,19 +284,19 @@ const s = {
   },
   statCard: {
     background: pal.white, border: `1px solid ${pal.rule}`,
-    padding: "16px 18px", flex: 1, display: "flex", flexDirection: "column",
+    padding: "12px 14px 10px", display: "flex", flexDirection: "column",
   },
-  statAsideStack: { display: "flex", flexDirection: "column", gap: 10, flex: 1 },
-  statBox: { background: pal.parchment, border: `1px solid ${pal.rule}`, padding: "12px 14px" },
+  statAsideStack: { display: "flex", flexDirection: "column", gap: 8 },
+  statBox: { background: pal.parchment, border: `1px solid ${pal.rule}`, padding: "8px 12px" },
   statBoxLink: { cursor: "pointer", transition: "border-color 0.15s" },
   statCutoutFlow: {
-    width: "100%", maxWidth: 130, height: "auto", objectFit: "contain", objectPosition: "bottom center",
-    display: "block", marginTop: "auto", paddingTop: 14,
+    width: "78%", maxWidth: 118, height: "auto", objectFit: "contain", objectPosition: "center",
+    display: "block", alignSelf: "center", marginTop: 2, marginBottom: 0,
     filter: "drop-shadow(0 3px 8px rgba(44,26,14,0.18))",
   },
-  statNum: { fontFamily: ff.display, fontSize: 30, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
-  statLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 5 },
-  statNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.inkMuted, marginTop: 4, lineHeight: 1.4 },
+  statNum: { fontFamily: ff.display, fontSize: 26, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
+  statLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 3 },
+  statNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.inkMuted, marginTop: 3, lineHeight: 1.35 },
   specimenCard: {
     background: pal.parchment, border: `1px solid ${pal.rule}`,
     padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px",
@@ -546,7 +547,7 @@ function VitalStatsColumn({ onTabChange, totalTicks }) {
             <div style={s.statNote}>Sit through Go · see Repertoire</div>
           </div>
           <div style={s.statBox}>
-            <div style={{ ...s.statNum, fontSize: 18, paddingTop: 6 }}>20 quintillion</div>
+            <div style={{ ...s.statNum, fontSize: 17, paddingTop: 2 }}>20 quintillion</div>
             <div style={s.statLabel}>Friends</div>
             <div style={s.statNote}>Est. all living animals on Earth. Mostly insects and roundworms. Zero intends to meet every one.</div>
           </div>
@@ -991,8 +992,8 @@ function TickTracker({ incidents, setIncidents }) {
               <td style={{ ...s.td, fontFamily: ff.display, fontWeight: 600, color: pal.tickRed }}>
                 {inc.count}
               </td>
-              <td style={s.td}>{inc.location || "—"}</td>
-              <td style={{ ...s.td, fontStyle: "italic" }}>{inc.notes || "—"}</td>
+              <td style={s.td}>{inc.location || "-"}</td>
+              <td style={{ ...s.td, fontStyle: "italic" }}>{inc.notes || "-"}</td>
             </tr>
           ))}
         </tbody>
@@ -1030,9 +1031,9 @@ export default function App() {
         @media (min-width: 901px) {
           .profile-top-row {
             display: grid;
-            grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+            grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
             gap: 28px;
-            align-items: stretch;
+            align-items: start;
           }
           .facts-grid { grid-template-columns: repeat(3, 1fr) !important; }
         }
@@ -1042,10 +1043,19 @@ export default function App() {
           .gallery-preview-grid { grid-template-columns: repeat(4, 1fr) !important; }
         }
         @media (max-width: 600px) {
-          .masthead-inner { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; padding: 20px 20px 18px !important; }
-          .masthead-meta { text-align: left !important; display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px 20px !important; width: 100% !important; }
-          .masthead-meta-sub { opacity: 0.65; }
-          .masthead-meta-sub:last-child { opacity: 0.55; }
+          .masthead-inner { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; padding: 16px 20px 14px !important; }
+          .masthead-meta {
+            text-align: left !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 2px !important;
+            width: auto !important;
+            line-height: 1.45 !important;
+          }
+          .masthead-meta-born { order: 1; }
+          .masthead-meta-age { order: 2; }
+          .masthead-meta-bday { order: 3; opacity: 0.65; }
+          .masthead-meta-zodiac { order: 4; opacity: 0.65; margin-top: 4px; }
           .masthead-title { font-size: 28px !important; }
           .main-content { padding: 28px 20px 60px !important; }
           .two-col-grid { grid-template-columns: 1fr !important; }
@@ -1059,8 +1069,8 @@ export default function App() {
           .repertoire-tricks { max-width: none !important; }
           .play-sequence { max-width: 100%; width: 100%; margin: 0 auto; height: auto !important; }
           .play-sequence-frame { max-width: min(100%, 360px) !important; width: min(100%, 360px) !important; height: auto !important; aspect-ratio: 1 / 1 !important; }
-          .masthead-left { align-items: flex-start !important; }
-          .masthead-cutout { width: 72px !important; height: 72px !important; }
+          .masthead-left { align-items: center !important; gap: 14px !important; }
+          .masthead-cutout { width: 108px !important; height: 108px !important; }
           .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
           .loves-cutout { width: 68px !important; max-height: 72% !important; }
           .tab-bar { margin-left: -4px; }
@@ -1091,7 +1101,7 @@ export default function App() {
                 style={s.mastheadCutout}
                 className="masthead-cutout"
                 src={cutoutSrc(CUTOUTS.happyFace)}
-                alt="Zero — happy face"
+                alt="Zero, happy face"
                 fetchPriority="high"
                 decoding="async"
                 width={96}
@@ -1104,16 +1114,17 @@ export default function App() {
               </div>
             </div>
             <div style={s.mastheadMeta} className="masthead-meta">
-              <div>Born September 16, 2024</div>
+              <div className="masthead-meta-born">Born September 16, 2024</div>
               <button
                 type="button"
+                className="masthead-meta-zodiac"
                 style={{ ...s.mastheadMetaSub, ...s.mastheadLink }}
                 onClick={() => handleTabChange("cosmos")}
               >
                 {STAR_SIGN.symbol} {STAR_SIGN.name} · {CHINESE_ZODIAC.character} {CHINESE_ZODIAC.name}
               </button>
-              <div>{getAge(BIRTHDAY)}</div>
-              <div className="masthead-meta-sub" style={s.mastheadMetaSub}>
+              <div className="masthead-meta-age">{getAge(BIRTHDAY)}</div>
+              <div className="masthead-meta-bday" style={s.mastheadMetaSub}>
                 {daysUntilBirthday === 0
                   ? "Happy Birthday, Zero!"
                   : `${daysUntilBirthday} days until next birthday`}
@@ -1225,7 +1236,7 @@ export default function App() {
                         {group.items.map((item) => (
                           <li key={item.name} style={s.adventureItem}>
                             {item.name}
-                            <span style={s.adventureItemDetail}> — {item.detail}</span>
+                            <span style={s.adventureItemDetail}> · {item.detail}</span>
                           </li>
                         ))}
                       </ul>

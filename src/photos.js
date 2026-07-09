@@ -157,6 +157,38 @@ export const PHOTOS = [
     "taken": "2026-07-03T20:26:46"
   },
   {
+    "file": "IMG_3812.jpg",
+    "taken": "2026-07-04T08:54:27"
+  },
+  {
+    "file": "IMG_3813.jpg",
+    "taken": "2026-07-04T09:01:12"
+  },
+  {
+    "file": "IMG_3817.jpg",
+    "taken": "2026-07-04T09:36:01"
+  },
+  {
+    "file": "IMG_3822.jpg",
+    "taken": "2026-07-04T20:00:05"
+  },
+  {
+    "file": "IMG_3863.jpg",
+    "taken": "2026-07-05T18:07:30"
+  },
+  {
+    "file": "IMG_3883.jpg",
+    "taken": "2026-07-07T11:37:13"
+  },
+  {
+    "file": "IMG_3886.jpg",
+    "taken": "2026-07-07T11:37:23"
+  },
+  {
+    "file": "IMG_3888.jpg",
+    "taken": "2026-07-07T11:57:15"
+  },
+  {
     "file": "IMG_4213.jpg",
     "taken": "2025-01-24T14:50:16"
   },
@@ -167,6 +199,10 @@ export const PHOTOS = [
   {
     "file": "IMG_5097.jpg",
     "taken": "2025-02-12T13:26:59"
+  },
+  {
+    "file": "IMG_5812.jpg",
+    "taken": "2026-07-05T17:28:48"
   },
   {
     "file": "IMG_6872.jpg",
@@ -364,6 +400,38 @@ export const GALLERY_PHOTOS = [
     "taken": "2026-07-03T20:26:46"
   },
   {
+    "file": "IMG_3812.jpg",
+    "taken": "2026-07-04T08:54:27"
+  },
+  {
+    "file": "IMG_3813.jpg",
+    "taken": "2026-07-04T09:01:12"
+  },
+  {
+    "file": "IMG_3817.jpg",
+    "taken": "2026-07-04T09:36:01"
+  },
+  {
+    "file": "IMG_3822.jpg",
+    "taken": "2026-07-04T20:00:05"
+  },
+  {
+    "file": "IMG_3863.jpg",
+    "taken": "2026-07-05T18:07:30"
+  },
+  {
+    "file": "IMG_3883.jpg",
+    "taken": "2026-07-07T11:37:13"
+  },
+  {
+    "file": "IMG_3886.jpg",
+    "taken": "2026-07-07T11:37:23"
+  },
+  {
+    "file": "IMG_3888.jpg",
+    "taken": "2026-07-07T11:57:15"
+  },
+  {
     "file": "IMG_4213.jpg",
     "taken": "2025-01-24T14:50:16"
   },
@@ -374,6 +442,10 @@ export const GALLERY_PHOTOS = [
   {
     "file": "IMG_5097.jpg",
     "taken": "2025-02-12T13:26:59"
+  },
+  {
+    "file": "IMG_5812.jpg",
+    "taken": "2026-07-05T17:28:48"
   },
   {
     "file": "IMG_6872.jpg",

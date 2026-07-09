@@ -1,10 +1,6 @@
 const MIN_FOOTPRINTS = 28;
-const MAX_FOOTPRINTS_CAP = 160;
 const SPAWN_MIN_PX = 30;
 const SPAWN_MAX_PX = 55;
-const FADE_START_MS = 2_500;
-const FADE_DURATION_MS = 4_500;
-const FADE_STAGGER_MS = 150;
 const WAVE_FREQ = 0.72;
 const ANCHOR_RATIO = 0.5;
 const WAVE_LEAN = 10;
@@ -21,6 +17,15 @@ const PEAK_OPACITY = {
   tracker: 0.26,
   map: 0.32,
 };
+
+const isMobile =
+  typeof window !== "undefined" &&
+  window.matchMedia("(max-width: 600px), (pointer: coarse)").matches;
+
+const MAX_FOOTPRINTS_CAP = isMobile ? 100 : 160;
+const FADE_START_MS = isMobile ? 1_400 : 2_500;
+const FADE_DURATION_MS = isMobile ? 2_400 : 4_500;
+const FADE_STAGGER_MS = isMobile ? 90 : 150;
 
 let layer = null;
 let mode = "default";

@@ -2,7 +2,7 @@ export const PAW_LINES = [
   { pad: "Life line", zone: "Center pad", reading: "Long and worn down. Plenty of walks still ahead, most longer than you meant to take." },
   { pad: "Treat line", zone: "Inner left", reading: "Deep. He remembers which pocket had the good snacks yesterday and will check it again today." },
   { pad: "Squirrel line", zone: "Outer edge", reading: "Often interrupted. Bark first, look later. The squirrel remains unimpressed." },
-  { pad: "Heart line", zone: "Upper pad", reading: "Open. Loves everyone, which makes him excellent company and a terrible guard dog." },
+  { pad: "Heart line", zone: "Upper pad", reading: "Open. Loves everyone, which makes him great company and a terrible guard dog." },
   { pad: "Head line", zone: "Toe beans", reading: "Short. Fast decisions. Wrong about birds more often than he admits." },
   { pad: "Dewclaw", zone: "Reserved", reading: "Saved for reverse spins, dramatic exits, and the occasional ambiturner." },
 ];
