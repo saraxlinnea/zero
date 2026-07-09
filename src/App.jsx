@@ -494,6 +494,13 @@ function cutoutSrc(name) {
   return `${import.meta.env.BASE_URL}cutouts/${name}`;
 }
 
+function photoSrc(file, variant = "full") {
+  const base = import.meta.env.BASE_URL;
+  return variant === "thumb"
+    ? `${base}photos/thumbs/${file}`
+    : `${base}photos/${file}`;
+}
+
 function SectionHead({ title, first = false }) {
   return (
     <div style={{ ...s.secHead, ...(first ? s.secHeadFirst : {}) }}>
@@ -505,7 +512,6 @@ function SectionHead({ title, first = false }) {
 }
 
 function GalleryPreview({ onOpenGallery }) {
-  const base = import.meta.env.BASE_URL;
   const preview = sortPhotosByTaken(true).slice(0, 4);
 
   return (
@@ -513,12 +519,7 @@ function GalleryPreview({ onOpenGallery }) {
       <p style={s.galleryPreviewLabel}>Photographic record</p>
       <div style={s.galleryPreviewGrid} className="gallery-preview-grid">
         {preview.map(({ file }) => (
-          <img
-            key={file}
-            style={s.galleryPreviewImg}
-            src={`${base}photos/${file}`}
-            alt=""
-          />
+          <LazyThumb key={file} file={file} style={s.galleryPreviewImg} />
         ))}
       </div>
       <span style={s.galleryPreviewLink}>View full gallery →</span>
@@ -567,6 +568,8 @@ function VitalStatsColumn({ onTabChange, totalTicks }) {
           className="stat-cutout-flow"
           src={cutoutSrc(CUTOUTS.running)}
           alt="Zero running"
+          loading="lazy"
+          decoding="async"
         />
       </div>
     </aside>
@@ -668,7 +671,6 @@ function AdventureMap() {
 }
 
 function PlaySequence({ frameSize }) {
-  const base = import.meta.env.BASE_URL;
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -694,9 +696,11 @@ function PlaySequence({ frameSize }) {
         {PLAY_SEQUENCE.map(({ file }, i) => (
           <img
             key={file}
-            src={`${base}photos/${file}`}
+            src={photoSrc(file, "thumb")}
             alt={i === index ? "Zero at play" : ""}
             aria-hidden={i !== index}
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
             style={{
               ...s.playSequenceImg,
               opacity: i === index ? 1 : 0,
@@ -784,7 +788,37 @@ function TabBar({ active, onChange }) {
   );
 }
 
-function LazyGalleryPhoto({ file, taken, base, onOpen }) {
+function LazyThumb({ file, style, alt = "" }) {
+  const ref = useRef(null);
+  const [showSrc, setShowSrc] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setShowSrc(true); },
+      { rootMargin: "200px 0px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} style={style}>
+      {showSrc && (
+        <img
+          src={photoSrc(file, "thumb")}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
+      )}
+    </div>
+  );
+}
+
+function LazyGalleryPhoto({ file, taken, onOpen }) {
   const ref = useRef(null);
   const [showSrc, setShowSrc] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -807,8 +841,9 @@ function LazyGalleryPhoto({ file, taken, base, onOpen }) {
         {showSrc && (
           <img
             style={{ ...s.photoImg, opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease" }}
-            src={`${base}photos/${file}`}
+            src={photoSrc(file, "thumb")}
             alt={`Zero, ${caption}`}
+            loading="lazy"
             decoding="async"
             onLoad={() => setLoaded(true)}
           />
@@ -826,7 +861,6 @@ function PhotoGallery() {
   const [newestFirst, setNewestFirst] = useState(true);
   const [visibleCount, setVisibleCount] = useState(GALLERY_BATCH);
   const sentinelRef = useRef(null);
-  const base = import.meta.env.BASE_URL;
   const sorted = sortPhotosByTaken(newestFirst);
   const activePhoto = sorted.find((p) => p.file === active);
   const visible = sorted.slice(0, visibleCount);
@@ -867,7 +901,6 @@ function PhotoGallery() {
             key={file}
             file={file}
             taken={taken}
-            base={base}
             onOpen={setActive}
           />
         ))}
@@ -880,8 +913,9 @@ function PhotoGallery() {
           <button style={s.lightboxClose} onClick={() => setActive(null)} type="button">Close</button>
           <img
             style={s.lightboxImg}
-            src={`${base}photos/${active}`}
+            src={photoSrc(active, "full")}
             alt={`Zero, ${formatPhotoTaken(activePhoto.taken)}`}
+            decoding="async"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -1058,6 +1092,10 @@ export default function App() {
                 className="masthead-cutout"
                 src={cutoutSrc(CUTOUTS.happyFace)}
                 alt="Zero — happy face"
+                fetchPriority="high"
+                decoding="async"
+                width={96}
+                height={96}
               />
               <div>
                 <p style={s.siteLabel}>Specimen Record · Canine Division</p>
@@ -1159,6 +1197,8 @@ export default function App() {
                     src={cutoutSrc(CUTOUTS.headMassage)}
                     alt=""
                     aria-hidden="true"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div style={{ ...s.activitiesCard, background: pal.white }}>
@@ -1198,6 +1238,8 @@ export default function App() {
                     className="adventure-figure-img"
                     src={cutoutSrc(CUTOUTS.dirty)}
                     alt="Zero after an adventure"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <figcaption style={s.adventureCaption}>Field condition: acceptable.</figcaption>
                 </figure>
