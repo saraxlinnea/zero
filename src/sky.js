@@ -15,7 +15,7 @@ export const DAILY_SKY_NOTES = [
   { planet: "Mercury", placement: "in reverse spin", mood: "Good day for ambiturner if he is feeling bold." },
   { planet: "Venus", placement: "on Marina Green", mood: "Social calendar is full. He is the main event." },
   { planet: "Mars", placement: "after breakfast", mood: "Save the best trick for after the morning walk." },
-  { planet: "Jupiter", placement: "with Kaan and Melina", mood: "Guardian check-ins feel important today." },
+  { planet: "Jupiter", placement: "with Kaan and Malina", mood: "Guardian check-ins feel important today." },
   { planet: "Saturn", placement: "on the trail", mood: "Tick check after the hike. He is not hosting." },
   { planet: "Moon", placement: "in soft light", mood: "Quiet supervision at home beats a big outing." },
   { planet: "Mercury", placement: "near the birds", mood: "Bark first, friends second. Keep a loose leash by trees." },

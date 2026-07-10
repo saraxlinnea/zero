@@ -23,9 +23,9 @@ const isMobile =
   window.matchMedia("(max-width: 600px), (pointer: coarse)").matches;
 
 const MAX_FOOTPRINTS_CAP = isMobile ? 100 : 160;
-const FADE_START_MS = isMobile ? 1_400 : 2_500;
-const FADE_DURATION_MS = isMobile ? 2_400 : 4_500;
-const FADE_STAGGER_MS = isMobile ? 90 : 150;
+const FADE_START_MS = isMobile ? 1_200 : 2_200;
+const FADE_DURATION_MS = isMobile ? 1_800 : 2_200;
+const FADE_STAGGER_MS = isMobile ? 420 : 550;
 
 let layer = null;
 let mode = "default";

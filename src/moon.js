@@ -42,7 +42,7 @@ export const MOON_PHASES = [
     symbol: "🌖",
     what: "Still bright, but the moon is starting to shrink.",
     why: "High energy, but softer, good for sharing attention instead of hoarding it.",
-    favors: "Tug with Ender, sharing toys, head massages, and guardian check-ins with Kaan and Melina.",
+    favors: "Tug with Ender, sharing toys, head massages, and guardian check-ins with Kaan and Malina.",
   },
   {
     name: "Last Quarter",

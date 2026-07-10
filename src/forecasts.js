@@ -14,7 +14,7 @@ export const DAILY_FORECASTS = [
   "Play time comes first.",
   "Smile extra big today. It works.",
   "Mud may happen. Field condition: acceptable.",
-  "Check in on Kaan and Melina. They benefit from Zero energy.",
+  "Check in on Kaan and Malina. They benefit from Zero energy.",
   "Good day to practice swimming, even at the edge of the lake.",
   "Tug of war is about heart, not winning.",
   "Bath memory fading. Harness memory less so.",

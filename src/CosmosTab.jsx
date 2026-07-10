@@ -6,7 +6,7 @@ import {
   getDailyPawLine,
 } from "./cosmos.js";
 
-const BIRTHDAY = new Date("2024-09-16");
+const BIRTHDAY = new Date("2024-09-16T00:00:00");
 
 const cosmosPal = {
   ink: "#1A1428",
@@ -189,7 +189,7 @@ function CosmosLunarRecord() {
   const todayMoon = getMoonPhaseInfo(new Date());
   return (
     <div style={cs.moonGrid} className="two-col-grid cosmos-moon-grid">
-      <CosmosMoonCard label="At birth" date="September 16, 2024" info={birthMoon} />
+      <CosmosMoonCard label="At birth" date="September 16, 2024 · 00:00:00" info={birthMoon} />
       <CosmosMoonCard
         label="Today"
         date={new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}

@@ -11,7 +11,7 @@ import "leaflet/dist/leaflet.css";
 const FONT_LINK =
   "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap";
 
-const BIRTHDAY = new Date("2024-09-16");
+const BIRTHDAY = new Date("2024-09-16T00:00:00");
 
 const NICKNAMES = [
   "Little Zero", "Little Floof", "Little Dragon", "Little Polar Bear",
@@ -25,7 +25,7 @@ const STAR_SIGN = {
   name: "Virgo",
   symbol: "♍",
   paragraphs: [
-    "Zero was born September 16, a Virgo. Earth sign, neat about routine when it suits him. He has strong feelings about which side of the street smells right and treats the same hydrant like a standing appointment.",
+    "Zero was born September 16 at exactly 00:00:00, a Virgo. Earth sign, neat about routine when it suits him. He has strong feelings about which side of the street smells right and treats the same hydrant like a standing appointment.",
     "Mercury rules Virgo, which here means alert barking, sustained eye contact, and noticeable silence if you forget to praise him. He likes a day with a shape: walk, breakfast, nap, a little watching over the household. He will love a stranger on the sidewalk and still regard the blow dryer as an insult. He has standards.",
   ],
 };
@@ -62,6 +62,7 @@ const CUTOUTS = {
   running: "zero-running.png",
   headMassage: "zero-head-massage.png",
   dirty: "dirty-zero.png",
+  skellington: "zero-skellington.png",
 };
 
 const DISLIKES = [
@@ -263,6 +264,7 @@ const s = {
     color: pal.lightBrown, background: "none", border: "none",
     borderBottom: "2px solid transparent", padding: "12px 20px", cursor: "pointer",
     whiteSpace: "nowrap", flexShrink: 0, marginBottom: -1,
+    transition: "color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease",
   },
   tabBtnActive: {
     color: pal.darkBrown, borderBottom: `2px solid ${pal.accentLight}`, fontWeight: 500,
@@ -270,7 +272,10 @@ const s = {
   tabBtnCosmosActive: {
     color: "#1A1428", borderBottom: "2px solid #9B8AB8", fontWeight: 500,
   },
-  tabPanel: { minHeight: 320 },
+  tabPanel: {
+    minHeight: 320,
+    animation: "tab-panel-in 0.28s ease",
+  },
   secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 22, marginTop: 52 },
   secHeadFirst: { marginTop: 0 },
   secTitle: { fontFamily: ff.display, fontSize: 22, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1 },
@@ -412,6 +417,7 @@ const s = {
     width: 96, height: 96, objectFit: "contain", objectPosition: "bottom",
     filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.35))",
     flexShrink: 0,
+    transition: "transform 0.35s ease",
   },
   lovesCard: { position: "relative", background: pal.parchment, overflow: "hidden" },
   lovesList: { position: "relative" },
@@ -460,6 +466,20 @@ const s = {
     fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.85,
   },
   proseParagraph: { margin: "0 0 16px" },
+  namingCard: {
+    background: pal.parchment, border: `1px solid ${pal.rule}`,
+    padding: "22px 26px", display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(100px, 140px)",
+    gap: 20, alignItems: "center",
+  },
+  namingImg: {
+    width: "100%", height: "auto", objectFit: "contain",
+    filter: "drop-shadow(0 4px 14px rgba(44,26,14,0.2))",
+  },
+  namingCaption: {
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 11, color: pal.lightBrown,
+    textAlign: "center", margin: "8px 0 0",
+  },
   aspirationGroupLabel: {
     fontFamily: ff.display, fontSize: 14, fontWeight: 600, color: pal.midBrown,
     margin: "0 0 8px", letterSpacing: "0.02em",
@@ -602,7 +622,9 @@ function LiveAgeCounter() {
           </div>
         ))}
       </div>
-      <p style={s.ageNote}>Precise elapsed time since September 16, 2024. Zero has been on Earth for every second of it.</p>
+      <p style={s.ageNote}>
+        Precise elapsed time since September 16, 2024 at 00:00:00. Zero arrived on the stroke of midnight and has been on Earth for every second since.
+      </p>
     </div>
   );
 }
@@ -760,6 +782,63 @@ function RepertoireBlock() {
   );
 }
 
+function NamingNote() {
+  return (
+    <div style={s.namingCard} className="naming-card">
+      <div>
+        <p style={{ ...s.proseParagraph, marginBottom: 0 }}>
+          Zero is named after Zero Skellington, the little ghost dog from <em>The Nightmare Before Christmas</em>.
+          Same bright loyalty, same habit of lighting up a room, and the same conviction that wherever his people go, he goes too.
+        </p>
+      </div>
+      <figure style={{ margin: 0, textAlign: "center" }}>
+        <img
+          style={s.namingImg}
+          src={cutoutSrc(CUTOUTS.skellington)}
+          alt="Zero Skellington from The Nightmare Before Christmas"
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption style={s.namingCaption}>Zero Skellington</figcaption>
+      </figure>
+    </div>
+  );
+}
+
+function BirthRecord() {
+  return (
+    <div style={{ ...s.namingCard, marginBottom: 28 }} className="naming-card birth-record">
+      <div>
+        <div style={{ ...s.fieldBlock, marginBottom: 14 }}>
+          <p style={s.fieldLabel}>Birth Time</p>
+          <p style={s.fieldValue}>00:00:00</p>
+        </div>
+        <div style={{ ...s.fieldBlock, marginBottom: 14 }}>
+          <p style={s.fieldLabel}>Birth Date</p>
+          <p style={s.fieldValue}>September 16, 2024</p>
+        </div>
+        <div style={s.fieldBlock}>
+          <p style={s.fieldLabel}>Given Name</p>
+          <p style={s.fieldValue}>Zero*</p>
+          <p style={{ ...s.fieldSub, marginTop: 8, lineHeight: 1.55 }}>
+            * Named for Zero Skellington of <em>The Nightmare Before Christmas</em>. A ghost dog with a glowing nose, and a snow dog with a glowing personality.
+          </p>
+        </div>
+      </div>
+      <figure style={{ margin: 0, textAlign: "center" }}>
+        <img
+          style={s.namingImg}
+          src={cutoutSrc(CUTOUTS.skellington)}
+          alt="Zero Skellington from The Nightmare Before Christmas"
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption style={s.namingCaption}>Zero Skellington</figcaption>
+      </figure>
+    </div>
+  );
+}
+
 function TabBar({ active, onChange }) {
   return (
     <div style={s.tabBar} role="tablist" aria-label="Specimen sections" className="tab-bar">
@@ -773,7 +852,7 @@ function TabBar({ active, onChange }) {
             aria-selected={isActive}
             aria-controls={`panel-${id}`}
             id={`tab-${id}`}
-            className={id === "cosmos" ? "tab-btn-cosmos" : undefined}
+            className={`tab-btn tab-btn-${id}${isActive ? " is-active" : ""}`}
             style={{
               ...s.tabBtn,
               ...(isActive && id === "cosmos" ? s.tabBtnCosmosActive : {}),
@@ -837,7 +916,7 @@ function LazyGalleryPhoto({ file, taken, onOpen }) {
   }, []);
 
   return (
-    <figure ref={ref} style={s.photoCard} onClick={() => onOpen(file)}>
+    <figure ref={ref} style={s.photoCard} className="photo-card" onClick={() => onOpen(file)}>
       <div style={s.photoFrame}>
         {showSrc && (
           <img
@@ -1023,11 +1102,68 @@ export default function App() {
   }, [tab]);
 
   return (
-    <LayerShell mood={tab}>
+    <LayerShell mood="default">
       <link rel="stylesheet" href={FONT_LINK} />
       <style>{`
         * { box-sizing: border-box; }
         input, select, textarea, button { font-size: 16px !important; }
+        @keyframes tab-panel-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .masthead-meta {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 2px;
+        }
+        .masthead-meta-zodiac {
+          margin-bottom: 4px;
+          color: ${pal.mastheadMuted};
+          transition: color 0.2s ease;
+        }
+        .masthead-meta-zodiac:hover { color: ${pal.accentLight}; }
+        .masthead-cutout:hover { transform: translateY(-3px) rotate(-2deg); }
+        .tab-btn:hover { color: ${pal.darkBrown}; }
+        .tab-btn-profile.is-active {
+          border-bottom-color: ${pal.navy} !important;
+          color: ${pal.navy} !important;
+          background: rgba(34, 49, 79, 0.08);
+        }
+        .tab-btn-character.is-active {
+          border-bottom-color: #C9893A !important;
+          color: #6B4226 !important;
+          background: rgba(201, 137, 58, 0.12);
+        }
+        .tab-btn-cosmos.is-active {
+          border-bottom-color: #9B8AB8 !important;
+          color: #1A1428 !important;
+          background: rgba(155, 138, 184, 0.14);
+        }
+        .tab-btn-breed.is-active {
+          border-bottom-color: #8B6B45 !important;
+          color: #5C3D1E !important;
+          background: rgba(139, 107, 69, 0.12);
+        }
+        .tab-btn-gallery.is-active {
+          border-bottom-color: ${pal.accentLight} !important;
+          color: ${pal.darkBrown} !important;
+          background: rgba(212, 149, 106, 0.14);
+        }
+        .tab-btn-records.is-active {
+          border-bottom-color: ${pal.tickRed} !important;
+          color: ${pal.tickRed} !important;
+          background: rgba(122, 26, 26, 0.08);
+        }
+        .stat-box-link:hover {
+          border-color: ${pal.accentLight} !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(44, 26, 14, 0.08);
+        }
+        .stat-box-link { transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+        .gallery-preview:hover { border-color: ${pal.accentLight}; }
+        .photo-card { transition: transform 0.25s ease, border-color 0.25s ease; }
+        .photo-card:hover { transform: translateY(-3px); border-color: ${pal.accentLight} !important; }
         @media (min-width: 901px) {
           .profile-top-row {
             display: grid;
@@ -1046,16 +1182,28 @@ export default function App() {
           .masthead-inner { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; padding: 16px 20px 14px !important; }
           .masthead-meta {
             text-align: left !important;
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 2px !important;
-            width: auto !important;
+            display: grid !important;
+            grid-template-columns: 1fr auto !important;
+            column-gap: 16px !important;
+            row-gap: 2px !important;
+            align-items: start !important;
+            width: 100% !important;
             line-height: 1.45 !important;
           }
-          .masthead-meta-born { order: 1; }
-          .masthead-meta-age { order: 2; }
-          .masthead-meta-bday { order: 3; opacity: 0.65; }
-          .masthead-meta-zodiac { order: 4; opacity: 0.65; margin-top: 4px; }
+          .masthead-meta-born { grid-column: 1; grid-row: 1; }
+          .masthead-meta-age { grid-column: 1; grid-row: 2; }
+          .masthead-meta-bday { grid-column: 1; grid-row: 3; opacity: 0.65; }
+          .masthead-meta-zodiac {
+            grid-column: 2;
+            grid-row: 1 / span 3;
+            align-self: center;
+            justify-self: end;
+            text-align: right;
+            max-width: 9.5em;
+            line-height: 1.35;
+            margin-bottom: 0 !important;
+            opacity: 0.85;
+          }
           .masthead-title { font-size: 28px !important; }
           .main-content { padding: 28px 20px 60px !important; }
           .two-col-grid { grid-template-columns: 1fr !important; }
@@ -1072,13 +1220,17 @@ export default function App() {
           .masthead-left { align-items: center !important; gap: 14px !important; }
           .masthead-cutout { width: 108px !important; height: 108px !important; }
           .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
+          .naming-card { grid-template-columns: 1fr !important; }
           .loves-cutout { width: 68px !important; max-height: 72% !important; }
           .tab-bar { margin-left: -4px; }
           .age-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .adventure-map { height: 260px !important; }
         }
-        .stat-box-link:hover { border-color: ${pal.accentLight} !important; }
-        .gallery-preview:hover { border-color: ${pal.accentLight}; }
+        @media (prefers-reduced-motion: reduce) {
+          .tab-panel, [role="tabpanel"] { animation: none !important; }
+          .masthead-cutout, .stat-box-link, .photo-card, .tab-btn { transition: none !important; }
+          .masthead-cutout:hover, .stat-box-link:hover, .photo-card:hover { transform: none !important; }
+        }
         .leaflet-container { font-family: 'EB Garamond', Georgia, serif; }
         .leaflet-popup-content-wrapper { border-radius: 0; border: 1px solid #C9A97A; }
         .cosmos-panel::before {
@@ -1090,7 +1242,6 @@ export default function App() {
           opacity: 0.35;
           pointer-events: none;
         }
-        .tab-btn-cosmos[aria-selected="true"] { border-bottom-color: #9B8AB8 !important; color: #1A1428 !important; }
       `}</style>
       <div style={s.page} className="page-shell page-shell--layered">
 
@@ -1114,7 +1265,6 @@ export default function App() {
               </div>
             </div>
             <div style={s.mastheadMeta} className="masthead-meta">
-              <div className="masthead-meta-born">Born September 16, 2024</div>
               <button
                 type="button"
                 className="masthead-meta-zodiac"
@@ -1123,6 +1273,7 @@ export default function App() {
               >
                 {STAR_SIGN.symbol} {STAR_SIGN.name} · {CHINESE_ZODIAC.character} {CHINESE_ZODIAC.name}
               </button>
+              <div className="masthead-meta-born">Born September 16, 2024</div>
               <div className="masthead-meta-age">{getAge(BIRTHDAY)}</div>
               <div className="masthead-meta-bday" style={s.mastheadMetaSub}>
                 {daysUntilBirthday === 0
@@ -1170,6 +1321,7 @@ export default function App() {
                     <div style={s.fieldBlock}>
                       <p style={s.fieldLabel}>Birth date</p>
                       <p style={s.fieldValue}>September 16, 2024</p>
+                      <p style={s.fieldSub}>Exactly 00:00:00. Of course.</p>
                     </div>
                     <div style={s.fieldBlock}>
                       <p style={s.fieldLabel}>Coat</p>
@@ -1264,6 +1416,9 @@ export default function App() {
               <SectionHead title="Repertoire" first />
               <RepertoireBlock />
 
+              <SectionHead title="On the Name" />
+              <NamingNote />
+
               <SectionHead title="Time on Earth" />
               <LiveAgeCounter />
 
@@ -1305,7 +1460,10 @@ export default function App() {
 
           {tab === "records" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-records" aria-labelledby="tab-records">
-              <SectionHead title="Tick Tracker" first />
+              <SectionHead title="Birth Record" first />
+              <BirthRecord />
+
+              <SectionHead title="Tick Tracker" />
               <TickTracker incidents={tickIncidents} setIncidents={setTickIncidents} />
             </div>
           )}

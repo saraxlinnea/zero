@@ -17,7 +17,7 @@ export const ASPIRATION_GROUPS = [
   {
     group: "Family",
     items: [
-      { title: "See Ender, Kaan, and Melina more", detail: "Help them grow up right. Zero takes guardian duty seriously." },
+      { title: "See Ender, Kaan, and Malina more", detail: "Help them grow up right. Zero takes guardian duty seriously." },
     ],
   },
 ];
