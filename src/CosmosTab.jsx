@@ -1,10 +1,7 @@
 import { getMoonPhaseInfo } from "./moon.js";
 import { getDailyForecast, formatForecastDate } from "./forecasts.js";
 import { getDailySkyNote } from "./sky.js";
-import {
-  PAW_LINES,
-  getDailyPawLine,
-} from "./cosmos.js";
+import { PAW_LINES } from "./cosmos.js";
 
 const BIRTHDAY = new Date("2024-09-16T00:00:00");
 
@@ -97,24 +94,33 @@ const cs = {
   pawCard: {
     background: `linear-gradient(180deg, #FFFDF8 0%, ${cosmosPal.lavenderMid} 100%)`,
     border: `1px solid ${cosmosPal.borderSoft}`,
-    padding: "24px 28px",
+    padding: "16px 18px",
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(120px, 160px)",
+    gap: 16,
+    alignItems: "start",
   },
-  pawDaily: {
-    fontFamily: ff.display, fontSize: 17, fontStyle: "italic", color: cosmosPal.ink,
-    margin: "0 0 20px", lineHeight: 1.55,
-  },
-  pawGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 },
+  pawGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 },
   pawLineCard: {
     background: "rgba(255, 253, 248, 0.7)",
     border: `1px solid ${cosmosPal.borderSoft}`,
-    padding: "14px 16px",
+    padding: "8px 10px",
   },
-  pawPad: {
-    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase",
-    color: cosmosPal.gold, marginBottom: 2,
+  pawLine: {
+    fontFamily: ff.body, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
+    color: cosmosPal.gold, marginBottom: 1,
   },
-  pawZone: { fontFamily: ff.body, fontSize: 11, color: cosmosPal.silver, fontStyle: "italic", marginBottom: 6 },
-  pawReading: { fontFamily: ff.body, fontSize: 14, color: cosmosPal.inkMuted, lineHeight: 1.65, margin: 0 },
+  pawPad: { fontFamily: ff.body, fontSize: 10, color: cosmosPal.silver, fontStyle: "italic", marginBottom: 3 },
+  pawReading: { fontFamily: ff.body, fontSize: 12.5, color: cosmosPal.inkMuted, lineHeight: 1.4, margin: 0 },
+  pawFigure: { margin: 0, textAlign: "center", alignSelf: "center" },
+  pawImg: {
+    width: "100%", maxWidth: 150, height: "auto", objectFit: "contain",
+    filter: "drop-shadow(0 4px 12px rgba(26, 20, 40, 0.18))",
+  },
+  pawCaption: {
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 10, color: cosmosPal.silver,
+    margin: "6px 0 0",
+  },
 };
 
 function CosmosSectionHead({ title, stamp = "✦", first = false }) {
@@ -227,19 +233,30 @@ function ZodiacParagraphs({ paragraphs }) {
 }
 
 function Pawmistry() {
-  const dailyLine = getDailyPawLine(new Date());
+  const base = import.meta.env.BASE_URL;
   return (
-    <div style={cs.pawCard}>
-      <p style={cs.pawDaily}>{dailyLine}</p>
-      <div style={cs.pawGrid} className="cosmos-paw-grid">
-        {PAW_LINES.map((line) => (
-          <div key={line.pad} style={cs.pawLineCard}>
-            <p style={cs.pawPad}>{line.pad}</p>
-            <p style={cs.pawZone}>{line.zone}</p>
-            <p style={cs.pawReading}>{line.reading}</p>
-          </div>
-        ))}
+    <div style={cs.pawCard} className="pawmistry-card">
+      <div>
+        <div style={cs.pawGrid} className="cosmos-paw-grid">
+          {PAW_LINES.map((entry) => (
+            <div key={entry.line} style={cs.pawLineCard}>
+              <p style={cs.pawLine}>{entry.line}</p>
+              <p style={cs.pawPad}>{entry.pad}</p>
+              <p style={cs.pawReading}>{entry.reading}</p>
+            </div>
+          ))}
+        </div>
       </div>
+      <figure style={cs.pawFigure}>
+        <img
+          style={cs.pawImg}
+          src={`${base}cutouts/pawmistry-paw.png`}
+          alt="Zero's paw for pawmistry"
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption style={cs.pawCaption}>Specimen paw</figcaption>
+      </figure>
     </div>
   );
 }

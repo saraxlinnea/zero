@@ -9,6 +9,7 @@ const outDir = join(root, "public", "cutouts");
 
 /** Output name → max width (display size × ~2 for retina). */
 const CUTOUTS = [
+  { match: /zero_paw|pawmistry/i, out: "pawmistry-paw.png", maxWidth: 360, removeWhite: true },
   { match: /happy/i, out: "zero-happy-face.png", maxWidth: 200, removeWhite: true },
   { match: /running/i, out: "zero-running.png", maxWidth: 280 },
   { match: /head-massage|massage/i, out: "zero-head-massage.png", maxWidth: 300 },
