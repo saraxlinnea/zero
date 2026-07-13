@@ -1221,6 +1221,7 @@ export default function App() {
           .masthead-cutout { width: 108px !important; height: 108px !important; }
           .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
           .naming-card { grid-template-columns: 1fr !important; }
+          .pawmistry-card { grid-template-columns: 1fr !important; }
           .loves-cutout { width: 68px !important; max-height: 72% !important; }
           .tab-bar { margin-left: -4px; }
           .age-grid { grid-template-columns: repeat(2, 1fr) !important; }
