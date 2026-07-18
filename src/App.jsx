@@ -9,7 +9,14 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 const FONT_LINK =
-  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap";
+  "https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap";
+
+const MARGIN_PHOTOS = [
+  "IMG_4173.jpg",
+  "IMG_4157.jpg",
+  "IMG_0737.jpg",
+  "IMG_0113.jpg",
+];
 
 const BIRTHDAY = new Date("2024-09-16T00:00:00");
 
@@ -225,7 +232,7 @@ const s = {
   page: { fontFamily: ff.body, background: pal.cream, minHeight: "100vh", color: pal.ink },
   masthead: { background: pal.masthead, color: pal.mastheadText },
   mastheadInner: {
-    maxWidth: PAGE_MAX, margin: "0 auto", padding: "28px 36px 24px",
+    maxWidth: PAGE_MAX, margin: "0 auto", padding: "32px 36px 28px",
     display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24,
   },
   siteLabel: {
@@ -233,8 +240,8 @@ const s = {
     textTransform: "uppercase", color: pal.mastheadMuted, marginBottom: 6,
   },
   mastheadTitle: {
-    fontFamily: ff.display, fontSize: 42, fontWeight: 700,
-    color: pal.mastheadText, lineHeight: 1.02, margin: 0,
+    fontFamily: ff.display, fontSize: 54, fontWeight: 700,
+    color: pal.mastheadText, lineHeight: 0.94, margin: 0,
   },
   mastheadSub: {
     fontFamily: ff.body, fontStyle: "italic", fontSize: 16,
@@ -278,7 +285,7 @@ const s = {
     minHeight: 320,
     animation: "tab-panel-in 0.28s ease",
   },
-  secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 24, marginTop: 60 },
+  secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 28, marginTop: 72 },
   secHeadFirst: { marginTop: 0 },
   secTitle: { fontFamily: ff.display, fontSize: 24, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1.05 },
   secStamp: { fontFamily: ff.display, fontSize: 14, color: pal.navy, lineHeight: 1, flexShrink: 0 },
@@ -347,17 +354,17 @@ const s = {
   tricksGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 },
   tricksGridTwoCol: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 },
   repertoireRow: {
-    display: "grid", gridTemplateColumns: "minmax(0, 1fr) 260px",
-    gap: 24, alignItems: "start", marginBottom: 32,
+    display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(320px, 40%)",
+    gap: 24, alignItems: "stretch", marginBottom: 36,
   },
   repertoireTricks: { minWidth: 0 },
   playSequenceCard: {
     background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0,
-    width: 260, display: "flex", flexDirection: "column", alignSelf: "start",
+    height: "100%", display: "flex", flexDirection: "column", alignSelf: "stretch",
   },
   playSequenceFrame: {
     position: "relative", background: pal.parchment, overflow: "hidden",
-    width: 240, height: 240, flexShrink: 0, margin: "0 auto",
+    flex: 1, minHeight: 0, width: "100%", margin: 0,
   },
   playSequenceImg: {
     position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
@@ -409,15 +416,30 @@ const s = {
     display: "flex", alignItems: "center", justifyContent: "center",
     zIndex: 1000, padding: 24, cursor: "pointer",
   },
-  lightboxImg: { maxWidth: "100%", maxHeight: "100%", objectFit: "contain", border: `2px solid ${pal.rule}` },
+  lightboxFigure: {
+    position: "relative", display: "flex", flexDirection: "column", alignItems: "center",
+    maxWidth: "calc(100vw - 140px)", maxHeight: "calc(100vh - 80px)", margin: 0, cursor: "default",
+  },
+  lightboxImg: { maxWidth: "100%", maxHeight: "calc(100vh - 130px)", objectFit: "contain", border: `2px solid ${pal.rule}` },
+  lightboxCaption: {
+    fontFamily: "'Caveat', 'Segoe Script', cursive", fontSize: 20,
+    color: pal.mastheadMuted, marginTop: 10, textAlign: "center",
+  },
   lightboxClose: {
     position: "absolute", top: 20, right: 24,
     fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase",
     color: pal.mastheadMuted, background: "none", border: "none", cursor: "pointer",
   },
+  lightboxArrow: {
+    position: "absolute", top: "50%", transform: "translateY(-50%)",
+    width: 52, height: 72, border: `1px solid rgba(201,169,122,0.35)`,
+    background: "rgba(44,26,14,0.3)", color: pal.mastheadMuted,
+    fontFamily: ff.display, fontSize: 42, lineHeight: 1, cursor: "pointer",
+    transition: "color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out",
+  },
   mastheadLeft: { display: "flex", alignItems: "flex-end", gap: 20 },
   mastheadCutout: {
-    width: 96, height: 96, objectFit: "contain", objectPosition: "bottom",
+    width: 128, height: 128, objectFit: "contain", objectPosition: "bottom",
     filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.35))",
     flexShrink: 0,
     transition: "transform 0.35s ease",
@@ -489,7 +511,7 @@ const s = {
   },
   aspirationGroupBlock: { marginBottom: 18 },
   photoCaption: {
-    fontFamily: ff.body, fontSize: 12, color: pal.midBrown, fontStyle: "italic",
+    fontSize: 12, color: pal.midBrown, fontStyle: "normal",
     padding: 0, margin: 0, textAlign: "center",
   },
   gallerySortRow: {
@@ -552,19 +574,82 @@ function GalleryPreview({ onOpenGallery }) {
 }
 
 function MarginPhotos() {
-  const sorted = sortPhotosByTaken(true);
-  const photos = [2, 11, 23, 37]
-    .map((index) => sorted[index])
-    .filter(Boolean);
+  const byFile = new Map(GALLERY_PHOTOS.map((p) => [p.file, p]));
+  const photos = MARGIN_PHOTOS.map((file) => byFile.get(file)).filter(Boolean);
 
   return (
     <aside className="margin-photo-rail" aria-hidden="true">
-      {photos.map(({ file }, index) => (
+      {photos.map(({ file, taken }, index) => (
         <figure key={file} className={`margin-photo margin-photo--${index + 1}`}>
           <img src={photoSrc(file, "thumb")} alt="" loading="lazy" decoding="async" />
+          <figcaption className="margin-photo__caption">{formatPhotoTaken(taken)}</figcaption>
         </figure>
       ))}
     </aside>
+  );
+}
+
+function AnimatedCount({ value, suffix = "", style }) {
+  const ref = useRef(null);
+  const frameRef = useRef(null);
+  const hasAnimatedRef = useRef(false);
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (hasAnimatedRef.current) {
+      setDisplayValue(value);
+      return;
+    }
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const run = () => {
+      hasAnimatedRef.current = true;
+      if (reduced) {
+        setDisplayValue(value);
+        return;
+      }
+
+      const startedAt = performance.now();
+      const duration = 900;
+
+      const tick = (now) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setDisplayValue(Math.round(value * eased));
+        if (progress < 1) frameRef.current = requestAnimationFrame(tick);
+      };
+
+      frameRef.current = requestAnimationFrame(tick);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        run();
+      },
+      { threshold: 0.55 },
+    );
+
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
+  }, [value]);
+
+  const accessibleValue = `${value}${suffix ? ` ${suffix}` : ""}`;
+
+  return (
+    <div ref={ref} style={style} aria-label={accessibleValue}>
+      <span aria-hidden="true">
+        {displayValue}{suffix ? ` ${suffix}` : ""}
+      </span>
+    </div>
   );
 }
 
@@ -582,12 +667,12 @@ function VitalStatsColumn({ onTabChange, totalTicks }) {
             onClick={() => onTabChange("character")}
             onKeyDown={(e) => statKeyActivate(e, () => onTabChange("character"))}
           >
-            <div style={s.statNum}>{ALL_TRICKS.length}</div>
+            <AnimatedCount value={ALL_TRICKS.length} style={s.statNum} />
             <div style={s.statLabel}>Known tricks</div>
             <div style={s.statNote}>Sit through Go · see Repertoire</div>
           </div>
           <div style={s.statBox}>
-            <div style={{ ...s.statNum, fontSize: 17, paddingTop: 2 }}>20 quintillion</div>
+            <AnimatedCount value={20} suffix="quintillion" style={{ ...s.statNum, fontSize: 17, paddingTop: 2 }} />
             <div style={s.statLabel}>Friends</div>
             <div style={s.statNote}>Est. all living animals on Earth. Mostly insects and roundworms. Zero intends to meet every one.</div>
           </div>
@@ -599,9 +684,9 @@ function VitalStatsColumn({ onTabChange, totalTicks }) {
             onClick={() => onTabChange("records")}
             onKeyDown={(e) => statKeyActivate(e, () => onTabChange("records"))}
           >
-            <div style={s.statNum}>{totalTicks}</div>
+            <AnimatedCount value={totalTicks} style={s.statNum} />
             <div style={s.statLabel}>Ticks hosted</div>
-            <div style={s.statNote}>One coastal hike · see Tick Tracker</div>
+            <div style={s.statNote}>Two hikes · see Tick Tracker</div>
           </div>
         </div>
         <img
@@ -687,19 +772,22 @@ function AdventureMap() {
     if (!containerRef.current || mapRef.current) return;
 
     const map = L.map(containerRef.current, { scrollWheelZoom: false }).setView([37.2, -121.8], 8);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 19,
     }).addTo(map);
 
     ADVENTURE_PINS.forEach((pin) => {
-      L.circleMarker([pin.lat, pin.lng], {
-        radius: 8,
-        fillColor: pin.accent || pal.midBrown,
-        color: pal.darkBrown,
-        weight: 2,
-        fillOpacity: 0.95,
-      })
-        .bindPopup(`<strong>${pin.name}</strong><br>${pin.detail}`)
+      const icon = L.divIcon({
+        className: "adventure-pin",
+        html: `<span class="adventure-pin__dot" style="--pin-accent:${pin.accent || pal.midBrown}"></span>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      });
+      const flavor = pin.flavor ? `<br><span class="adventure-popup-flavor">${pin.flavor}</span>` : "";
+      L.marker([pin.lat, pin.lng], { icon })
+        .bindPopup(`<strong>${pin.name}</strong><br>${pin.detail}${flavor}`)
         .addTo(map);
     });
 
@@ -892,7 +980,7 @@ function LazyThumb({ file, style, alt = "" }) {
   );
 }
 
-function LazyGalleryPhoto({ file, taken, plateNo, onOpen }) {
+function LazyGalleryPhoto({ file, taken, onOpen }) {
   const ref = useRef(null);
   const [showSrc, setShowSrc] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -924,7 +1012,6 @@ function LazyGalleryPhoto({ file, taken, plateNo, onOpen }) {
         )}
       </div>
       <figcaption className="photo-archival-label">
-        <p className="photo-archival-meta">Plate {String(plateNo).padStart(3, "0")}</p>
         <p style={s.photoCaption} className="photo-caption">{caption}</p>
       </figcaption>
     </figure>
@@ -940,7 +1027,14 @@ function PhotoGallery() {
   const sentinelRef = useRef(null);
   const sorted = sortPhotosByTaken(newestFirst);
   const activePhoto = sorted.find((p) => p.file === active);
+  const activeIndex = active ? sorted.findIndex((p) => p.file === active) : -1;
   const visible = sorted.slice(0, visibleCount);
+
+  function showAdjacent(delta) {
+    if (activeIndex < 0) return;
+    const nextIndex = (activeIndex + delta + sorted.length) % sorted.length;
+    setActive(sorted[nextIndex].file);
+  }
 
   useEffect(() => {
     setVisibleCount(GALLERY_BATCH);
@@ -961,6 +1055,28 @@ function PhotoGallery() {
     return () => obs.disconnect();
   }, [visibleCount, sorted.length]);
 
+  useEffect(() => {
+    if (!active) return;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setActive(null);
+        return;
+      }
+
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      const photos = sortPhotosByTaken(newestFirst);
+      const currentIndex = photos.findIndex((p) => p.file === active);
+      if (currentIndex < 0) return;
+      const delta = event.key === "ArrowLeft" ? -1 : 1;
+      const nextIndex = (currentIndex + delta + photos.length) % photos.length;
+      setActive(photos[nextIndex].file);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [active, newestFirst]);
+
   return (
     <>
       <div style={s.gallerySortRow}>
@@ -974,12 +1090,11 @@ function PhotoGallery() {
         </button>
       </div>
       <div style={s.photoGrid} className="photo-grid">
-        {visible.map(({ file, taken }, i) => (
+        {visible.map(({ file, taken }) => (
           <LazyGalleryPhoto
             key={file}
             file={file}
             taken={taken}
-            plateNo={i + 1}
             onOpen={setActive}
           />
         ))}
@@ -990,13 +1105,41 @@ function PhotoGallery() {
       {active && activePhoto && (
         <div style={s.lightbox} onClick={() => setActive(null)} role="dialog" aria-modal="true" aria-label="Photo preview">
           <button style={s.lightboxClose} onClick={() => setActive(null)} type="button">Close</button>
-          <img
-            style={s.lightboxImg}
-            src={photoSrc(active, "full")}
-            alt={`Zero, ${formatPhotoTaken(activePhoto.taken)}`}
-            decoding="async"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <button
+            type="button"
+            className="lightbox-arrow"
+            style={{ ...s.lightboxArrow, left: 22 }}
+            aria-label="Previous photo"
+            onClick={(event) => {
+              event.stopPropagation();
+              showAdjacent(-1);
+            }}
+          >
+            ‹
+          </button>
+          <figure style={s.lightboxFigure} onClick={(event) => event.stopPropagation()}>
+            <img
+              style={s.lightboxImg}
+              src={photoSrc(active, "full")}
+              alt={`Zero, ${formatPhotoTaken(activePhoto.taken)}`}
+              decoding="async"
+            />
+            <figcaption style={s.lightboxCaption}>
+              {formatPhotoTaken(activePhoto.taken)}
+            </figcaption>
+          </figure>
+          <button
+            type="button"
+            className="lightbox-arrow"
+            style={{ ...s.lightboxArrow, right: 22 }}
+            aria-label="Next photo"
+            onClick={(event) => {
+              event.stopPropagation();
+              showAdjacent(1);
+            }}
+          >
+            ›
+          </button>
         </div>
       )}
     </>
@@ -1202,7 +1345,7 @@ export default function App() {
             margin-bottom: 0 !important;
             opacity: 0.85;
           }
-          .masthead-title { font-size: 28px !important; }
+          .masthead-title { font-size: 36px !important; }
           .main-content { padding: 28px 20px 60px !important; }
           .two-col-grid { grid-template-columns: 1fr !important; }
           .specimen-card { grid-template-columns: 1fr !important; gap: 10px !important; padding: 14px 16px !important; }
@@ -1213,10 +1356,10 @@ export default function App() {
           .photo-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .repertoire-row { grid-template-columns: 1fr !important; }
           .repertoire-tricks { max-width: none !important; }
-          .play-sequence { max-width: 260px; width: min(100%, 260px) !important; margin: 0 auto; height: auto !important; }
-          .play-sequence-frame { max-width: 240px !important; width: min(100%, 240px) !important; height: auto !important; aspect-ratio: 1 / 1 !important; }
+          .play-sequence { max-width: 100%; width: 100%; margin: 0 auto; height: auto !important; }
+          .play-sequence-frame { max-width: min(100%, 360px) !important; width: min(100%, 360px) !important; height: auto !important; aspect-ratio: 1 / 1 !important; }
           .masthead-left { align-items: center !important; gap: 14px !important; }
-          .masthead-cutout { width: 108px !important; height: 108px !important; }
+          .masthead-cutout { width: 118px !important; height: 118px !important; }
           .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
           .naming-card { grid-template-columns: 1fr !important; }
           .pawmistry-card { grid-template-columns: 1fr !important; }
@@ -1248,16 +1391,18 @@ export default function App() {
         <header style={s.masthead}>
           <div style={s.mastheadInner} className="masthead-inner">
             <div style={s.mastheadLeft} className="masthead-left">
-              <img
-                style={s.mastheadCutout}
-                className="masthead-cutout"
-                src={cutoutSrc(CUTOUTS.happyFace)}
-                alt="Zero, happy face"
-                fetchPriority="high"
-                decoding="async"
-                width={96}
-                height={96}
-              />
+              <div className="masthead-portrait">
+                <img
+                  style={s.mastheadCutout}
+                  className="masthead-cutout"
+                  src={cutoutSrc(CUTOUTS.happyFace)}
+                  alt="Zero, happy face"
+                  fetchPriority="high"
+                  decoding="async"
+                  width={128}
+                  height={128}
+                />
+              </div>
               <div>
                 <p style={s.siteLabel}>Specimen Record · Canine Division</p>
                 <h1 style={s.mastheadTitle} className="masthead-title">Zero</h1>
@@ -1468,6 +1613,10 @@ export default function App() {
             </div>
           )}
 
+          <footer className="page-footer">
+            <p className="page-footer__note">Record ongoing.</p>
+            <p className="page-footer__meta">Zero · Samoyed · San Francisco</p>
+          </footer>
         </main>
       </div>
     </LayerShell>

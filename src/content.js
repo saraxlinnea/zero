@@ -63,12 +63,12 @@ export const ADVENTURE_GROUPS = [
 ];
 
 export const ADVENTURE_PINS = [
-  { name: "Marina Green", lat: 37.804, lng: -122.437, detail: "Marina district", accent: "#7A9B76" },
-  { name: "Crissy Field", lat: 37.804, lng: -122.465, detail: "Presidio waterfront", accent: "#7A9B76" },
-  { name: "Marshall Beach", lat: 37.788, lng: -122.483, detail: "Lands End", accent: "#7A9B76" },
-  { name: "Star Lake", lat: 38.879, lng: -120.04, detail: "Lake Tahoe", accent: "#D4956A" },
-  { name: "Wilder Ranch", lat: 36.972, lng: -122.074, detail: "Santa Cruz", accent: "#D4956A" },
-  { name: "Waterfall Loop", lat: 37.159, lng: -121.785, detail: "Uvas Canyon County Park", accent: "#D4956A" },
-  { name: "Fort Funston", lat: 37.715, lng: -122.501, detail: "South San Francisco", accent: "#D4956A" },
-  { name: "Nevada Nordic", lat: 39.314, lng: -120.162, detail: "Lake Tahoe", accent: "#6B8FA3" },
+  { name: "Marina Green", lat: 37.804, lng: -122.437, detail: "Marina district", accent: "#7A9B76", flavor: "Morning walks and excellent hydrant density." },
+  { name: "Crissy Field", lat: 37.804, lng: -122.465, detail: "Presidio waterfront", accent: "#7A9B76", flavor: "Wind, sand, and very serious stick negotiations." },
+  { name: "Marshall Beach", lat: 37.788, lng: -122.483, detail: "Lands End", accent: "#7A9B76", flavor: "Cliffs, fog, and dramatic posing." },
+  { name: "Star Lake", lat: 38.879, lng: -120.04, detail: "Lake Tahoe", accent: "#D4956A", flavor: "Alpine air and snow-sniffing." },
+  { name: "Wilder Ranch", lat: 36.972, lng: -122.074, detail: "Santa Cruz", accent: "#D4956A", flavor: "Coastal trails and suspicious seagulls." },
+  { name: "Waterfall Loop", lat: 37.159, lng: -121.785, detail: "Uvas Canyon County Park", accent: "#D4956A", flavor: "Mud on the party pants, worth it." },
+  { name: "Fort Funston", lat: 37.715, lng: -122.501, detail: "South San Francisco", accent: "#D4956A", flavor: "Dunes, hang gliders, and off-leash joy." },
+  { name: "Nevada Nordic", lat: 39.314, lng: -120.162, detail: "Lake Tahoe", accent: "#6B8FA3", flavor: "Snow days and Nordic ambition." },
 ];

@@ -126,7 +126,7 @@ const cs = {
 
 function CosmosSectionHead({ title, stamp = "✦", first = false }) {
   return (
-    <div style={{ ...cs.secHead, ...(first ? cs.secHeadFirst : {}) }}>
+    <div style={{ ...cs.secHead, ...(first ? cs.secHeadFirst : {}) }} className={`sec-head${first ? " sec-head-first" : ""}`}>
       <span style={cs.secStamp} aria-hidden="true">{stamp}</span>
       <h2 style={cs.secTitle}>{title}</h2>
       <hr style={cs.secRule} />
@@ -165,7 +165,7 @@ function MoonPhaseDisc({ illumination }) {
 
 function CosmosMoonCard({ label, date, info }) {
   return (
-    <div style={cs.moonCard}>
+    <div style={cs.moonCard} className="cosmos-card cosmos-moon-card">
       <div style={cs.moonTop}>
         <MoonPhaseDisc illumination={info.illumination} />
         <div style={{ minWidth: 0 }}>
@@ -212,7 +212,7 @@ function CosmosDailyDispatch() {
   const moon = getMoonPhaseInfo(today);
   const sky = getDailySkyNote(today);
   return (
-    <div style={cs.heroCard}>
+    <div style={cs.heroCard} className="cosmos-card cosmos-hero-card">
       <p style={cs.heroDate}>Today Zero might… · {formatForecastDate(today)}</p>
       <p style={cs.heroText}>{forecast}</p>
       <p style={cs.heroNote}>
@@ -236,7 +236,7 @@ function ZodiacParagraphs({ paragraphs }) {
 function Pawmistry() {
   const base = import.meta.env.BASE_URL;
   return (
-    <div style={cs.pawCard} className="pawmistry-card">
+    <div style={cs.pawCard} className="cosmos-card pawmistry-card">
       <div>
         <div style={cs.pawGrid} className="cosmos-paw-grid">
           {PAW_LINES.map((entry) => (
@@ -271,13 +271,13 @@ export default function CosmosTab({ starSign, chineseZodiac }) {
 
         <CosmosSectionHead title="Birth Chart" stamp="♍" />
         <div style={cs.zodiacGrid} className="two-col-grid cosmos-zodiac-grid">
-          <div style={cs.zodiacCard}>
+          <div style={cs.zodiacCard} className="cosmos-card cosmos-zodiac-card">
             <span style={cs.cardOrnament} aria-hidden="true">✧</span>
             <div style={cs.zodiacSymbol}>{starSign.symbol}</div>
             <h3 style={cs.zodiacName}>{starSign.name}</h3>
             <ZodiacParagraphs paragraphs={starSign.paragraphs} />
           </div>
-          <div style={cs.zodiacCard}>
+          <div style={cs.zodiacCard} className="cosmos-card cosmos-zodiac-card">
             <span style={cs.cardOrnament} aria-hidden="true">✧</span>
             <div style={{ ...cs.zodiacSymbol, fontFamily: ff.body }}>
               {chineseZodiac.character}
