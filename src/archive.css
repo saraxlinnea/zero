@@ -332,41 +332,35 @@
 
 /* Keep tab engravings small and secondary to the archive content. */
 .layer-ambient__flora--tl {
-  opacity: 0.065 !important;
   background-size: 70% auto;
   background-position: left top;
 }
 
 .layer-ambient__flora--tr {
-  opacity: 0.06 !important;
   background-size: 66% auto;
   background-position: right top;
 }
 
 .layer-ambient__flora--bl {
-  opacity: 0.06 !important;
   background-size: 68% auto;
   background-position: left bottom;
 }
 
 .layer-ambient__flora--br {
-  opacity: 0.06 !important;
   background-size: 68% auto;
   background-position: right bottom;
 }
 
 .layer-ambient__flora--contour {
-  opacity: 0.035 !important;
   background-size: 72% auto;
 }
 
 .layer-ambient__flora--extra {
-  opacity: 0.055 !important;
   background-size: 62% auto;
 }
 
 @media (max-width: 700px) {
-  .masthead-miniature {
+  .masthead-stars {
     display: none;
   }
 
@@ -788,43 +782,108 @@
   overflow: hidden;
 }
 
-.masthead-miniature {
+.masthead-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.masthead-stars {
   position: absolute;
-  top: 11px;
-  left: 50%;
+  inset: 0;
   z-index: 1;
   color: rgba(201, 169, 122, 0.58);
   font-family: var(--ff-display);
-  font-size: 11px;
-  letter-spacing: 0.72em;
   line-height: 1;
-  white-space: nowrap;
-  transform: translateX(-50%);
   pointer-events: none;
 }
 
-.masthead-miniature::before {
-  content: "✦  ·  ✧  ·  ✦";
+.masthead-stars span {
+  position: absolute;
+  opacity: 0.42;
+  text-shadow: 0 0 10px rgba(201, 169, 122, 0.2);
 }
 
-.site-masthead[data-tab="character"] .masthead-miniature::before {
-  content: "✧  ✦  ·  ✦  ✧";
+.masthead-stars span:nth-child(1) {
+  top: 14%;
+  left: 3%;
+  font-size: 11px;
 }
 
-.site-masthead[data-tab="cosmos"] .masthead-miniature::before {
-  content: "✦  ·  ☽  ·  ✦";
+.masthead-stars span:nth-child(2) {
+  top: 70%;
+  left: 13%;
+  font-size: 8px;
 }
 
-.site-masthead[data-tab="breed"] .masthead-miniature::before {
-  content: "△  ·  ✦  ·  △";
+.masthead-stars span:nth-child(3) {
+  top: 28%;
+  left: 24%;
+  font-size: 18px;
+  opacity: 0.3;
 }
 
-.site-masthead[data-tab="gallery"] .masthead-miniature::before {
-  content: "✧  □  ✦  □  ✧";
+.masthead-stars span:nth-child(4) {
+  top: 78%;
+  left: 36%;
+  font-size: 10px;
 }
 
-.site-masthead[data-tab="records"] .masthead-miniature::before {
-  content: "·  ✦  ·  ✦  ·";
+.masthead-stars span:nth-child(5) {
+  top: 11%;
+  left: 48%;
+  font-size: 7px;
+}
+
+.masthead-stars span:nth-child(6) {
+  top: 63%;
+  left: 58%;
+  font-size: 17px;
+  opacity: 0.28;
+}
+
+.masthead-stars span:nth-child(7) {
+  top: 22%;
+  left: 70%;
+  font-size: 10px;
+}
+
+.masthead-stars span:nth-child(8) {
+  top: 76%;
+  left: 81%;
+  font-size: 8px;
+}
+
+.masthead-stars span:nth-child(9) {
+  top: 39%;
+  left: 90%;
+  font-size: 16px;
+  opacity: 0.3;
+}
+
+.masthead-stars span:nth-child(10) {
+  top: 12%;
+  left: 96%;
+  font-size: 9px;
+}
+
+.site-masthead[data-tab="character"] .masthead-stars {
+  color: rgba(212, 149, 106, 0.68);
+}
+
+.site-masthead[data-tab="cosmos"] .masthead-stars {
+  color: rgba(201, 184, 224, 0.72);
+}
+
+.site-masthead[data-tab="breed"] .masthead-stars {
+  color: rgba(143, 163, 134, 0.68);
+}
+
+.site-masthead[data-tab="gallery"] .masthead-stars {
+  color: rgba(232, 214, 180, 0.65);
+}
+
+.site-masthead[data-tab="records"] .masthead-stars {
+  color: rgba(155, 166, 166, 0.65);
 }
 
 .masthead-portrait {

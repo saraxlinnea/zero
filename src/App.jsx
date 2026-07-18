@@ -1399,7 +1399,18 @@ export default function App() {
         <MarginPhotos tab={tab} />
 
         <header style={s.masthead} className="site-masthead" data-tab={tab}>
-          <div className="masthead-miniature" aria-hidden="true" />
+          <div className="masthead-stars" aria-hidden="true">
+            <span>✦</span>
+            <span>✧</span>
+            <span>·</span>
+            <span>✦</span>
+            <span>✧</span>
+            <span>·</span>
+            <span>✦</span>
+            <span>✧</span>
+            <span>·</span>
+            <span>✦</span>
+          </div>
           <div style={s.mastheadInner} className="masthead-inner">
             <div style={s.mastheadLeft} className="masthead-left">
               <div className="masthead-portrait">

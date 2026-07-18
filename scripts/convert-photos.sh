@@ -18,6 +18,7 @@ while IFS=$'\t' read -r src stem taken; do
   thumb="$THUMBS/${stem}.jpg"
   sips -Z "$MAX_EDGE" -s format jpeg -s formatOptions "$JPEG_QUALITY" "$src" --out "$out" >/dev/null
   sips -Z "$THUMB_EDGE" -s format jpeg -s formatOptions "$JPEG_QUALITY" "$src" --out "$thumb" >/dev/null
+  node "$ROOT/scripts/sanitize-photo.mjs" "$out" "$thumb" >/dev/null
   if [ -n "$taken" ]; then
     node "$ROOT/scripts/photo-utils.mjs" apply-date "$out" "$taken"
     node "$ROOT/scripts/photo-utils.mjs" apply-date "$thumb" "$taken"

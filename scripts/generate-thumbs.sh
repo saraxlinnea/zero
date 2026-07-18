@@ -15,6 +15,7 @@ for out in "$OUT"/*.jpg; do
   stem=$(basename "$out")
   thumb="$THUMBS/$stem"
   sips -Z "$THUMB_EDGE" -s format jpeg -s formatOptions "$JPEG_QUALITY" "$out" --out "$thumb" >/dev/null
+  node "$ROOT/scripts/sanitize-photo.mjs" "$thumb" >/dev/null
   tkb=$(du -k "$thumb" | cut -f1)
   echo "Thumb ${stem} (${tkb}KB)"
 done
