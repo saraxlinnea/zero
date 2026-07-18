@@ -1,0 +1,569 @@
+/* ── Specimen archive elevations ──
+   Subtle craft on top of the existing parchment system.
+   Decorative art stays 5–12% opacity; motion stays understated. */
+
+:root {
+  --archive-ink: #2c1a0e;
+  --archive-sepia: #6b4226;
+  --archive-muted: #a67c52;
+  --archive-rule: #c9a97a;
+  --archive-cream: #faf6ed;
+  --archive-paper: #fffdf8;
+  --archive-parchment: #f0e8d5;
+  --archive-shadow: rgba(44, 26, 14, 0.07);
+  --archive-shadow-lift: rgba(44, 26, 14, 0.11);
+  --ff-display: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --ff-body: "Source Serif 4", "EB Garamond", Georgia, serif;
+  --ff-meta: "Source Serif 4", Georgia, serif;
+  --ease-archive: ease-in-out;
+  --dur-archive: 200ms;
+}
+
+/* ── Typography helpers (labels / metadata) ── */
+
+.archive-meta,
+.field-label,
+.fact-label,
+.stat-label,
+.age-label,
+.gallery-preview-label,
+.adventure-group-label,
+.photo-archival-meta,
+.gallery-sort-btn,
+.tab-btn {
+  font-family: var(--ff-meta) !important;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+/* ── Paper depth on cards ── */
+
+.stat-card,
+.specimen-card,
+.activities-card,
+.fact-card,
+.trick-card,
+.prose-card,
+.log-form,
+.age-box,
+.log-stat-box,
+.gallery-preview,
+.play-sequence,
+.naming-card,
+.adventure-card,
+.gallery-archive-shell {
+  box-shadow: 0 1px 0 rgba(255, 253, 248, 0.8) inset,
+    0 2px 10px var(--archive-shadow);
+  transition: box-shadow var(--dur-archive) var(--ease-archive),
+    border-color var(--dur-archive) var(--ease-archive),
+    transform var(--dur-archive) var(--ease-archive);
+}
+
+.gallery-preview:hover,
+.stat-box-link:hover,
+.activities-card:hover,
+.fact-card:hover,
+.trick-card:hover {
+  box-shadow: 0 1px 0 rgba(255, 253, 248, 0.9) inset,
+    0 6px 18px var(--archive-shadow-lift);
+}
+
+.add-btn,
+.gallery-sort-btn {
+  transition: background-color var(--dur-archive) var(--ease-archive),
+    color var(--dur-archive) var(--ease-archive),
+    border-color var(--dur-archive) var(--ease-archive),
+    box-shadow var(--dur-archive) var(--ease-archive),
+    transform var(--dur-archive) var(--ease-archive);
+}
+
+.add-btn:hover,
+.gallery-sort-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px var(--archive-shadow);
+}
+
+/* ── Botanical / explorer margin illustrations ── */
+
+.layer-ambient__flora {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.11;
+  background-repeat: no-repeat;
+  background-size: contain;
+  transition: opacity 0.6s var(--ease-archive);
+  mix-blend-mode: multiply;
+}
+
+.layer-ambient__flora--tl {
+  top: 2%;
+  left: 0;
+  width: min(250px, 25vw);
+  height: min(340px, 42vh);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 320' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M25 310 C58 255 88 198 112 135 C130 88 141 49 146 12'/%3E%3Cpath d='M103 158 C73 143 46 120 24 92 M112 135 C82 116 61 94 45 65 M121 108 C98 88 81 66 70 40 M129 81 C111 63 101 45 94 24 M96 180 C125 170 151 151 176 124 M87 204 C119 198 153 180 190 151 M76 230 C111 227 151 211 202 181 M64 255 C102 255 140 243 186 218'/%3E%3Cpath d='M24 92 C35 91 47 96 54 105 C42 108 30 104 24 92 Z M45 65 C57 66 67 72 72 82 C60 84 50 78 45 65 Z M70 40 C82 43 91 50 94 61 C82 61 74 54 70 40 Z M176 124 C164 124 154 130 147 140 C161 141 171 136 176 124 Z M190 151 C176 150 165 156 157 167 C172 169 184 163 190 151 Z M202 181 C187 178 174 184 165 196 C182 198 195 192 202 181 Z M186 218 C170 214 155 220 145 232 C164 235 178 229 186 218 Z'/%3E%3C/g%3E%3C/svg%3E");
+  transform: rotate(-2deg);
+}
+
+.layer-ambient__flora--tr {
+  top: 6%;
+  right: 0;
+  width: min(300px, 30vw);
+  height: min(220px, 28vh);
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 210' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 168 L58 103 L91 135 L150 56 L194 116 L230 84 L296 162 M5 179 C62 167 115 174 155 169 C210 162 253 166 296 177'/%3E%3Cpath d='M238 169 V108 M220 169 L238 121 L256 169 M224 146 H252 M268 174 V127 M255 174 L268 139 L282 174 M258 155 H278 M35 173 V130 M23 173 L35 140 L48 173 M26 157 H44'/%3E%3Ccircle cx='257' cy='38' r='18'/%3E%3Cpath d='M257 11 V1 M257 75 V65 M230 38 H220 M294 38 H284 M238 19 L231 12 M276 57 L283 64 M276 19 L283 12'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.layer-ambient__flora--bl {
+  bottom: 2%;
+  left: 0;
+  width: min(320px, 32vw);
+  height: min(250px, 32vh);
+  opacity: 0.11;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 250' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M70 238 V58 M34 238 L70 72 L106 238 M43 195 H97 M48 164 H92 M54 133 H86 M59 104 H81 M155 238 V22 M106 238 L155 39 L204 238 M118 191 H191 M125 150 H184 M134 112 H176 M142 78 H168 M251 238 V83 M220 238 L251 97 L283 238 M226 201 H277 M232 169 H270 M238 140 H264 M243 116 H259 M8 239 H310'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.layer-ambient__flora--br {
+  bottom: 5%;
+  right: 0;
+  width: min(250px, 26vw);
+  height: min(310px, 38vh);
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 300' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M220 288 C173 248 139 207 111 163 C83 120 61 74 47 12'/%3E%3Cpath d='M121 178 L170 158 M105 151 L153 125 M89 122 L130 91 M75 92 L109 60 M62 61 L83 34 M136 201 L177 191 M151 221 L193 216 M166 242 L207 241'/%3E%3Cpath d='M170 158 C158 151 145 151 135 159 C147 166 160 166 170 158 Z M153 125 C140 119 128 121 119 130 C132 135 145 133 153 125 Z M130 91 C117 87 106 91 99 100 C112 103 123 100 130 91 Z M109 60 C97 58 87 63 82 73 C94 74 103 70 109 60 Z M177 191 C166 184 153 185 144 193 C155 199 168 198 177 191 Z M193 216 C181 208 167 210 158 219 C171 225 184 223 193 216 Z M207 241 C194 233 180 235 171 245 C184 251 198 248 207 241 Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.layer-ambient__flora--contour {
+  top: 42%;
+  left: 50%;
+  width: min(520px, 70vw);
+  height: min(180px, 22vh);
+  transform: translateX(-50%);
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 160' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='0.9'%3E%3Cellipse cx='260' cy='80' rx='200' ry='55'/%3E%3Cellipse cx='260' cy='80' rx='150' ry='38'/%3E%3Cellipse cx='260' cy='80' rx='95' ry='22'/%3E%3Cellipse cx='260' cy='80' rx='40' ry='9'/%3E%3Cpath d='M60 40 C120 20 200 15 260 18 C340 22 420 40 470 70' opacity='0.5'/%3E%3Cpath d='M50 120 C130 140 220 145 300 138 C380 130 450 110 490 85' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: center;
+}
+
+@media (max-width: 700px) {
+  .layer-ambient__flora--tl,
+  .layer-ambient__flora--tr {
+    width: min(110px, 28vw);
+    height: min(150px, 22vh);
+    opacity: 0.06;
+  }
+  .layer-ambient__flora--bl,
+  .layer-ambient__flora--br,
+  .layer-ambient__flora--contour {
+    display: none;
+  }
+}
+
+/* ── Organic cutout overflow ── */
+
+.stat-card {
+  overflow: visible;
+}
+
+.stat-cutout-flow {
+  transform: rotate(-2deg) translateY(6px);
+  margin-bottom: -10px !important;
+}
+
+.loves-card {
+  overflow: visible !important;
+}
+
+.loves-cutout {
+  transform: rotate(3deg);
+  right: -14px !important;
+  bottom: -6px !important;
+}
+
+.adventure-figure-img {
+  transform: scale(1.22) rotate(-1.5deg) !important;
+}
+
+.naming-card img,
+.birth-record img {
+  transform: rotate(1.5deg);
+}
+
+/* ── Aspirations ── */
+
+.aspirations-board {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.85fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.aspiration-group {
+  position: relative;
+  background: rgba(255, 253, 248, 0.88);
+  border: 1px solid var(--archive-rule);
+  padding: 22px 22px 24px;
+  box-shadow: 0 1px 0 rgba(255, 253, 248, 0.85) inset,
+    0 3px 12px var(--archive-shadow);
+}
+
+.aspiration-group:nth-child(2) {
+  background: rgba(240, 232, 213, 0.9);
+}
+
+.aspiration-group__title {
+  font-family: var(--ff-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--archive-ink);
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(201, 169, 122, 0.6);
+}
+
+.aspiration-group__title::after {
+  content: "✦";
+  float: right;
+  color: var(--archive-muted);
+  font-size: 10px;
+  margin-top: 5px;
+  opacity: 0.7;
+}
+
+.aspiration-group__items {
+  display: flex;
+  flex-direction: column;
+}
+
+.aspiration-item {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(201, 169, 122, 0.28);
+}
+
+.aspiration-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.aspiration-item h4 {
+  font-size: 18px !important;
+  line-height: 1.25;
+  margin-bottom: 7px !important;
+}
+
+.aspiration-item p {
+  font-size: 15px !important;
+  line-height: 1.72 !important;
+}
+
+/* ── Field archive gallery ── */
+
+.gallery-archive-shell {
+  background: linear-gradient(180deg, #f3ead8 0%, #f0e8d5 100%);
+  border: 1px solid var(--archive-rule);
+  padding: 22px 24px 28px;
+  position: relative;
+}
+
+.photo-grid {
+  gap: 18px 16px !important;
+  padding-top: 8px;
+}
+
+.photo-card {
+  background: var(--archive-paper) !important;
+  border: 1px solid rgba(201, 169, 122, 0.55) !important;
+  box-shadow: 0 1px 2px var(--archive-shadow), 0 4px 14px rgba(44, 26, 14, 0.05);
+  overflow: visible !important;
+  position: relative;
+  transition: transform var(--dur-archive) var(--ease-archive),
+    box-shadow var(--dur-archive) var(--ease-archive),
+    border-color var(--dur-archive) var(--ease-archive);
+}
+
+.photo-card:nth-child(5n + 1) {
+  transform: rotate(-0.8deg);
+}
+.photo-card:nth-child(5n + 2) {
+  transform: rotate(0.6deg);
+}
+.photo-card:nth-child(5n + 3) {
+  transform: rotate(-0.4deg);
+}
+.photo-card:nth-child(5n + 4) {
+  transform: rotate(1deg);
+}
+.photo-card:nth-child(5n) {
+  transform: rotate(-0.3deg);
+}
+
+.photo-card:hover {
+  transform: translateY(-4px) rotate(0deg) !important;
+  box-shadow: 0 8px 22px var(--archive-shadow-lift);
+  border-color: var(--archive-muted) !important;
+  z-index: 2;
+}
+
+.photo-card .photo-frame {
+  margin: 8px 8px 0;
+  width: calc(100% - 16px) !important;
+  border: 1px solid rgba(201, 169, 122, 0.35);
+  box-shadow: inset 0 0 0 3px #faf6ed;
+  background: #ebe3d2 !important;
+}
+
+.photo-archival-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 10px 10px;
+  text-align: center;
+}
+
+.photo-archival-meta {
+  font-size: 9px !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase;
+  color: rgba(166, 124, 82, 0.7);
+  margin: 0;
+}
+
+.photo-caption {
+  font-family: var(--ff-body) !important;
+  font-style: italic;
+  font-size: 12px !important;
+  color: var(--archive-sepia) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.35;
+}
+
+/* Tape corners on a few plates */
+.photo-card:nth-child(7n + 1)::before,
+.photo-card:nth-child(11n + 3)::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 18%;
+  width: 42px;
+  height: 14px;
+  background: rgba(232, 214, 180, 0.72);
+  border: 1px solid rgba(201, 169, 122, 0.35);
+  transform: rotate(-8deg);
+  z-index: 3;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgba(44, 26, 14, 0.08);
+}
+
+.photo-card:nth-child(9n + 5)::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  right: 16%;
+  width: 36px;
+  height: 12px;
+  background: rgba(232, 214, 180, 0.65);
+  border: 1px solid rgba(201, 169, 122, 0.3);
+  transform: rotate(6deg);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.gallery-preview {
+  position: relative;
+}
+
+.gallery-preview .gallery-preview-grid > div {
+  border: 1px solid rgba(201, 169, 122, 0.4);
+  box-shadow: inset 0 0 0 2px #faf6ed;
+  overflow: hidden;
+}
+
+.gallery-preview .gallery-preview-grid > div:nth-child(1) {
+  transform: rotate(-1deg);
+}
+.gallery-preview .gallery-preview-grid > div:nth-child(2) {
+  transform: rotate(0.8deg);
+}
+.gallery-preview .gallery-preview-grid > div:nth-child(3) {
+  transform: rotate(-0.5deg);
+}
+.gallery-preview .gallery-preview-grid > div:nth-child(4) {
+  transform: rotate(1.2deg);
+}
+
+.gallery-preview:hover .gallery-preview-link {
+  opacity: 0.75;
+}
+
+.gallery-preview-link {
+  transition: opacity var(--dur-archive) var(--ease-archive);
+}
+
+/* ── Wide-screen photograph margins ── */
+
+.margin-photo-rail {
+  display: none;
+}
+
+@media (min-width: 1580px) {
+  .margin-photo-rail {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .margin-photo {
+    position: absolute;
+    width: 94px;
+    margin: 0;
+    padding: 6px 6px 18px;
+    background: #fffdf8;
+    border: 1px solid rgba(201, 169, 122, 0.55);
+    box-shadow: 0 5px 18px rgba(44, 26, 14, 0.1);
+    opacity: 0.82;
+  }
+
+  .margin-photo img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1.12;
+    object-fit: cover;
+    filter: saturate(0.82) sepia(0.08);
+  }
+
+  .margin-photo--1 {
+    top: 24vh;
+    left: max(16px, calc((100vw - 1320px) / 4 - 48px));
+    transform: rotate(-3deg);
+  }
+
+  .margin-photo--2 {
+    bottom: 10vh;
+    left: max(20px, calc((100vw - 1320px) / 4 - 38px));
+    transform: rotate(2deg);
+  }
+
+  .margin-photo--3 {
+    top: 19vh;
+    right: max(18px, calc((100vw - 1320px) / 4 - 44px));
+    transform: rotate(2.5deg);
+  }
+
+  .margin-photo--4 {
+    bottom: 14vh;
+    right: max(14px, calc((100vw - 1320px) / 4 - 52px));
+    transform: rotate(-2deg);
+  }
+}
+
+/* ── Registration marks / archival ink ── */
+
+.main-content {
+  position: relative;
+}
+
+.main-content::before,
+.main-content::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: rgba(166, 124, 82, 0.28);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.main-content::before {
+  top: 12px;
+  left: 12px;
+  border-width: 1px 0 0 1px;
+}
+
+.main-content::after {
+  bottom: 24px;
+  right: 12px;
+  border-width: 0 1px 1px 0;
+}
+
+.sec-head {
+  margin-top: 60px !important;
+}
+
+.sec-head-first {
+  margin-top: 0 !important;
+}
+
+/* Map marker pulse */
+.leaflet-interactive {
+  transition: opacity 0.25s ease-in-out;
+}
+
+@keyframes archive-marker-pulse {
+  0%,
+  100% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.adventure-map .leaflet-interactive {
+  animation: archive-marker-pulse 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-card,
+  .photo-card:nth-child(n),
+  .stat-cutout-flow,
+  .loves-cutout,
+  .adventure-figure-img,
+  .naming-card img,
+  .birth-record img,
+  .gallery-preview .gallery-preview-grid > div {
+    transform: none !important;
+  }
+
+  .photo-card:hover,
+  .gallery-preview:hover,
+  .stat-box-link:hover,
+  .add-btn:hover,
+  .gallery-sort-btn:hover {
+    transform: none !important;
+  }
+
+  .adventure-map .leaflet-interactive {
+    animation: none !important;
+  }
+
+  .layer-ambient__flora {
+    transition: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .gallery-archive-shell {
+    padding: 16px 14px 20px;
+  }
+
+  .main-content::before,
+  .main-content::after {
+    display: none;
+  }
+
+  .photo-card:nth-child(n) {
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .aspirations-board {
+    grid-template-columns: 1fr;
+  }
+
+  .aspiration-group {
+    padding: 20px 22px;
+  }
+}

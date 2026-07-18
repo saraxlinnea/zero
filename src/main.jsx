@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import { initFootprintSystem } from "./footprint-system.js";
 import "./footprints.css";
+import "./archive.css";
 
 initFootprintSystem({ mode: "default" });
 

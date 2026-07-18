@@ -2,22 +2,25 @@ export const ASPIRATION_GROUPS = [
   {
     group: "Out and about",
     items: [
-      { title: "More adventures", detail: "Hikes, trips, and new smells. Always." },
-      { title: "Cross-country travel", detail: "Come on road trips whenever possible, ideally with a window seat." },
-      { title: "Better swimming", detail: "Get strong enough to cross lakes and rivers without looking panicked." },
+      { title: "More adventures", detail: "More hikes, trips, and places where he can stop to smell everything." },
+      { title: "Road trips", detail: "Come along whenever possible, preferably with a window seat." },
+      { title: "Better swimming", detail: "Keep practicing until lakes and rivers feel easy." },
     ],
   },
   {
-    group: "Home & friends",
+    group: "Home & Food",
     items: [
-      { title: "More friends at home", detail: "More animals under the same roof and more people who hang out properly." },
-      { title: "Play time, always", detail: "Play is not a reward. It is the point." },
+      { title: "Food at all times", detail: "Have food available whenever he wants it, or at least let him make a convincing case." },
+      { title: "Wet food, please", detail: "Wet food is always preferred to plain kibble." },
+      { title: "The dinner extras", detail: "Fish oil, dental chews, and plenty of accoutrements added to dinner." },
     ],
   },
   {
-    group: "Family",
+    group: "Friends & Family",
     items: [
-      { title: "See Ender, Kaan, and Malina more", detail: "Help them grow up right. Zero takes guardian duty seriously." },
+      { title: "More friends at home", detail: "More animals around the house and more people who stay long enough to play." },
+      { title: "Play every day", detail: "There should always be time to play." },
+      { title: "See Ender, Kaan, and Malina more", detail: "He likes keeping an eye on them and helping them grow up right." },
     ],
   },
 ];

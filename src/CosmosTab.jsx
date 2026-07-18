@@ -21,8 +21,9 @@ const cosmosPal = {
 };
 
 const ff = {
-  display: "'Playfair Display', Georgia, serif",
-  body: "'EB Garamond', Georgia, serif",
+  display: "'Cormorant Garamond', Georgia, serif",
+  body: "'Source Serif 4', Georgia, serif",
+  meta: "'Source Serif 4', Georgia, serif",
 };
 
 const cs = {
@@ -47,7 +48,7 @@ const cs = {
     boxShadow: `0 8px 28px ${cosmosPal.glow}`,
   },
   heroDate: {
-    fontFamily: ff.body, fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase",
     color: cosmosPal.silver, marginBottom: 12,
   },
   heroText: {
@@ -81,13 +82,13 @@ const cs = {
   },
   moonTop: { display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 12 },
   fieldLabel: {
-    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase",
     color: cosmosPal.silver, marginBottom: 4,
   },
   moonIllum: { fontFamily: ff.body, fontSize: 12, color: cosmosPal.silver, fontStyle: "italic", margin: "4px 0 10px" },
   moonPhaseLine: { fontFamily: ff.body, fontSize: 13.5, color: cosmosPal.inkMuted, lineHeight: 1.55, margin: "0 0 8px" },
   moonPhaseLabel: {
-    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: cosmosPal.silver,
+    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: cosmosPal.silver,
   },
   illumBar: { height: 4, background: cosmosPal.border, borderRadius: 2, marginTop: 6, overflow: "hidden" },
   illumFill: { height: "100%", background: cosmosPal.gold, borderRadius: 2 },
@@ -107,7 +108,7 @@ const cs = {
     padding: "8px 10px",
   },
   pawLine: {
-    fontFamily: ff.body, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase",
     color: cosmosPal.gold, marginBottom: 1,
   },
   pawPad: { fontFamily: ff.body, fontSize: 10, color: cosmosPal.silver, fontStyle: "italic", marginBottom: 3 },

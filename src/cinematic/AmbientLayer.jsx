@@ -25,6 +25,11 @@ export default function AmbientLayer() {
       <div className="layer-ambient__wash layer-ambient__wash--cool" />
       <div className="layer-ambient__texture" />
       <div className="layer-ambient__vignette" />
+      <div className="layer-ambient__flora layer-ambient__flora--tl" />
+      <div className="layer-ambient__flora layer-ambient__flora--tr" />
+      <div className="layer-ambient__flora layer-ambient__flora--bl" />
+      <div className="layer-ambient__flora layer-ambient__flora--br" />
+      <div className="layer-ambient__flora layer-ambient__flora--contour" />
     </div>
   );
 }

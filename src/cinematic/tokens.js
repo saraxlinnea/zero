@@ -19,8 +19,9 @@ export const PAL = {
 };
 
 export const FF = {
-  display: "'Playfair Display', Georgia, serif",
-  body: "'EB Garamond', Georgia, serif",
+  display: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+  body: "'Source Serif 4', 'EB Garamond', Georgia, serif",
+  meta: "'Source Serif 4', Georgia, serif",
 };
 
 /**

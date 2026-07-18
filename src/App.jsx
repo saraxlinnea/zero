@@ -9,7 +9,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 const FONT_LINK =
-  "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap";
+  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap";
 
 const BIRTHDAY = new Date("2024-09-16T00:00:00");
 
@@ -140,6 +140,7 @@ const ALL_TRICKS = [
 ];
 
 const INITIAL_TICKS = [
+  { id: 2, date: "2026-07-13", location: "Woods hike, Larkspur", count: 1, notes: "Tick identified at Hookfish restaurant after the hike." },
   { id: 1, date: "2025-05-03", location: "Coastal hike, Santa Cruz", count: 12, notes: "All 12 found and removed after the hike. Zero was unperturbed." },
 ];
 
@@ -215,8 +216,9 @@ const pal = {
 };
 
 const ff = {
-  display: "'Playfair Display', Georgia, serif",
-  body: "'EB Garamond', Georgia, serif",
+  display: "'Cormorant Garamond', Georgia, serif",
+  body: "'Source Serif 4', Georgia, serif",
+  meta: "'Source Serif 4', Georgia, serif",
 };
 
 const s = {
@@ -227,22 +229,22 @@ const s = {
     display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24,
   },
   siteLabel: {
-    fontFamily: ff.body, fontSize: 11, letterSpacing: "0.18em",
-    textTransform: "uppercase", color: pal.mastheadMuted, marginBottom: 4,
+    fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.2em",
+    textTransform: "uppercase", color: pal.mastheadMuted, marginBottom: 6,
   },
   mastheadTitle: {
-    fontFamily: ff.display, fontSize: 38, fontWeight: 700,
-    color: pal.mastheadText, lineHeight: 1.05, margin: 0,
+    fontFamily: ff.display, fontSize: 42, fontWeight: 700,
+    color: pal.mastheadText, lineHeight: 1.02, margin: 0,
   },
   mastheadSub: {
-    fontFamily: ff.body, fontStyle: "italic", fontSize: 15,
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 16,
     color: pal.mastheadMuted, marginTop: 6,
   },
   mastheadMeta: {
-    textAlign: "right", fontFamily: ff.body, fontSize: 13,
-    color: pal.mastheadMuted, lineHeight: 1.9,
+    textAlign: "right", fontFamily: ff.meta, fontSize: 12,
+    color: pal.mastheadMuted, lineHeight: 1.85, letterSpacing: "0.02em",
   },
-  mastheadMetaSub: { fontSize: 12, lineHeight: 1.7 },
+  mastheadMetaSub: { fontSize: 11, lineHeight: 1.7 },
   mastheadLink: {
     background: "none", border: "none", padding: 0, margin: 0, cursor: "pointer",
     font: "inherit", color: "inherit", textAlign: "inherit", lineHeight: "inherit",
@@ -251,20 +253,20 @@ const s = {
   main: { maxWidth: PAGE_MAX, width: "100%", margin: "0 auto", padding: "40px 36px 80px" },
   // intro blurb
   introBlock: {
-    fontFamily: ff.body, fontSize: 17, color: pal.inkMuted, lineHeight: 1.85,
-    marginBottom: 28, fontStyle: "italic",
+    fontFamily: ff.body, fontSize: 18, color: pal.inkMuted, lineHeight: 1.9,
+    marginBottom: 32, fontStyle: "italic",
   },
   introStrong: { fontFamily: ff.display, fontStyle: "normal", fontWeight: 600, color: pal.darkBrown },
   tabBar: {
     display: "flex", gap: 0, borderBottom: `1px solid ${pal.rule}`,
-    marginBottom: 36, overflowX: "auto", WebkitOverflowScrolling: "touch",
+    marginBottom: 40, overflowX: "auto", WebkitOverflowScrolling: "touch",
   },
   tabBtn: {
-    fontFamily: ff.body, fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase",
     color: pal.lightBrown, background: "none", border: "none",
     borderBottom: "2px solid transparent", padding: "12px 20px", cursor: "pointer",
     whiteSpace: "nowrap", flexShrink: 0, marginBottom: -1,
-    transition: "color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease",
+    transition: "color 0.2s ease-in-out, border-color 0.2s ease-in-out, background-color 0.2s ease-in-out",
   },
   tabBtnActive: {
     color: pal.darkBrown, borderBottom: `2px solid ${pal.accentLight}`, fontWeight: 500,
@@ -276,9 +278,9 @@ const s = {
     minHeight: 320,
     animation: "tab-panel-in 0.28s ease",
   },
-  secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 22, marginTop: 52 },
+  secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 24, marginTop: 60 },
   secHeadFirst: { marginTop: 0 },
-  secTitle: { fontFamily: ff.display, fontSize: 22, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1 },
+  secTitle: { fontFamily: ff.display, fontSize: 24, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1.05 },
   secStamp: { fontFamily: ff.display, fontSize: 14, color: pal.navy, lineHeight: 1, flexShrink: 0 },
   secRule: { flex: 1, height: 1, background: pal.rule, opacity: 0.45, border: "none" },
   profileStatsCol: { display: "flex", flexDirection: "column" },
@@ -293,29 +295,30 @@ const s = {
   },
   statAsideStack: { display: "flex", flexDirection: "column", gap: 8 },
   statBox: { background: pal.parchment, border: `1px solid ${pal.rule}`, padding: "8px 12px" },
-  statBoxLink: { cursor: "pointer", transition: "border-color 0.15s" },
+  statBoxLink: { cursor: "pointer", transition: "border-color 0.2s ease-in-out" },
   statCutoutFlow: {
     width: "78%", maxWidth: 118, height: "auto", objectFit: "contain", objectPosition: "center",
     display: "block", alignSelf: "center", marginTop: 2, marginBottom: 0,
-    filter: "drop-shadow(0 3px 8px rgba(44,26,14,0.18))",
+    filter: "drop-shadow(0 4px 12px rgba(44,26,14,0.2))",
   },
-  statNum: { fontFamily: ff.display, fontSize: 26, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
-  statLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 3 },
-  statNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.inkMuted, marginTop: 3, lineHeight: 1.35 },
+  statNum: { fontFamily: ff.display, fontSize: 28, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
+  statLabel: { fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
+  statNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.inkMuted, marginTop: 3, lineHeight: 1.4 },
   specimenCard: {
     background: pal.parchment, border: `1px solid ${pal.rule}`,
-    padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px",
+    padding: "18px 22px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 24px",
   },
-  fieldLabel: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 2 },
-  fieldValue: { fontFamily: ff.display, fontSize: 16, color: pal.darkBrown, fontWeight: 600, margin: 0, lineHeight: 1.3 },
-  fieldSub: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12.5, color: pal.inkMuted, lineHeight: 1.3, marginTop: 2 },
+  fieldLabel: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 3 },
+  fieldValue: { fontFamily: ff.display, fontSize: 17, color: pal.darkBrown, fontWeight: 600, margin: 0, lineHeight: 1.3 },
+  fieldSub: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13, color: pal.inkMuted, lineHeight: 1.35, marginTop: 2 },
   fieldBlock: { marginBottom: 0 },
   galleryPreview: {
     display: "block", width: "100%", textAlign: "left", cursor: "pointer",
     background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 16px",
+    transition: "border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
   },
   galleryPreviewLabel: {
-    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase",
     color: pal.lightBrown, margin: "0 0 10px",
   },
   galleryPreviewGrid: {
@@ -328,49 +331,49 @@ const s = {
   },
   activitiesGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
   activitiesCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "22px 26px" },
-  activitiesCardTitle: { fontFamily: ff.display, fontSize: 17, fontWeight: 600, color: pal.darkBrown, margin: "0 0 14px" },
+  activitiesCardTitle: { fontFamily: ff.display, fontSize: 18, fontWeight: 600, color: pal.darkBrown, margin: "0 0 14px" },
   activityItem: {
-    fontFamily: ff.body, fontSize: 14.5, color: pal.inkMuted, lineHeight: 1,
-    padding: "7px 0", borderBottom: `1px solid rgba(201,169,122,0.2)`,
+    fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.15,
+    padding: "8px 0", borderBottom: `1px solid rgba(201,169,122,0.2)`,
     display: "flex", alignItems: "center", gap: 10,
   },
   activityDot: { width: 5, height: 5, background: pal.accentLight, flexShrink: 0 },
   dislikeDot: { width: 5, height: 5, background: pal.dislikeRed, flexShrink: 0 },
   factsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 },
   factCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "16px 20px" },
-  factLabel: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 3 },
-  factValue: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
-  factDetail: { fontFamily: ff.body, fontSize: 13.5, color: pal.inkMuted, lineHeight: 1.7, margin: 0 },
+  factLabel: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 4 },
+  factValue: { fontFamily: ff.display, fontSize: 17, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
+  factDetail: { fontFamily: ff.body, fontSize: 14, color: pal.inkMuted, lineHeight: 1.75, margin: 0 },
   tricksGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 },
   tricksGridTwoCol: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 },
   repertoireRow: {
-    display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto",
-    gap: 24, alignItems: "stretch", marginBottom: 32,
+    display: "grid", gridTemplateColumns: "minmax(0, 1fr) 260px",
+    gap: 24, alignItems: "start", marginBottom: 32,
   },
   repertoireTricks: { minWidth: 0 },
   playSequenceCard: {
     background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0,
-    height: "100%", display: "flex", flexDirection: "column", alignSelf: "stretch",
+    width: 260, display: "flex", flexDirection: "column", alignSelf: "start",
   },
   playSequenceFrame: {
     position: "relative", background: pal.parchment, overflow: "hidden",
-    flexShrink: 0, margin: "0 auto",
+    width: 240, height: 240, flexShrink: 0, margin: "0 auto",
   },
   playSequenceImg: {
     position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
     transition: "opacity 0.2s ease",
   },
   playSequenceCaption: {
-    fontFamily: ff.body, fontSize: 11, color: pal.lightBrown, fontStyle: "italic",
+    fontFamily: ff.body, fontSize: 12, color: pal.lightBrown, fontStyle: "italic",
     padding: "8px 10px", margin: 0, textAlign: "center", lineHeight: 1.5,
   },
   playSequenceLabel: {
-    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase",
     color: pal.accentLight, padding: "10px 10px 0", margin: 0, textAlign: "center",
   },
   trickCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "13px 16px" },
-  trickNum: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.14em", color: pal.accentLight, textTransform: "uppercase", marginBottom: 3 },
-  trickName: { fontFamily: ff.display, fontSize: 15.5, fontWeight: 600, color: pal.darkBrown, margin: 0 },
+  trickNum: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.14em", color: pal.accentLight, textTransform: "uppercase", marginBottom: 3 },
+  trickName: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, margin: 0 },
   trickNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12.5, color: pal.lightBrown, margin: "3px 0 0" },
   tickBanner: {
     background: pal.tickRedLight,
@@ -384,20 +387,20 @@ const s = {
   logFormTitle: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, marginBottom: 16 },
   formRow: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 },
   formGroup: { display: "flex", flexDirection: "column", gap: 4 },
-  lbl: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown },
+  lbl: { fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown },
   inp: { fontFamily: ff.body, fontSize: 14, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0 },
   sel: { fontFamily: ff.body, fontSize: 14, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0, appearance: "none", cursor: "pointer" },
   ta: { fontFamily: ff.body, fontSize: 14, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0, resize: "vertical", minHeight: 60 },
-  addBtn: { fontFamily: ff.body, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", background: pal.masthead, color: pal.mastheadText, border: "none", padding: "9px 22px", cursor: "pointer", marginTop: 8 },
+  addBtn: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", background: pal.masthead, color: pal.mastheadText, border: "none", padding: "9px 22px", cursor: "pointer", marginTop: 8 },
   table: { width: "100%", borderCollapse: "collapse", fontFamily: ff.body, fontSize: 14, background: pal.white, border: `1px solid ${pal.rule}` },
-  th: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: pal.lightBrown, borderBottom: `1px solid ${pal.rule}`, padding: "10px 14px", textAlign: "left", background: pal.parchment },
+  th: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: pal.lightBrown, borderBottom: `1px solid ${pal.rule}`, padding: "10px 14px", textAlign: "left", background: pal.parchment },
   td: { padding: "10px 14px", color: pal.inkMuted, borderBottom: `1px solid rgba(201,169,122,0.25)`, verticalAlign: "top" },
   empty: { fontFamily: ff.body, fontStyle: "italic", fontSize: 14, color: pal.lightBrown, padding: "20px 14px", background: pal.white, border: `1px solid ${pal.rule}` },
   logStatRow: { display: "flex", gap: 14, marginBottom: 20 },
   logStatBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 18px", minWidth: 100 },
   logStatNum: { fontFamily: ff.display, fontSize: 26, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
-  logStatLabel: { fontFamily: ff.body, fontSize: 11, letterSpacing: "0.13em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
-  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 },
+  logStatLabel: { fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
+  photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 18 },
   photoCard: { background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0, cursor: "pointer" },
   photoFrame: { width: "100%", aspectRatio: "1", background: pal.parchment, position: "relative", overflow: "hidden" },
   photoImg: { width: "100%", height: "100%", aspectRatio: "1", objectFit: "cover", display: "block" },
@@ -409,7 +412,7 @@ const s = {
   lightboxImg: { maxWidth: "100%", maxHeight: "100%", objectFit: "contain", border: `2px solid ${pal.rule}` },
   lightboxClose: {
     position: "absolute", top: 20, right: 24,
-    fontFamily: ff.body, fontSize: 13, letterSpacing: "0.12em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase",
     color: pal.mastheadMuted, background: "none", border: "none", cursor: "pointer",
   },
   mastheadLeft: { display: "flex", alignItems: "flex-end", gap: 20 },
@@ -444,7 +447,7 @@ const s = {
   },
   adventureGroups: { display: "flex", flexDirection: "column", gap: 12 },
   adventureGroupLabel: {
-    fontFamily: ff.body, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase",
     color: pal.lightBrown, margin: "0 0 4px",
   },
   adventureList: { margin: 0, paddingLeft: 18, listStyle: "disc" },
@@ -459,11 +462,11 @@ const s = {
   ageGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 0 },
   ageBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "18px 14px", textAlign: "center" },
   ageNum: { fontFamily: ff.display, fontSize: 28, fontWeight: 700, color: pal.darkBrown, lineHeight: 1, fontVariantNumeric: "tabular-nums" },
-  ageLabel: { fontFamily: ff.body, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 6 },
-  ageNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13, color: pal.inkMuted, marginTop: 14, lineHeight: 1.6 },
+  ageLabel: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 6 },
+  ageNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13.5, color: pal.inkMuted, marginTop: 14, lineHeight: 1.7 },
   proseCard: {
-    background: pal.white, border: `1px solid ${pal.rule}`, padding: "24px 28px",
-    fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.85,
+    background: pal.white, border: `1px solid ${pal.rule}`, padding: "26px 30px",
+    fontFamily: ff.body, fontSize: 15.5, color: pal.inkMuted, lineHeight: 1.9,
   },
   proseParagraph: { margin: "0 0 16px" },
   namingCard: {
@@ -486,14 +489,14 @@ const s = {
   },
   aspirationGroupBlock: { marginBottom: 18 },
   photoCaption: {
-    fontFamily: ff.body, fontSize: 11, color: pal.lightBrown, fontStyle: "italic",
-    padding: "6px 8px", margin: 0, textAlign: "center",
+    fontFamily: ff.body, fontSize: 12, color: pal.midBrown, fontStyle: "italic",
+    padding: 0, margin: 0, textAlign: "center",
   },
   gallerySortRow: {
-    display: "flex", justifyContent: "flex-end", marginBottom: 16,
+    display: "flex", justifyContent: "flex-end", marginBottom: 18, marginTop: 12,
   },
   gallerySortBtn: {
-    fontFamily: ff.body, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase",
     color: pal.midBrown, background: pal.white, border: `1px solid ${pal.rule}`,
     padding: "8px 14px", cursor: "pointer",
   },
@@ -524,7 +527,7 @@ function photoSrc(file, variant = "full") {
 
 function SectionHead({ title, first = false }) {
   return (
-    <div style={{ ...s.secHead, ...(first ? s.secHeadFirst : {}) }}>
+    <div style={{ ...s.secHead, ...(first ? s.secHeadFirst : {}) }} className={`sec-head${first ? " sec-head-first" : ""}`}>
       <span style={s.secStamp} aria-hidden="true">✦</span>
       <h2 style={s.secTitle}>{title}</h2>
       <hr style={s.secRule} />
@@ -545,6 +548,23 @@ function GalleryPreview({ onOpenGallery }) {
       </div>
       <span style={s.galleryPreviewLink}>View full gallery →</span>
     </button>
+  );
+}
+
+function MarginPhotos() {
+  const sorted = sortPhotosByTaken(true);
+  const photos = [2, 11, 23, 37]
+    .map((index) => sorted[index])
+    .filter(Boolean);
+
+  return (
+    <aside className="margin-photo-rail" aria-hidden="true">
+      {photos.map(({ file }, index) => (
+        <figure key={file} className={`margin-photo margin-photo--${index + 1}`}>
+          <img src={photoSrc(file, "thumb")} alt="" loading="lazy" decoding="async" />
+        </figure>
+      ))}
+    </aside>
   );
 }
 
@@ -631,17 +651,19 @@ function LiveAgeCounter() {
 
 function Aspirations() {
   return (
-    <div style={{ ...s.proseCard, background: pal.parchment }}>
-      {ASPIRATION_GROUPS.map((group, gi) => (
-        <div key={group.group} style={{ ...s.aspirationGroupBlock, marginBottom: gi === ASPIRATION_GROUPS.length - 1 ? 0 : 18 }}>
-          <p style={s.aspirationGroupLabel}>{group.group}</p>
-          {group.items.map((item, ii) => (
-            <div key={item.title} style={{ ...s.aspirationItem, marginBottom: ii === group.items.length - 1 ? 0 : 12 }}>
-              <p style={s.aspirationTitle}>{item.title}</p>
-              <p style={s.aspirationDetail}>{item.detail}</p>
-            </div>
-          ))}
-        </div>
+    <div className="aspirations-board">
+      {ASPIRATION_GROUPS.map((group) => (
+        <section key={group.group} className="aspiration-group">
+          <h3 className="aspiration-group__title">{group.group}</h3>
+          <div className="aspiration-group__items">
+            {group.items.map((item) => (
+              <div key={item.title} className="aspiration-item">
+                <h4 style={s.aspirationTitle}>{item.title}</h4>
+                <p style={s.aspirationDetail}>{item.detail}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       ))}
     </div>
   );
@@ -649,7 +671,7 @@ function Aspirations() {
 
 function SamoyedHistory() {
   return (
-    <div style={{ ...s.proseCard, ...s.historyBlock }}>
+    <div style={{ ...s.proseCard, ...s.historyBlock }} className="prose-card">
       {SAMOYED_HISTORY.map((paragraph, i) => (
         <p key={i} style={{ ...s.proseParagraph, marginBottom: i === SAMOYED_HISTORY.length - 1 ? 0 : 16 }}>{paragraph}</p>
       ))}
@@ -693,7 +715,7 @@ function AdventureMap() {
   return <div ref={containerRef} style={s.adventureMap} className="adventure-map" aria-label="Map of Zero's adventures" />;
 }
 
-function PlaySequence({ frameSize }) {
+function PlaySequence() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -708,14 +730,10 @@ function PlaySequence({ frameSize }) {
 
   if (!PLAY_SEQUENCE.length) return null;
 
-  const frameStyle = frameSize
-    ? { ...s.playSequenceFrame, width: frameSize, height: frameSize }
-    : s.playSequenceFrame;
-
   return (
     <figure style={s.playSequenceCard} className="play-sequence">
       <p style={s.playSequenceLabel}>At play</p>
-      <div style={frameStyle} className="play-sequence-frame">
+      <div style={s.playSequenceFrame} className="play-sequence-frame">
         {PLAY_SEQUENCE.map(({ file }, i) => (
           <img
             key={file}
@@ -739,34 +757,10 @@ function PlaySequence({ frameSize }) {
   );
 }
 
-const PLAY_CHROME_HEIGHT = 58;
-
 function RepertoireBlock() {
-  const tricksRef = useRef(null);
-  const [frameSize, setFrameSize] = useState(null);
-
-  useEffect(() => {
-    const el = tricksRef.current;
-    if (!el) return;
-
-    const update = () => {
-      const h = el.offsetHeight;
-      setFrameSize(Math.max(140, h - PLAY_CHROME_HEIGHT));
-    };
-
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener("resize", update);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, []);
-
   return (
     <div style={s.repertoireRow} className="repertoire-row">
-      <div ref={tricksRef} style={s.repertoireTricks} className="repertoire-tricks">
+      <div style={s.repertoireTricks} className="repertoire-tricks">
         <div style={s.tricksGridTwoCol} className="tricks-grid-two-col">
           {ALL_TRICKS.map((trick, i) => (
             <div key={trick.name} style={{ ...s.trickCard, background: i % 2 === 0 ? pal.white : pal.parchment }}>
@@ -777,7 +771,7 @@ function RepertoireBlock() {
           ))}
         </div>
       </div>
-      <PlaySequence frameSize={frameSize} />
+      <PlaySequence />
     </div>
   );
 }
@@ -898,7 +892,7 @@ function LazyThumb({ file, style, alt = "" }) {
   );
 }
 
-function LazyGalleryPhoto({ file, taken, onOpen }) {
+function LazyGalleryPhoto({ file, taken, plateNo, onOpen }) {
   const ref = useRef(null);
   const [showSrc, setShowSrc] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -917,7 +911,7 @@ function LazyGalleryPhoto({ file, taken, onOpen }) {
 
   return (
     <figure ref={ref} style={s.photoCard} className="photo-card" onClick={() => onOpen(file)}>
-      <div style={s.photoFrame}>
+      <div style={s.photoFrame} className="photo-frame">
         {showSrc && (
           <img
             style={{ ...s.photoImg, opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease" }}
@@ -929,7 +923,10 @@ function LazyGalleryPhoto({ file, taken, onOpen }) {
           />
         )}
       </div>
-      <figcaption style={s.photoCaption}>{caption}</figcaption>
+      <figcaption className="photo-archival-label">
+        <p className="photo-archival-meta">Plate {String(plateNo).padStart(3, "0")}</p>
+        <p style={s.photoCaption} className="photo-caption">{caption}</p>
+      </figcaption>
     </figure>
   );
 }
@@ -970,17 +967,19 @@ function PhotoGallery() {
         <button
           type="button"
           style={s.gallerySortBtn}
+          className="gallery-sort-btn"
           onClick={() => setNewestFirst((v) => !v)}
         >
           {newestFirst ? "Newest first" : "Oldest first"}
         </button>
       </div>
       <div style={s.photoGrid} className="photo-grid">
-        {visible.map(({ file, taken }) => (
+        {visible.map(({ file, taken }, i) => (
           <LazyGalleryPhoto
             key={file}
             file={file}
             taken={taken}
+            plateNo={i + 1}
             onOpen={setActive}
           />
         ))}
@@ -1160,10 +1159,9 @@ export default function App() {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(44, 26, 14, 0.08);
         }
-        .stat-box-link { transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+        .stat-box-link { transition: border-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
         .gallery-preview:hover { border-color: ${pal.accentLight}; }
-        .photo-card { transition: transform 0.25s ease, border-color 0.25s ease; }
-        .photo-card:hover { transform: translateY(-3px); border-color: ${pal.accentLight} !important; }
+        .photo-card { transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
         @media (min-width: 901px) {
           .profile-top-row {
             display: grid;
@@ -1215,8 +1213,8 @@ export default function App() {
           .photo-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .repertoire-row { grid-template-columns: 1fr !important; }
           .repertoire-tricks { max-width: none !important; }
-          .play-sequence { max-width: 100%; width: 100%; margin: 0 auto; height: auto !important; }
-          .play-sequence-frame { max-width: min(100%, 360px) !important; width: min(100%, 360px) !important; height: auto !important; aspect-ratio: 1 / 1 !important; }
+          .play-sequence { max-width: 260px; width: min(100%, 260px) !important; margin: 0 auto; height: auto !important; }
+          .play-sequence-frame { max-width: 240px !important; width: min(100%, 240px) !important; height: auto !important; aspect-ratio: 1 / 1 !important; }
           .masthead-left { align-items: center !important; gap: 14px !important; }
           .masthead-cutout { width: 108px !important; height: 108px !important; }
           .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
@@ -1232,7 +1230,7 @@ export default function App() {
           .masthead-cutout, .stat-box-link, .photo-card, .tab-btn { transition: none !important; }
           .masthead-cutout:hover, .stat-box-link:hover, .photo-card:hover { transform: none !important; }
         }
-        .leaflet-container { font-family: 'EB Garamond', Georgia, serif; }
+        .leaflet-container { font-family: 'Source Serif 4', Georgia, serif; }
         .leaflet-popup-content-wrapper { border-radius: 0; border: 1px solid #C9A97A; }
         .cosmos-panel::before {
           content: "";
@@ -1245,6 +1243,7 @@ export default function App() {
         }
       `}</style>
       <div style={s.page} className="page-shell page-shell--layered">
+        <MarginPhotos />
 
         <header style={s.masthead}>
           <div style={s.mastheadInner} className="masthead-inner">
@@ -1310,7 +1309,7 @@ export default function App() {
                   <SectionHead title="Field Notes" first />
                   <div style={s.specimenCard} className="specimen-card">
                     <div style={s.fieldBlock}>
-                      <p style={s.fieldLabel}>Species</p>
+                      <p style={s.fieldLabel} className="field-label">Species</p>
                       <p style={s.fieldValue}>Samoyed</p>
                       <p style={s.fieldSub}>Canis lupus familiaris</p>
                     </div>
@@ -1345,7 +1344,7 @@ export default function App() {
 
               <SectionHead title="Favorite Activities" />
               <div style={s.activitiesGrid} className="two-col-grid">
-                <div style={{ ...s.activitiesCard, ...s.lovesCard }} className="loves-card">
+                <div style={{ ...s.activitiesCard, ...s.lovesCard }} className="loves-card activities-card">
                   <p style={s.activitiesCardTitle}>Loves</p>
                   <div style={s.lovesList} className="loves-list">
                     {LIKES.map((item, i) => (
@@ -1365,7 +1364,7 @@ export default function App() {
                     decoding="async"
                   />
                 </div>
-                <div style={{ ...s.activitiesCard, background: pal.white }}>
+                <div style={{ ...s.activitiesCard, background: pal.white }} className="activities-card">
                   <p style={s.activitiesCardTitle}>Would rather not</p>
                   {DISLIKES.map((item, i) => (
                     <div key={item} style={{ ...s.activityItem, borderBottom: i === DISLIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
@@ -1440,8 +1439,8 @@ export default function App() {
               <SectionHead title="About the Samoyed" />
               <div style={s.factsGrid} className="two-col-grid">
                 {SAMOYED_FACTS.map((f, i) => (
-                  <div key={f.label} style={{ ...s.factCard, background: i % 2 === 0 ? pal.white : pal.parchment }}>
-                    <p style={s.factLabel}>{f.label}</p>
+                  <div key={f.label} style={{ ...s.factCard, background: i % 2 === 0 ? pal.white : pal.parchment }} className="fact-card">
+                    <p style={s.factLabel} className="fact-label">{f.label}</p>
                     <p style={s.factValue}>{f.value}</p>
                     <p style={s.factDetail}>{f.detail}</p>
                   </div>
@@ -1453,7 +1452,7 @@ export default function App() {
           {tab === "gallery" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-gallery" aria-labelledby="tab-gallery">
               <SectionHead title="Photographic Record" first />
-              <div style={{ background: pal.parchment, border: `1px solid ${pal.rule}`, padding: "20px 22px" }}>
+              <div className="gallery-archive-shell">
                 <PhotoGallery />
               </div>
             </div>
