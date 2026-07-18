@@ -156,7 +156,7 @@
   opacity: 0.11;
   background-repeat: no-repeat;
   background-size: contain;
-  transition: opacity 0.6s var(--ease-archive);
+  transition: opacity 0.55s var(--ease-archive);
   mix-blend-mode: multiply;
 }
 
@@ -207,7 +207,169 @@
   background-position: center;
 }
 
+.layer-ambient__flora--extra {
+  display: none;
+}
+
+/* Profile: ferns + pressed leaves (default flora) */
+.layer-ambient--profile .layer-ambient__flora--tl {
+  opacity: 0.12;
+}
+.layer-ambient--profile .layer-ambient__flora--br {
+  opacity: 0.11;
+}
+
+/* Character: flowers + leafy vines */
+.layer-ambient--character .layer-ambient__flora--tl {
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 320' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M40 310 C70 240 95 170 110 100 C120 55 128 22 132 8'/%3E%3Cpath d='M95 140 C60 125 35 95 18 60 M108 110 C78 90 55 60 42 28 M118 78 C95 55 82 30 74 8'/%3E%3Cpath d='M88 170 C120 155 155 125 185 90 M78 205 C115 195 155 170 195 130 M70 240 C108 235 152 215 205 175'/%3E%3Ccircle cx='18' cy='60' r='10'/%3E%3Ccircle cx='42' cy='28' r='8'/%3E%3Ccircle cx='185' cy='90' r='11'/%3E%3Ccircle cx='195' cy='130' r='9'/%3E%3Cpath d='M18 60 L18 50 M18 70 L18 60 M8 60 H28 M12 52 L24 68 M12 68 L24 52'/%3E%3Cpath d='M185 90 L185 78 M185 102 L185 90 M173 90 H197 M177 80 L193 100 M177 100 L193 80'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--character .layer-ambient__flora--tr {
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 210' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 180 C70 140 120 90 160 50 C185 25 205 10 220 4'/%3E%3Cpath d='M140 70 C110 55 85 30 70 8 M155 95 C125 75 105 50 95 25 M170 120 C145 100 130 75 122 48'/%3E%3Cpath d='M130 145 C165 130 205 100 245 65 M115 170 C155 160 200 135 255 100'/%3E%3Ccircle cx='70' cy='8' r='7'/%3E%3Ccircle cx='95' cy='25' r='9'/%3E%3Ccircle cx='245' cy='65' r='10'/%3E%3Ccircle cx='255' cy='100' r='8'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--character .layer-ambient__flora--bl {
+  opacity: 0.08;
+}
+.layer-ambient--character .layer-ambient__flora--contour {
+  opacity: 0.04;
+}
+
+/* Cosmos: night-garden botanicals + constellation dots */
+.layer-ambient--cosmos .layer-ambient__flora--tl {
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 320' fill='none'%3E%3Cg stroke='%234A3F5C' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 300 C55 230 80 160 100 95 C115 50 125 20 130 6'/%3E%3Cpath d='M90 130 C60 110 40 80 28 48 M105 95 C78 72 60 45 50 18 M115 65 C95 42 85 20 78 4'/%3E%3Cpath d='M85 165 C115 150 145 120 175 85 M75 200 C110 190 145 165 185 125'/%3E%3Ccircle cx='28' cy='48' r='5'/%3E%3Ccircle cx='50' cy='18' r='4'/%3E%3Ccircle cx='175' cy='85' r='5'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--cosmos .layer-ambient__flora--tr {
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 210' fill='none'%3E%3Cg stroke='%237A6B94' stroke-width='1.2' stroke-linecap='round'%3E%3Ccircle cx='40' cy='40' r='2'/%3E%3Ccircle cx='90' cy='28' r='1.5'/%3E%3Ccircle cx='140' cy='50' r='2.2'/%3E%3Ccircle cx='190' cy='30' r='1.6'/%3E%3Ccircle cx='240' cy='55' r='2'/%3E%3Ccircle cx='270' cy='25' r='1.4'/%3E%3Ccircle cx='60' cy='90' r='1.5'/%3E%3Ccircle cx='120' cy='100' r='2'/%3E%3Ccircle cx='180' cy='85' r='1.4'/%3E%3Ccircle cx='230' cy='110' r='1.8'/%3E%3Cpath d='M40 40 L90 28 L140 50 L190 30 L240 55' opacity='0.45'/%3E%3Cpath d='M60 90 L120 100 L180 85 L230 110' opacity='0.4'/%3E%3Ccircle cx='250' cy='160' r='16'/%3E%3Cpath d='M250 136 V128 M250 192 V184 M226 160 H218 M282 160 H274' opacity='0.55'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--cosmos .layer-ambient__flora--bl {
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 250' fill='none'%3E%3Cg stroke='%234A3F5C' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 230 C80 200 130 150 170 100 C195 65 215 35 230 12'/%3E%3Cpath d='M150 120 C120 100 95 70 80 40 M165 90 C140 70 120 45 110 20'/%3E%3Cpath d='M140 155 C175 140 215 110 255 75 M125 185 C165 175 210 150 265 115'/%3E%3Ccircle cx='80' cy='40' r='6'/%3E%3Ccircle cx='255' cy='75' r='7'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--cosmos .layer-ambient__flora--br {
+  opacity: 0.08;
+}
+.layer-ambient--cosmos .layer-ambient__flora--contour {
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 160' fill='none'%3E%3Cg stroke='%237A6B94' stroke-width='0.9'%3E%3Cellipse cx='260' cy='80' rx='180' ry='48'/%3E%3Cellipse cx='260' cy='80' rx='120' ry='30'/%3E%3Cellipse cx='260' cy='80' rx='60' ry='14'/%3E%3Ccircle cx='100' cy='50' r='1.5'/%3E%3Ccircle cx='400' cy='45' r='1.8'/%3E%3Ccircle cx='160' cy='110' r='1.4'/%3E%3Ccircle cx='360' cy='115' r='1.6'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--cosmos .layer-ambient__flora--extra {
+  display: block;
+  top: 12%;
+  right: 8%;
+  width: min(180px, 18vw);
+  height: min(180px, 22vh);
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160' fill='none'%3E%3Cg stroke='%237A6B94' stroke-width='1.2'%3E%3Ccircle cx='80' cy='80' r='28'/%3E%3Ccircle cx='80' cy='80' r='18' opacity='0.5'/%3E%3Cpath d='M80 40 V28 M80 132 V120 M40 80 H28 M132 80 H120 M52 52 L44 44 M108 108 L116 116 M108 52 L116 44 M52 108 L44 116'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Breed: pines + mountain contours */
+.layer-ambient--breed .layer-ambient__flora--tl {
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 320' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M70 310 V90 M40 310 L70 110 L100 310 M48 250 H92 M54 210 H86 M60 170 H80 M65 135 H75'/%3E%3Cpath d='M150 310 V50 M110 310 L150 70 L190 310 M122 250 H178 M130 200 H170 M138 150 H162 M144 110 H156'/%3E%3Cpath d='M10 310 H210'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--breed .layer-ambient__flora--tr {
+  opacity: 0.11;
+}
+.layer-ambient--breed .layer-ambient__flora--bl {
+  opacity: 0.12;
+}
+.layer-ambient--breed .layer-ambient__flora--br {
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 300' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 280 L70 140 L110 220 L160 80 L210 280'/%3E%3Cpath d='M30 280 H200'/%3E%3Cpath d='M90 280 V180 M70 280 L90 200 L110 280 M75 245 H105'/%3E%3Cpath d='M170 280 V160 M150 280 L170 180 L190 280 M155 240 H185'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--breed .layer-ambient__flora--contour {
+  opacity: 0.06;
+}
+
+/* Gallery: botanical frames + soft pressed-leaf accents */
+.layer-ambient--gallery .layer-ambient__flora--tl {
+  opacity: 0.1;
+}
+.layer-ambient--gallery .layer-ambient__flora--tr {
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 210' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='40' y='30' width='200' height='140'/%3E%3Crect x='52' y='42' width='176' height='116' opacity='0.55'/%3E%3Cpath d='M70 20 C95 35 110 55 118 80 M230 20 C205 35 190 55 182 80'/%3E%3Cpath d='M70 180 C95 165 110 145 118 120 M230 180 C205 165 190 145 182 120'/%3E%3Ccircle cx='70' cy='20' r='5'/%3E%3Ccircle cx='230' cy='20' r='5'/%3E%3Ccircle cx='70' cy='180' r='5'/%3E%3Ccircle cx='230' cy='180' r='5'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--gallery .layer-ambient__flora--bl {
+  opacity: 0.07;
+}
+.layer-ambient--gallery .layer-ambient__flora--br {
+  opacity: 0.1;
+}
+.layer-ambient--gallery .layer-ambient__flora--contour {
+  opacity: 0.035;
+}
+.layer-ambient--gallery .layer-ambient__flora--extra {
+  display: block;
+  bottom: 18%;
+  left: 6%;
+  width: min(200px, 20vw);
+  height: min(140px, 18vh);
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 140' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.2' stroke-linecap='round'%3E%3Crect x='10' y='20' width='50' height='70'/%3E%3Crect x='70' y='20' width='50' height='70'/%3E%3Crect x='130' y='20' width='50' height='70'/%3E%3Cpath d='M18 105 H52 M78 105 H112 M138 105 H172'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Records: trees, trails, map contours */
+.layer-ambient--records .layer-ambient__flora--tl {
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 320' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M60 310 V120 M35 310 L60 140 L85 310 M42 250 H78 M48 210 H72 M54 175 H66'/%3E%3Cpath d='M140 310 V70 M105 310 L140 95 L175 310 M118 245 H162 M126 195 H154 M134 150 H146'/%3E%3Cpath d='M20 310 C70 280 120 250 160 200 C185 170 205 140 215 110' opacity='0.7'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--records .layer-ambient__flora--tr {
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 210' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.2' stroke-linecap='round'%3E%3Cpath d='M20 40 H280 M20 80 H280 M20 120 H280 M20 160 H280' opacity='0.45'/%3E%3Cpath d='M40 30 V180 M100 30 V180 M160 30 V180 M220 30 V180' opacity='0.35'/%3E%3Cpath d='M30 170 C80 140 130 100 180 70 C220 45 250 30 280 22'/%3E%3Ccircle cx='180' cy='70' r='4'/%3E%3Ccircle cx='100' cy='125' r='3.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+.layer-ambient--records .layer-ambient__flora--bl {
+  opacity: 0.1;
+}
+.layer-ambient--records .layer-ambient__flora--br {
+  opacity: 0.09;
+}
+.layer-ambient--records .layer-ambient__flora--contour {
+  opacity: 0.07;
+}
+
+/* Keep tab engravings small and secondary to the archive content. */
+.layer-ambient__flora--tl {
+  opacity: 0.065 !important;
+  background-size: 70% auto;
+  background-position: left top;
+}
+
+.layer-ambient__flora--tr {
+  opacity: 0.06 !important;
+  background-size: 66% auto;
+  background-position: right top;
+}
+
+.layer-ambient__flora--bl {
+  opacity: 0.06 !important;
+  background-size: 68% auto;
+  background-position: left bottom;
+}
+
+.layer-ambient__flora--br {
+  opacity: 0.06 !important;
+  background-size: 68% auto;
+  background-position: right bottom;
+}
+
+.layer-ambient__flora--contour {
+  opacity: 0.035 !important;
+  background-size: 72% auto;
+}
+
+.layer-ambient__flora--extra {
+  opacity: 0.055 !important;
+  background-size: 62% auto;
+}
+
 @media (max-width: 700px) {
+  .masthead-miniature {
+    display: none;
+  }
+
   .layer-ambient__flora--tl,
   .layer-ambient__flora--tr {
     width: min(110px, 28vw);
@@ -216,7 +378,8 @@
   }
   .layer-ambient__flora--bl,
   .layer-ambient__flora--br,
-  .layer-ambient__flora--contour {
+  .layer-ambient__flora--contour,
+  .layer-ambient__flora--extra {
     display: none;
   }
 }
@@ -472,7 +635,16 @@
   display: none;
 }
 
-@media (min-width: 1280px) {
+@keyframes margin-set-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 1440px) {
   .margin-photo-rail {
     display: block;
     position: fixed;
@@ -481,40 +653,30 @@
     pointer-events: none;
   }
 
+  .margin-photo-set {
+    position: absolute;
+    inset: 0;
+    animation: margin-set-in 0.5s ease;
+  }
+
   .margin-photo {
     position: absolute;
-    width: 168px;
+    width: 190px;
     margin: 0;
     padding: 8px 8px 22px;
     background: #fffdf8;
     border: 1px solid rgba(201, 169, 122, 0.55);
     box-shadow: 0 6px 22px rgba(44, 26, 14, 0.12);
-    opacity: 0.9;
+    opacity: 0.92;
   }
 
   .margin-photo img {
     display: block;
     width: 100%;
-    aspect-ratio: 1 / 1.08;
+    aspect-ratio: 1 / 1.12;
     object-fit: cover;
     object-position: center 22%;
     filter: saturate(0.88) sepia(0.06);
-  }
-
-  .margin-photo--1 img {
-    object-position: center 15%;
-  }
-
-  .margin-photo--2 img {
-    object-position: center 20%;
-  }
-
-  .margin-photo--3 img {
-    object-position: center 18%;
-  }
-
-  .margin-photo--4 img {
-    object-position: center 24%;
   }
 
   .margin-photo__caption {
@@ -522,32 +684,44 @@
     font-size: 15px;
     color: var(--archive-muted);
     text-align: center;
-    margin: 6px 0 0;
+    margin: 8px 0 0;
     line-height: 1.1;
   }
 
   .margin-photo--1 {
-    top: 22vh;
-    left: max(12px, calc((100vw - 1320px) / 4 - 72px));
+    top: 18vh;
+    left: max(14px, calc((100vw - 1320px) / 4 - 96px));
     transform: rotate(-2.5deg);
   }
 
   .margin-photo--2 {
-    bottom: 12vh;
-    left: max(16px, calc((100vw - 1320px) / 4 - 58px));
+    bottom: 10vh;
+    left: max(18px, calc((100vw - 1320px) / 4 - 78px));
     transform: rotate(1.8deg);
   }
 
   .margin-photo--3 {
-    top: 18vh;
-    right: max(14px, calc((100vw - 1320px) / 4 - 68px));
+    top: 16vh;
+    right: max(16px, calc((100vw - 1320px) / 4 - 90px));
     transform: rotate(2deg);
   }
 
   .margin-photo--4 {
-    bottom: 16vh;
-    right: max(10px, calc((100vw - 1320px) / 4 - 76px));
+    bottom: 14vh;
+    right: max(12px, calc((100vw - 1320px) / 4 - 102px));
     transform: rotate(-1.5deg);
+  }
+}
+
+@media (min-width: 1680px) {
+  .margin-photo {
+    width: 205px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .margin-photo-set {
+    animation: none !important;
   }
 }
 
@@ -608,6 +782,50 @@
 }
 
 /* ── Masthead portrait botanical frame ── */
+
+.site-masthead {
+  position: relative;
+  overflow: hidden;
+}
+
+.masthead-miniature {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  z-index: 1;
+  color: rgba(201, 169, 122, 0.58);
+  font-family: var(--ff-display);
+  font-size: 11px;
+  letter-spacing: 0.72em;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.masthead-miniature::before {
+  content: "✦  ·  ✧  ·  ✦";
+}
+
+.site-masthead[data-tab="character"] .masthead-miniature::before {
+  content: "✧  ✦  ·  ✦  ✧";
+}
+
+.site-masthead[data-tab="cosmos"] .masthead-miniature::before {
+  content: "✦  ·  ☽  ·  ✦";
+}
+
+.site-masthead[data-tab="breed"] .masthead-miniature::before {
+  content: "△  ·  ✦  ·  △";
+}
+
+.site-masthead[data-tab="gallery"] .masthead-miniature::before {
+  content: "✧  □  ✦  □  ✧";
+}
+
+.site-masthead[data-tab="records"] .masthead-miniature::before {
+  content: "·  ✦  ·  ✦  ·";
+}
 
 .masthead-portrait {
   position: relative;

@@ -22,9 +22,17 @@ export function isImage(name) {
 export function getTakenDate(filePath) {
   const out = execSync(`sips -g creation "${filePath}"`, { encoding: "utf8" });
   const match = out.match(/creation:\s*(.+)/);
-  if (!match || match[1].trim() === "<nil>") return null;
-  const [datePart, timePart] = match[1].trim().split(" ");
-  return `${datePart.replace(/:/g, "-")}T${timePart}`;
+  if (match && match[1].trim() !== "<nil>") {
+    const [datePart, timePart] = match[1].trim().split(" ");
+    return `${datePart.replace(/:/g, "-")}T${timePart}`;
+  }
+
+  const stats = statSync(filePath);
+  const fallback = stats.birthtimeMs > 0 ? stats.birthtime : stats.mtime;
+  if (Number.isNaN(fallback.getTime())) return null;
+
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${fallback.getFullYear()}-${pad(fallback.getMonth() + 1)}-${pad(fallback.getDate())}T${pad(fallback.getHours())}:${pad(fallback.getMinutes())}:${pad(fallback.getSeconds())}`;
 }
 
 export function applyCreationDate(filePath, iso) {

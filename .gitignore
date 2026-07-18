@@ -1,6 +1,7 @@
 node_modules/
 dist/
 /Photos/
+/Ender/
 .DS_Store
 cutout-photos/
 AGENTS.md

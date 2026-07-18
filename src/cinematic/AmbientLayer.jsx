@@ -3,11 +3,13 @@ import { getMood } from "./tokens.js";
 
 export default function AmbientLayer() {
   const { mood } = useSceneContext();
-  const m = getMood(mood);
+  const theme = mood || "default";
+  const m = getMood(theme);
 
   return (
     <div
-      className="layer-ambient"
+      className={`layer-ambient layer-ambient--${theme}`}
+      data-theme={theme}
       aria-hidden="true"
       style={{
         "--ambient-base": m.base,
@@ -30,6 +32,7 @@ export default function AmbientLayer() {
       <div className="layer-ambient__flora layer-ambient__flora--bl" />
       <div className="layer-ambient__flora layer-ambient__flora--br" />
       <div className="layer-ambient__flora layer-ambient__flora--contour" />
+      <div className="layer-ambient__flora layer-ambient__flora--extra" />
     </div>
   );
 }

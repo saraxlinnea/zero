@@ -5,18 +5,12 @@ import CosmosTab from "./CosmosTab.jsx";
 import { setFootprintMode, clearFootprints } from "./footprint-system.js";
 import { TAB_FOOTPRINT_MODES } from "./footprint-modes.js";
 import LayerShell from "./cinematic/LayerShell.jsx";
+import { getTabScene } from "./tabScenes.js";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 const FONT_LINK =
   "https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap";
-
-const MARGIN_PHOTOS = [
-  "IMG_4173.jpg",
-  "IMG_4157.jpg",
-  "IMG_0737.jpg",
-  "IMG_0113.jpg",
-];
 
 const BIRTHDAY = new Date("2024-09-16T00:00:00");
 
@@ -573,18 +567,32 @@ function GalleryPreview({ onOpenGallery }) {
   );
 }
 
-function MarginPhotos() {
+function MarginPhotos({ tab }) {
   const byFile = new Map(GALLERY_PHOTOS.map((p) => [p.file, p]));
-  const photos = MARGIN_PHOTOS.map((file) => byFile.get(file)).filter(Boolean);
+  const scene = getTabScene(tab);
+  const photos = scene.photos
+    .map(({ file, position }) => {
+      const entry = byFile.get(file);
+      return entry ? { ...entry, position } : null;
+    })
+    .filter(Boolean);
 
   return (
     <aside className="margin-photo-rail" aria-hidden="true">
-      {photos.map(({ file, taken }, index) => (
-        <figure key={file} className={`margin-photo margin-photo--${index + 1}`}>
-          <img src={photoSrc(file, "thumb")} alt="" loading="lazy" decoding="async" />
-          <figcaption className="margin-photo__caption">{formatPhotoTaken(taken)}</figcaption>
-        </figure>
-      ))}
+      <div key={tab} className="margin-photo-set">
+        {photos.map(({ file, taken, position }, index) => (
+          <figure key={`${tab}-${file}`} className={`margin-photo margin-photo--${index + 1}`}>
+            <img
+              src={photoSrc(file, "thumb")}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style={{ objectPosition: position }}
+            />
+            <figcaption className="margin-photo__caption">{formatPhotoTaken(taken)}</figcaption>
+          </figure>
+        ))}
+      </div>
     </aside>
   );
 }
@@ -1243,8 +1251,10 @@ export default function App() {
     setFootprintMode(TAB_FOOTPRINT_MODES[tab] ?? "default");
   }, [tab]);
 
+  const scene = getTabScene(tab);
+
   return (
-    <LayerShell mood="default">
+    <LayerShell mood={scene.mood}>
       <link rel="stylesheet" href={FONT_LINK} />
       <style>{`
         * { box-sizing: border-box; }
@@ -1386,9 +1396,10 @@ export default function App() {
         }
       `}</style>
       <div style={s.page} className="page-shell page-shell--layered">
-        <MarginPhotos />
+        <MarginPhotos tab={tab} />
 
-        <header style={s.masthead}>
+        <header style={s.masthead} className="site-masthead" data-tab={tab}>
+          <div className="masthead-miniature" aria-hidden="true" />
           <div style={s.mastheadInner} className="masthead-inner">
             <div style={s.mastheadLeft} className="masthead-left">
               <div className="masthead-portrait">
