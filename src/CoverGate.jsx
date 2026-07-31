@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { GALLERY_PHOTOS } from "./photos.js";
 
 const COVER_STORAGE_KEY = "zero-cover-dismissed";
-const COVER_START = "IMG_3332.jpg";
+const COVER_START = "IMG_3351.jpg"; // third June 15, 2026 photo
 const COVER_COUNT = 20;
 
 /** Hold each photo, then crossfade. */
-const HOLD_MS = 4200;
-const FADE_MS = 1400;
+const HOLD_MS = 2400;
+const FADE_MS = 900;
 
 export function wasCoverDismissed() {
   try {
@@ -38,7 +38,7 @@ function shuffle(list) {
   return arr;
 }
 
-/** Fresh random reel each mount: start on June 15 run, then random gallery photos. */
+/** Fresh random reel each mount: start on third June 15 shot, then random gallery photos. */
 function buildCoverPlaylist() {
   const pool = GALLERY_PHOTOS.map((p) => p.file).filter((f) => f !== COVER_START);
   const picked = shuffle(pool).slice(0, Math.max(0, COVER_COUNT - 1));
