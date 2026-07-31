@@ -6,6 +6,7 @@ import { setFootprintMode, clearFootprints } from "./footprint-system.js";
 import { TAB_FOOTPRINT_MODES } from "./footprint-modes.js";
 import LayerShell from "./cinematic/LayerShell.jsx";
 import { getTabScene } from "./tabScenes.js";
+import CoverGate, { wasCoverDismissed } from "./CoverGate.jsx";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -196,12 +197,12 @@ const pal = {
   masthead: "#2C1A0E",
   mastheadText: "#F5ECD7",
   mastheadMuted: "#C9A97A",
-  cream: "#FAF6ED",
-  parchment: "#F0E8D5",
-  darkBrown: "#2C1A0E",
+  cream: "#F7F6F3",
+  parchment: "#EDE9E0",
+  darkBrown: "#1A1A18",
   midBrown: "#6B4226",
   lightBrown: "#A67C52",
-  ink: "#1C110A",
+  ink: "#1A1A18",
   inkMuted: "#5C3D1E",
   rule: "#C9A97A",
   accentLight: "#D4956A",
@@ -230,22 +231,24 @@ const s = {
     display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24,
   },
   siteLabel: {
-    fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.2em",
+    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.12em",
     textTransform: "uppercase", color: pal.mastheadMuted, marginBottom: 6,
   },
   mastheadTitle: {
     fontFamily: ff.display, fontSize: 54, fontWeight: 700,
     color: pal.mastheadText, lineHeight: 0.94, margin: 0,
+    padding: 0, border: "none", background: "none", cursor: "pointer",
+    textAlign: "left",
   },
   mastheadSub: {
     fontFamily: ff.body, fontStyle: "italic", fontSize: 16,
     color: pal.mastheadMuted, marginTop: 6,
   },
   mastheadMeta: {
-    textAlign: "right", fontFamily: ff.meta, fontSize: 12,
+    textAlign: "right", fontFamily: ff.meta, fontSize: 13,
     color: pal.mastheadMuted, lineHeight: 1.85, letterSpacing: "0.02em",
   },
-  mastheadMetaSub: { fontSize: 11, lineHeight: 1.7 },
+  mastheadMetaSub: { fontSize: 12, lineHeight: 1.7 },
   mastheadLink: {
     background: "none", border: "none", padding: 0, margin: 0, cursor: "pointer",
     font: "inherit", color: "inherit", textAlign: "inherit", lineHeight: "inherit",
@@ -254,40 +257,43 @@ const s = {
   main: { maxWidth: PAGE_MAX, width: "100%", margin: "0 auto", padding: "40px 36px 80px" },
   // intro blurb
   introBlock: {
-    fontFamily: ff.body, fontSize: 18, color: pal.inkMuted, lineHeight: 1.9,
+    fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.75,
     marginBottom: 32, fontStyle: "italic",
   },
-  introStrong: { fontFamily: ff.display, fontStyle: "normal", fontWeight: 600, color: pal.darkBrown },
+  introStrong: {
+    fontFamily: ff.display, fontStyle: "normal", fontWeight: 600,
+    fontSize: 16, color: pal.darkBrown,
+  },
   tabBar: {
     display: "flex", gap: 0, borderBottom: `1px solid ${pal.rule}`,
     marginBottom: 40, overflowX: "auto", WebkitOverflowScrolling: "touch",
   },
   tabBtn: {
-    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase",
-    color: pal.lightBrown, background: "none", border: "none",
+    fontFamily: ff.display, fontSize: 15, letterSpacing: "0.03em", textTransform: "none",
+    fontWeight: 500, color: pal.lightBrown, background: "none", border: "none",
     borderBottom: "2px solid transparent", padding: "12px 20px", cursor: "pointer",
     whiteSpace: "nowrap", flexShrink: 0, marginBottom: -1,
     transition: "color 0.2s ease-in-out, border-color 0.2s ease-in-out, background-color 0.2s ease-in-out",
   },
   tabBtnActive: {
-    color: pal.darkBrown, borderBottom: `2px solid ${pal.accentLight}`, fontWeight: 500,
+    color: pal.darkBrown, borderBottom: `2px solid ${pal.accentLight}`, fontWeight: 600,
   },
   tabBtnCosmosActive: {
-    color: "#1A1428", borderBottom: "2px solid #9B8AB8", fontWeight: 500,
+    color: "#1A2430", borderBottom: "2px solid #6B8FA3", fontWeight: 600,
   },
   tabPanel: {
     minHeight: 320,
-    animation: "tab-panel-in 0.28s ease",
+    animation: "tab-panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
   },
   secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 28, marginTop: 72 },
   secHeadFirst: { marginTop: 0 },
-  secTitle: { fontFamily: ff.display, fontSize: 24, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1.05 },
-  secStamp: { fontFamily: ff.display, fontSize: 14, color: pal.navy, lineHeight: 1, flexShrink: 0 },
+  secTitle: { fontFamily: ff.display, fontSize: 27, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1.05 },
+  secStamp: { fontFamily: ff.display, fontSize: 15, color: pal.navy, lineHeight: 1, flexShrink: 0 },
   secRule: { flex: 1, height: 1, background: pal.rule, opacity: 0.45, border: "none" },
   profileStatsCol: { display: "flex", flexDirection: "column" },
   profileRightCol: { display: "flex", flexDirection: "column", gap: 16, minWidth: 0 },
   profileAsideLabel: {
-    fontFamily: ff.display, fontSize: 15, fontWeight: 600, color: pal.darkBrown,
+    fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown,
     margin: "0 0 12px", letterSpacing: "0.02em",
   },
   statCard: {
@@ -302,16 +308,16 @@ const s = {
     display: "block", alignSelf: "center", marginTop: 2, marginBottom: 0,
     filter: "drop-shadow(0 4px 12px rgba(44,26,14,0.2))",
   },
-  statNum: { fontFamily: ff.display, fontSize: 28, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
-  statLabel: { fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
-  statNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.inkMuted, marginTop: 3, lineHeight: 1.4 },
+  statNum: { fontFamily: ff.display, fontSize: 30, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
+  statLabel: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
+  statNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13, color: pal.inkMuted, marginTop: 3, lineHeight: 1.4 },
   specimenCard: {
     background: pal.parchment, border: `1px solid ${pal.rule}`,
     padding: "18px 22px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 24px",
   },
-  fieldLabel: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 3 },
-  fieldValue: { fontFamily: ff.display, fontSize: 17, color: pal.darkBrown, fontWeight: 600, margin: 0, lineHeight: 1.3 },
-  fieldSub: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13, color: pal.inkMuted, lineHeight: 1.35, marginTop: 2 },
+  fieldLabel: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 3 },
+  fieldValue: { fontFamily: ff.display, fontSize: 18, color: pal.darkBrown, fontWeight: 600, margin: 0, lineHeight: 1.3 },
+  fieldSub: { fontFamily: ff.body, fontStyle: "italic", fontSize: 14, color: pal.inkMuted, lineHeight: 1.35, marginTop: 2 },
   fieldBlock: { marginBottom: 0 },
   galleryPreview: {
     display: "block", width: "100%", textAlign: "left", cursor: "pointer",
@@ -319,7 +325,7 @@ const s = {
     transition: "border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
   },
   galleryPreviewLabel: {
-    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase",
     color: pal.lightBrown, margin: "0 0 10px",
   },
   galleryPreviewGrid: {
@@ -327,14 +333,14 @@ const s = {
   },
   galleryPreviewImg: { width: "100%", aspectRatio: "1", objectFit: "cover", display: "block" },
   galleryPreviewLink: {
-    fontFamily: ff.body, fontSize: 13, fontStyle: "italic", color: pal.midBrown,
+    fontFamily: ff.body, fontSize: 14, fontStyle: "italic", color: pal.midBrown,
     display: "block", marginTop: 10,
   },
   activitiesGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
   activitiesCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "22px 26px" },
-  activitiesCardTitle: { fontFamily: ff.display, fontSize: 18, fontWeight: 600, color: pal.darkBrown, margin: "0 0 14px" },
+  activitiesCardTitle: { fontFamily: ff.display, fontSize: 19, fontWeight: 600, color: pal.darkBrown, margin: "0 0 14px" },
   activityItem: {
-    fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.15,
+    fontFamily: ff.body, fontSize: 15.5, color: pal.inkMuted, lineHeight: 1.15,
     padding: "8px 0", borderBottom: `1px solid rgba(201,169,122,0.2)`,
     display: "flex", alignItems: "center", gap: 10,
   },
@@ -342,9 +348,9 @@ const s = {
   dislikeDot: { width: 5, height: 5, background: pal.dislikeRed, flexShrink: 0 },
   factsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 },
   factCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "16px 20px" },
-  factLabel: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 4 },
-  factValue: { fontFamily: ff.display, fontSize: 17, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
-  factDetail: { fontFamily: ff.body, fontSize: 14, color: pal.inkMuted, lineHeight: 1.75, margin: 0 },
+  factLabel: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 4 },
+  factValue: { fontFamily: ff.display, fontSize: 18, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
+  factDetail: { fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.75, margin: 0 },
   tricksGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 },
   tricksGridTwoCol: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 },
   repertoireRow: {
@@ -365,42 +371,42 @@ const s = {
     transition: "opacity 0.2s ease",
   },
   playSequenceCaption: {
-    fontFamily: ff.body, fontSize: 12, color: pal.lightBrown, fontStyle: "italic",
+    fontFamily: ff.body, fontSize: 13, color: pal.lightBrown, fontStyle: "italic",
     padding: "8px 10px", margin: 0, textAlign: "center", lineHeight: 1.5,
   },
   playSequenceLabel: {
-    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase",
     color: pal.accentLight, padding: "10px 10px 0", margin: 0, textAlign: "center",
   },
   trickCard: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "13px 16px" },
-  trickNum: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.14em", color: pal.accentLight, textTransform: "uppercase", marginBottom: 3 },
-  trickName: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, margin: 0 },
-  trickNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 12.5, color: pal.lightBrown, margin: "3px 0 0" },
+  trickNum: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", color: pal.accentLight, textTransform: "uppercase", marginBottom: 3 },
+  trickName: { fontFamily: ff.display, fontSize: 17, fontWeight: 600, color: pal.darkBrown, margin: 0 },
+  trickNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13.5, color: pal.lightBrown, margin: "3px 0 0" },
   tickBanner: {
     background: pal.tickRedLight,
     border: `1px solid ${pal.tickBorder}`,
     borderLeft: `3px solid ${pal.tickRed}`,
     padding: "18px 24px", marginBottom: 20,
   },
-  tickBannerTitle: { fontFamily: ff.display, fontSize: 16, fontWeight: 700, color: pal.tickRed, margin: "0 0 6px" },
-  tickBannerText: { fontFamily: ff.body, fontSize: 14, color: "#5C1A1A", lineHeight: 1.7, margin: 0 },
+  tickBannerTitle: { fontFamily: ff.display, fontSize: 17, fontWeight: 700, color: pal.tickRed, margin: "0 0 6px" },
+  tickBannerText: { fontFamily: ff.body, fontSize: 15, color: "#5C1A1A", lineHeight: 1.7, margin: 0 },
   logForm: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "24px 28px", marginBottom: 20 },
-  logFormTitle: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, marginBottom: 16 },
+  logFormTitle: { fontFamily: ff.display, fontSize: 17, fontWeight: 600, color: pal.darkBrown, marginBottom: 16 },
   formRow: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 },
   formGroup: { display: "flex", flexDirection: "column", gap: 4 },
-  lbl: { fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: pal.lightBrown },
-  inp: { fontFamily: ff.body, fontSize: 14, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0 },
-  sel: { fontFamily: ff.body, fontSize: 14, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0, appearance: "none", cursor: "pointer" },
-  ta: { fontFamily: ff.body, fontSize: 14, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0, resize: "vertical", minHeight: 60 },
-  addBtn: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", background: pal.masthead, color: pal.mastheadText, border: "none", padding: "9px 22px", cursor: "pointer", marginTop: 8 },
-  table: { width: "100%", borderCollapse: "collapse", fontFamily: ff.body, fontSize: 14, background: pal.white, border: `1px solid ${pal.rule}` },
-  th: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: pal.lightBrown, borderBottom: `1px solid ${pal.rule}`, padding: "10px 14px", textAlign: "left", background: pal.parchment },
+  lbl: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.lightBrown },
+  inp: { fontFamily: ff.body, fontSize: 15, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0 },
+  sel: { fontFamily: ff.body, fontSize: 15, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0, appearance: "none", cursor: "pointer" },
+  ta: { fontFamily: ff.body, fontSize: 15, background: pal.cream, border: `1px solid ${pal.rule}`, color: pal.ink, padding: "7px 10px", outline: "none", borderRadius: 0, resize: "vertical", minHeight: 60 },
+  addBtn: { fontFamily: ff.meta, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", background: pal.masthead, color: pal.mastheadText, border: "none", padding: "9px 22px", cursor: "pointer", marginTop: 8 },
+  table: { width: "100%", borderCollapse: "collapse", fontFamily: ff.body, fontSize: 15, background: pal.white, border: `1px solid ${pal.rule}` },
+  th: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.lightBrown, borderBottom: `1px solid ${pal.rule}`, padding: "10px 14px", textAlign: "left", background: pal.parchment },
   td: { padding: "10px 14px", color: pal.inkMuted, borderBottom: `1px solid rgba(201,169,122,0.25)`, verticalAlign: "top" },
-  empty: { fontFamily: ff.body, fontStyle: "italic", fontSize: 14, color: pal.lightBrown, padding: "20px 14px", background: pal.white, border: `1px solid ${pal.rule}` },
+  empty: { fontFamily: ff.body, fontStyle: "italic", fontSize: 15, color: pal.lightBrown, padding: "20px 14px", background: pal.white, border: `1px solid ${pal.rule}` },
   logStatRow: { display: "flex", gap: 14, marginBottom: 20 },
   logStatBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 18px", minWidth: 100 },
-  logStatNum: { fontFamily: ff.display, fontSize: 26, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
-  logStatLabel: { fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.13em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
+  logStatNum: { fontFamily: ff.display, fontSize: 28, fontWeight: 700, color: pal.darkBrown, lineHeight: 1 },
+  logStatLabel: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 4 },
   photoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 18 },
   photoCard: { background: pal.white, border: `1px solid ${pal.rule}`, overflow: "hidden", margin: 0, cursor: "pointer" },
   photoFrame: { width: "100%", aspectRatio: "1", background: pal.parchment, position: "relative", overflow: "hidden" },
@@ -421,7 +427,7 @@ const s = {
   },
   lightboxClose: {
     position: "absolute", top: 20, right: 24,
-    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase",
     color: pal.mastheadMuted, background: "none", border: "none", cursor: "pointer",
   },
   lightboxArrow: {
@@ -463,26 +469,26 @@ const s = {
   },
   adventureGroups: { display: "flex", flexDirection: "column", gap: 12 },
   adventureGroupLabel: {
-    fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase",
     color: pal.lightBrown, margin: "0 0 4px",
   },
   adventureList: { margin: 0, paddingLeft: 18, listStyle: "disc" },
   adventureItem: {
-    fontFamily: ff.body, fontSize: 14.5, color: pal.inkMuted, lineHeight: 1.35, padding: "3px 0",
+    fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.35, padding: "3px 0",
   },
   adventureItemDetail: { color: pal.lightBrown, fontStyle: "italic" },
   adventureCaption: {
-    fontFamily: ff.body, fontStyle: "italic", fontSize: 11, color: pal.lightBrown,
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.lightBrown,
     textAlign: "center", lineHeight: 1.3, margin: "8px 0 0", flexShrink: 0,
   },
   ageGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 0 },
   ageBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "18px 14px", textAlign: "center" },
-  ageNum: { fontFamily: ff.display, fontSize: 28, fontWeight: 700, color: pal.darkBrown, lineHeight: 1, fontVariantNumeric: "tabular-nums" },
-  ageLabel: { fontFamily: ff.meta, fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 6 },
-  ageNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13.5, color: pal.inkMuted, marginTop: 14, lineHeight: 1.7 },
+  ageNum: { fontFamily: ff.display, fontSize: 30, fontWeight: 700, color: pal.darkBrown, lineHeight: 1, fontVariantNumeric: "tabular-nums" },
+  ageLabel: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.lightBrown, marginTop: 6 },
+  ageNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 14.5, color: pal.inkMuted, marginTop: 14, lineHeight: 1.7 },
   proseCard: {
     background: pal.white, border: `1px solid ${pal.rule}`, padding: "26px 30px",
-    fontFamily: ff.body, fontSize: 15.5, color: pal.inkMuted, lineHeight: 1.9,
+    fontFamily: ff.body, fontSize: 16, color: pal.inkMuted, lineHeight: 1.9,
   },
   proseParagraph: { margin: "0 0 16px" },
   namingCard: {
@@ -496,29 +502,29 @@ const s = {
     filter: "drop-shadow(0 4px 14px rgba(44,26,14,0.2))",
   },
   namingCaption: {
-    fontFamily: ff.body, fontStyle: "italic", fontSize: 11, color: pal.lightBrown,
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.lightBrown,
     textAlign: "center", margin: "8px 0 0",
   },
   aspirationGroupLabel: {
-    fontFamily: ff.display, fontSize: 14, fontWeight: 600, color: pal.midBrown,
+    fontFamily: ff.display, fontSize: 15, fontWeight: 600, color: pal.midBrown,
     margin: "0 0 8px", letterSpacing: "0.02em",
   },
   aspirationGroupBlock: { marginBottom: 18 },
   photoCaption: {
-    fontSize: 12, color: pal.midBrown, fontStyle: "normal",
+    fontSize: 13, color: pal.midBrown, fontStyle: "normal",
     padding: 0, margin: 0, textAlign: "center",
   },
   gallerySortRow: {
     display: "flex", justifyContent: "flex-end", marginBottom: 18, marginTop: 12,
   },
   gallerySortBtn: {
-    fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase",
+    fontFamily: ff.meta, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase",
     color: pal.midBrown, background: pal.white, border: `1px solid ${pal.rule}`,
     padding: "8px 14px", cursor: "pointer",
   },
   aspirationItem: { marginBottom: 20 },
-  aspirationTitle: { fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
-  aspirationDetail: { fontFamily: ff.body, fontSize: 14.5, color: pal.inkMuted, lineHeight: 1.75, margin: 0 },
+  aspirationTitle: { fontFamily: ff.display, fontSize: 17, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
+  aspirationDetail: { fontFamily: ff.body, fontSize: 15.5, color: pal.inkMuted, lineHeight: 1.75, margin: 0 },
   adventureMap: { height: 380, width: "100%", border: `1px solid ${pal.rule}`, marginTop: 24, zIndex: 0 },
   historyBlock: { marginBottom: 28 },
 };
@@ -543,7 +549,10 @@ function photoSrc(file, variant = "full") {
 
 function SectionHead({ title, first = false }) {
   return (
-    <div style={{ ...s.secHead, ...(first ? s.secHeadFirst : {}) }} className={`sec-head${first ? " sec-head-first" : ""}`}>
+    <div
+      style={{ ...s.secHead, ...(first ? s.secHeadFirst : {}) }}
+      className={`sec-head archive-settle${first ? " sec-head-first" : ""}`}
+    >
       <span style={s.secStamp} aria-hidden="true">✦</span>
       <h2 style={s.secTitle}>{title}</h2>
       <hr style={s.secRule} />
@@ -663,7 +672,7 @@ function AnimatedCount({ value, suffix = "", style }) {
 
 function VitalStatsColumn({ onTabChange, totalTicks }) {
   return (
-    <aside className="profile-stats-col" style={s.profileStatsCol}>
+    <aside className="profile-stats-col archive-settle" style={s.profileStatsCol}>
       <SectionHead title="Vital Statistics" first />
       <div style={s.statCard} className="stat-card">
         <div style={s.statAsideStack}>
@@ -744,7 +753,7 @@ function LiveAgeCounter() {
 
 function Aspirations() {
   return (
-    <div className="aspirations-board">
+    <div className="aspirations-board archive-settle">
       {ASPIRATION_GROUPS.map((group) => (
         <section key={group.group} className="aspiration-group">
           <h3 className="aspiration-group__title">{group.group}</h3>
@@ -855,7 +864,7 @@ function PlaySequence() {
 
 function RepertoireBlock() {
   return (
-    <div style={s.repertoireRow} className="repertoire-row">
+    <div style={s.repertoireRow} className="repertoire-row archive-settle">
       <div style={s.repertoireTricks} className="repertoire-tricks">
         <div style={s.tricksGridTwoCol} className="tricks-grid-two-col">
           {ALL_TRICKS.map((trick, i) => (
@@ -1232,6 +1241,7 @@ function TickTracker({ incidents, setIncidents }) {
 }
 
 export default function App() {
+  const [showCover, setShowCover] = useState(() => !wasCoverDismissed());
   const [tab, setTab] = useState("profile");
   const [tickIncidents, setTickIncidents] = useState(INITIAL_TICKS);
   const totalTicks = tickIncidents.reduce((sum, i) => sum + (parseInt(i.count, 10) || 0), 0);
@@ -1247,9 +1257,76 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function enterArchive() {
+    setShowCover(false);
+    setTab("profile");
+    clearFootprints();
+    setFootprintMode(TAB_FOOTPRINT_MODES.profile ?? "default");
+    window.scrollTo({ top: 0, behavior: "auto" });
+    requestAnimationFrame(() => {
+      const title = document.querySelector(".masthead-title");
+      if (title instanceof HTMLElement) title.focus({ preventScroll: true });
+    });
+  }
+
+  function openCover() {
+    clearFootprints();
+    window.scrollTo({ top: 0, behavior: "auto" });
+    setShowCover(true);
+  }
+
   useEffect(() => {
+    if (showCover) return undefined;
     setFootprintMode(TAB_FOOTPRINT_MODES[tab] ?? "default");
-  }, [tab]);
+  }, [tab, showCover]);
+
+  useEffect(() => {
+    if (showCover) return undefined;
+    const nodes = Array.from(document.querySelectorAll(".archive-settle"));
+    if (!nodes.length) return undefined;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      nodes.forEach((node) => {
+        node.classList.remove("settle-pending");
+        node.classList.add("is-settled");
+      });
+      return undefined;
+    }
+
+    nodes.forEach((node) => {
+      node.classList.remove("is-settled", "settle-pending");
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.remove("settle-pending");
+          entry.target.classList.add("is-settled");
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
+    );
+
+    const fold = window.innerHeight * 0.94;
+    nodes.forEach((node) => {
+      const top = node.getBoundingClientRect().top;
+      if (top < fold) {
+        node.classList.add("is-settled");
+      } else {
+        node.classList.add("settle-pending");
+        observer.observe(node);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [tab, showCover]);
+
+  if (showCover) {
+    return <CoverGate onEnter={enterArchive} />;
+  }
 
   const scene = getTabScene(tab);
 
@@ -1258,10 +1335,14 @@ export default function App() {
       <link rel="stylesheet" href={FONT_LINK} />
       <style>{`
         * { box-sizing: border-box; }
-        input, select, textarea, button { font-size: 16px !important; }
+        input, select, textarea, button:not(.masthead-title) { font-size: 16px !important; }
         @keyframes tab-panel-in {
-          from { opacity: 0; transform: translateY(8px); }
+          from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-panel,
+        [role="tabpanel"] {
+          animation: tab-panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .masthead-meta {
           display: flex;
@@ -1276,6 +1357,16 @@ export default function App() {
         }
         .masthead-meta-zodiac:hover { color: ${pal.accentLight}; }
         .masthead-cutout:hover { transform: translateY(-3px) rotate(-2deg); }
+        .masthead-title:focus { outline: none; }
+        .masthead-title:focus-visible {
+          outline: 2px solid ${pal.mastheadMuted};
+          outline-offset: 4px;
+        }
+        .masthead-title:hover { color: ${pal.accentLight}; }
+        .masthead-title {
+          font-size: 54px !important;
+          line-height: 0.94 !important;
+        }
         .tab-btn:hover { color: ${pal.darkBrown}; }
         .tab-btn-profile.is-active {
           border-bottom-color: ${pal.navy} !important;
@@ -1288,9 +1379,9 @@ export default function App() {
           background: rgba(201, 137, 58, 0.12);
         }
         .tab-btn-cosmos.is-active {
-          border-bottom-color: #9B8AB8 !important;
-          color: #1A1428 !important;
-          background: rgba(155, 138, 184, 0.14);
+          border-bottom-color: #6B8FA3 !important;
+          color: #1A2430 !important;
+          background: rgba(107, 143, 163, 0.12);
         }
         .tab-btn-breed.is-active {
           border-bottom-color: #8B6B45 !important;
@@ -1427,7 +1518,17 @@ export default function App() {
               </div>
               <div>
                 <p style={s.siteLabel}>Specimen Record · Canine Division</p>
-                <h1 style={s.mastheadTitle} className="masthead-title">Zero</h1>
+                <h1 style={{ margin: 0, lineHeight: 0.94 }}>
+                  <button
+                    type="button"
+                    style={s.mastheadTitle}
+                    className="masthead-title"
+                    onClick={openCover}
+                    aria-label="Return to cover portrait"
+                  >
+                    Zero
+                  </button>
+                </h1>
                 <p style={s.mastheadSub}>Samoyed · San Francisco, CA</p>
               </div>
             </div>
@@ -1619,7 +1720,7 @@ export default function App() {
           {tab === "gallery" && (
             <div style={s.tabPanel} role="tabpanel" id="panel-gallery" aria-labelledby="tab-gallery">
               <SectionHead title="Photographic Record" first />
-              <div className="gallery-archive-shell">
+              <div className="gallery-archive-shell archive-settle">
                 <PhotoGallery />
               </div>
             </div>

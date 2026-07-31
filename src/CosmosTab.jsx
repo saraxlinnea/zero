@@ -6,17 +6,17 @@ import { PAW_LINES } from "./cosmos.js";
 const BIRTHDAY = new Date("2024-09-16T00:00:00");
 
 const cosmosPal = {
-  ink: "#1A1428",
-  inkMuted: "#4A3F5C",
-  silver: "#7A6B94",
+  ink: "#1A2430",
+  inkMuted: "#4A5C6A",
+  silver: "#6B8FA3",
   gold: "#C9A97A",
-  lavender: "#E8E0F5",
-  lavenderMid: "#EDE8F4",
-  lavenderLight: "#F7F3FC",
-  border: "#C9B8E0",
-  borderSoft: "rgba(201, 184, 224, 0.55)",
-  glow: "rgba(155, 138, 184, 0.18)",
-  night: "#2A2340",
+  lavender: "#E4EAF0",
+  lavenderMid: "#ECF0F4",
+  lavenderLight: "#F3F5F7",
+  border: "#B8C6D4",
+  borderSoft: "rgba(107, 143, 163, 0.45)",
+  glow: "rgba(107, 143, 163, 0.14)",
+  night: "#223040",
   moonLit: "#F5ECD7",
 };
 

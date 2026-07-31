@@ -33,6 +33,10 @@ export default function AmbientLayer() {
       <div className="layer-ambient__flora layer-ambient__flora--br" />
       <div className="layer-ambient__flora layer-ambient__flora--contour" />
       <div className="layer-ambient__flora layer-ambient__flora--extra" />
+      <div className="layer-ambient__flora layer-ambient__flora--paw" />
+      <div className="layer-ambient__flora layer-ambient__flora--blot" />
+      <div className="layer-ambient__flora layer-ambient__flora--mark" />
+      <div className="layer-ambient__flora layer-ambient__flora--leaf" />
     </div>
   );
 }
