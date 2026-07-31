@@ -6,7 +6,7 @@ import { setFootprintMode, clearFootprints } from "./footprint-system.js";
 import { TAB_FOOTPRINT_MODES } from "./footprint-modes.js";
 import LayerShell from "./cinematic/LayerShell.jsx";
 import { getTabScene } from "./tabScenes.js";
-import CoverGate, { wasCoverDismissed } from "./CoverGate.jsx";
+import CoverGate from "./CoverGate.jsx";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -1241,7 +1241,7 @@ function TickTracker({ incidents, setIncidents }) {
 }
 
 export default function App() {
-  const [showCover, setShowCover] = useState(() => !wasCoverDismissed());
+  const [showCover, setShowCover] = useState(true);
   const [tab, setTab] = useState("profile");
   const [tickIncidents, setTickIncidents] = useState(INITIAL_TICKS);
   const totalTicks = tickIncidents.reduce((sum, i) => sum + (parseInt(i.count, 10) || 0), 0);

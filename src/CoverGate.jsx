@@ -1,29 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GALLERY_PHOTOS } from "./photos.js";
 
-const COVER_STORAGE_KEY = "zero-cover-dismissed";
 const COVER_START = "IMG_3351.jpg"; // third June 15, 2026 photo
 const COVER_COUNT = 20;
 
 /** Hold each photo, then crossfade. */
 const HOLD_MS = 2400;
 const FADE_MS = 900;
-
-export function wasCoverDismissed() {
-  try {
-    return sessionStorage.getItem(COVER_STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-export function dismissCoverSession() {
-  try {
-    sessionStorage.setItem(COVER_STORAGE_KEY, "1");
-  } catch {
-    /* private mode / blocked storage */
-  }
-}
 
 function photoSrc(file) {
   return `${import.meta.env.BASE_URL}photos/${file}`;
@@ -46,8 +29,9 @@ function buildCoverPlaylist() {
 }
 
 /**
- * Session cover: Brand → Promise → Proof → Action.
+ * Landing cover: Brand → Promise → Proof → Action.
  * Dual-buffer crossfade; chrome stays above the reel at all times.
+ * Every fresh page load starts here; Enter opens the archive in-session.
  */
 export default function CoverGate({ onEnter }) {
   const playlist = useMemo(() => buildCoverPlaylist(), []);
@@ -123,7 +107,6 @@ export default function CoverGate({ onEnter }) {
   }, [index, playlist]);
 
   function enter() {
-    dismissCoverSession();
     onEnter();
   }
 
