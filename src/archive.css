@@ -8,8 +8,8 @@
   --archive-sepia: #6b4226;
   --archive-muted: #a67c52;
   --archive-rule: #c9a97a;
-  --archive-fog: #f7f6f3;
-  --archive-cream: #f7f6f3;
+  --archive-fog: #f2f5f7;
+  --archive-cream: #f2f5f7;
   --archive-paper: #fffdf8;
   --archive-parchment: #ede9e0;
   --archive-shadow: rgba(26, 26, 24, 0.04);
@@ -99,8 +99,9 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.45'/%3E%3C/svg%3E");
+  /* Quiet paper tooth; was mottled (opacity 0.35 / baseFrequency 0.9) */
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.28'/%3E%3C/svg%3E");
   mix-blend-mode: multiply;
 }
 
@@ -134,6 +135,120 @@
     inset 0 1px 0 rgba(255, 253, 248, 0.98),
     inset 0 -1px 0 rgba(201, 169, 122, 0.1),
     0 4px 14px var(--archive-shadow-lift);
+}
+
+/* ── Rubber-seal SPECIMEN stamp (one-shot press on enter-view) ── */
+
+.specimen-stamp-host {
+  position: relative;
+}
+
+.specimen-stamp {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 3;
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-10px) scale(1.18) rotate(-11deg);
+}
+
+.specimen-card.specimen-stamp-host {
+  padding-right: 88px !important;
+}
+
+.tab-panel.specimen-stamp-host {
+  position: relative;
+  padding-top: 8px;
+}
+
+.specimen-stamp__ring {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(107, 66, 38, 0.55);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 253, 248, 0.12);
+}
+
+.specimen-stamp__label {
+  font-family: var(--ff-meta);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(107, 66, 38, 0.72);
+  line-height: 1.15;
+  text-align: center;
+  padding: 0 6px;
+}
+
+.specimen-stamp.is-pressed {
+  animation: specimen-stamp-press 0.55s var(--ease-out-soft) both;
+}
+
+@keyframes specimen-stamp-press {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(1.18) rotate(-11deg);
+    filter: blur(0.4px);
+  }
+  55% {
+    opacity: 0.95;
+    transform: translateY(1px) scale(0.94) rotate(-9deg);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0.78;
+    transform: translateY(0) scale(1) rotate(-10deg);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .specimen-stamp.is-pressed {
+    animation: none;
+    opacity: 0.78;
+    transform: translateY(0) scale(1) rotate(-10deg);
+    filter: none;
+  }
+}
+
+/* ── Ledger ink-fill reveal (one-shot) ── */
+
+.ink-ledger {
+  display: inline-block;
+}
+
+.ink-ledger__glyph {
+  display: inline-block;
+  clip-path: inset(0 100% 0 0);
+  color: rgba(107, 66, 38, 0.55);
+}
+
+.ink-ledger.is-inked .ink-ledger__glyph {
+  clip-path: inset(0 0 0 0);
+  color: inherit;
+  transition:
+    clip-path 0.75s var(--ease-out-soft),
+    color 0.55s var(--ease-out-soft) 0.12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-ledger__glyph {
+    clip-path: none;
+    color: inherit;
+  }
+
+  .ink-ledger.is-inked .ink-ledger__glyph {
+    transition: none;
+  }
 }
 
 /* ── Section settle (one quiet entrance; paws untouched) ── */
@@ -210,26 +325,39 @@
 }
 
 .masthead-cutout {
-  animation: masthead-cutout-land 0.75s var(--ease-out-soft) both;
+  transform-origin: 50% 85%;
+  animation: masthead-cutout-land 1.35s var(--ease-out-soft) both;
 }
 
+/* Land, then a one-shot 1–2° fluff sway that damps out */
 @keyframes masthead-cutout-land {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(14px) rotate(0deg);
   }
-  to {
+  48% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) rotate(0deg);
+  }
+  64% {
+    transform: translateY(0) rotate(1.5deg);
+  }
+  80% {
+    transform: translateY(0) rotate(-0.85deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
   }
 }
 
+/* Flora corner art retired in favor of tiled wallpaper; keep selectors inert. */
 .layer-ambient__flora {
-  transition: opacity 0.7s var(--ease-out-soft);
+  display: none !important;
 }
 
 .layer-motion__orb,
-.layer-motion__stamp {
+.layer-motion__sprig {
   transition: opacity 0.65s var(--ease-out-soft);
 }
 
@@ -303,7 +431,7 @@
 .layer-ambient__flora {
   position: absolute;
   pointer-events: none;
-  opacity: 0.14;
+  opacity: 0.16;
   background-repeat: no-repeat;
   background-size: contain;
   transition: opacity 0.55s var(--ease-archive);
@@ -346,63 +474,88 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 300' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M220 288 C173 248 139 207 111 163 C83 120 61 74 47 12'/%3E%3Cpath d='M121 178 L170 158 M105 151 L153 125 M89 122 L130 91 M75 92 L109 60 M62 61 L83 34 M136 201 L177 191 M151 221 L193 216 M166 242 L207 241'/%3E%3Cpath d='M170 158 C158 151 145 151 135 159 C147 166 160 166 170 158 Z M153 125 C140 119 128 121 119 130 C132 135 145 133 153 125 Z M130 91 C117 87 106 91 99 100 C112 103 123 100 130 91 Z M109 60 C97 58 87 63 82 73 C94 74 103 70 109 60 Z M177 191 C166 184 153 185 144 193 C155 199 168 198 177 191 Z M193 216 C181 208 167 210 158 219 C171 225 184 223 193 216 Z M207 241 C194 233 180 235 171 245 C184 251 198 248 207 241 Z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-.layer-ambient__flora--contour {
-  top: 42%;
-  left: 50%;
-  width: min(520px, 70vw);
-  height: min(180px, 22vh);
-  transform: translateX(-50%);
-  opacity: 0.07;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 160' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='0.9'%3E%3Cellipse cx='260' cy='80' rx='200' ry='55'/%3E%3Cellipse cx='260' cy='80' rx='150' ry='38'/%3E%3Cellipse cx='260' cy='80' rx='95' ry='22'/%3E%3Cellipse cx='260' cy='80' rx='40' ry='9'/%3E%3Cpath d='M60 40 C120 20 200 15 260 18 C340 22 420 40 470 70' opacity='0.5'/%3E%3Cpath d='M50 120 C130 140 220 145 300 138 C380 130 450 110 490 85' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E");
-  background-position: center;
-}
-
 .layer-ambient__flora--extra {
   display: none;
 }
 
-/* Tiny mid-field archival doodads */
-.layer-ambient__flora--paw {
+/* Mid-field scatter: little flowers + leaves (replaces spiral contour) */
+.layer-ambient__flora--scatter {
   display: block;
-  top: 28%;
-  right: 8%;
-  width: min(72px, 9vw);
-  height: min(72px, 9vw);
-  opacity: 0.07;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Cg fill='%236B4226'%3E%3Cellipse cx='20' cy='18' rx='7' ry='9' transform='rotate(-18 20 18)'/%3E%3Cellipse cx='32' cy='12' rx='7' ry='9'/%3E%3Cellipse cx='44' cy='18' rx='7' ry='9' transform='rotate(18 44 18)'/%3E%3Cellipse cx='14' cy='30' rx='6' ry='8' transform='rotate(-32 14 30)'/%3E%3Cellipse cx='32' cy='40' rx='14' ry='12'/%3E%3C/g%3E%3C/svg%3E");
-  transform: rotate(-12deg);
+  top: 38%;
+  left: 50%;
+  width: min(480px, 68vw);
+  height: min(160px, 20vh);
+  transform: translateX(-50%);
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 140' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.15' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M40 90 C55 70 70 55 88 40'/%3E%3Cellipse cx='88' cy='40' rx='10' ry='5' transform='rotate(-36 88 40)'/%3E%3Ccircle cx='120' cy='58' r='5'/%3E%3Ccircle cx='112' cy='50' r='3.5'/%3E%3Ccircle cx='128' cy='50' r='3.5'/%3E%3Ccircle cx='120' cy='66' r='3.5'/%3E%3Cpath d='M160 100 C175 78 188 60 210 42'/%3E%3Cellipse cx='210' cy='42' rx='11' ry='5.5' transform='rotate(24 210 42)'/%3E%3Cpath d='M250 88 C268 72 286 58 308 48'/%3E%3Ccircle cx='330' cy='42' r='4.5'/%3E%3Ccircle cx='322' cy='36' r='3'/%3E%3Ccircle cx='338' cy='36' r='3'/%3E%3Ccircle cx='330' cy='50' r='3'/%3E%3Cpath d='M360 105 C378 88 396 70 420 55'/%3E%3Cellipse cx='420' cy='55' rx='10' ry='5' transform='rotate(-20 420 55)'/%3E%3Cpath d='M70 110 C90 100 110 98 130 102' opacity='0.55'/%3E%3Cpath d='M280 115 C310 108 340 110 370 118' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: center;
 }
 
-.layer-ambient__flora--blot {
+/* Tiny botanical doodads */
+.layer-ambient__flora--flower-a {
   display: block;
-  bottom: 22%;
-  left: 7%;
-  width: min(90px, 11vw);
+  top: 26%;
+  right: 7%;
+  width: min(70px, 9vw);
   height: min(70px, 9vw);
-  opacity: 0.06;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 70' fill='none'%3E%3Cpath d='M18 38 C12 28 16 16 28 14 C38 12 44 20 52 18 C62 16 72 22 74 34 C76 46 68 56 54 58 C42 60 36 52 28 54 C20 56 22 44 18 38 Z' fill='%236B4226' opacity='0.55'/%3E%3Ccircle cx='62' cy='22' r='4' fill='%236B4226' opacity='0.35'/%3E%3Ccircle cx='24' cy='48' r='2.5' fill='%236B4226' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.3'%3E%3Ccircle cx='32' cy='22' r='8'/%3E%3Ccircle cx='22' cy='30' r='7'/%3E%3Ccircle cx='42' cy='30' r='7'/%3E%3Ccircle cx='26' cy='40' r='7'/%3E%3Ccircle cx='38' cy='40' r='7'/%3E%3Ccircle cx='32' cy='32' r='4.5'/%3E%3Cpath d='M32 40 V56' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
   transform: rotate(8deg);
 }
 
-.layer-ambient__flora--mark {
+.layer-ambient__flora--flower-b {
   display: block;
-  top: 58%;
-  right: 14%;
-  width: min(56px, 7vw);
-  height: min(56px, 7vw);
+  bottom: 24%;
+  left: 6%;
+  width: min(64px, 8vw);
+  height: min(64px, 8vw);
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.25' stroke-linecap='round'%3E%3Ccircle cx='28' cy='20' r='6'/%3E%3Ccircle cx='18' cy='26' r='5.5'/%3E%3Ccircle cx='38' cy='26' r='5.5'/%3E%3Ccircle cx='22' cy='35' r='5.5'/%3E%3Ccircle cx='34' cy='35' r='5.5'/%3E%3Ccircle cx='28' cy='28' r='3.5'/%3E%3Cpath d='M28 36 V50'/%3E%3Cpath d='M28 44 C20 42 14 38 10 32 M28 44 C36 42 42 38 46 32'/%3E%3C/g%3E%3C/svg%3E");
+  transform: rotate(-14deg);
+}
+
+.layer-ambient__flora--flower-c {
+  display: block;
+  top: 62%;
+  right: 16%;
+  width: min(58px, 7.5vw);
+  height: min(58px, 7.5vw);
   opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.2'%3E%3Cpath d='M28 8 V48 M8 28 H48'/%3E%3Ccircle cx='28' cy='28' r='10'/%3E%3Cpath d='M28 4 V2 M28 54 V52 M4 28 H2 M54 28 H52' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 52' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.2'%3E%3Cellipse cx='26' cy='16' rx='5' ry='8'/%3E%3Cellipse cx='16' cy='24' rx='5' ry='8' transform='rotate(-50 16 24)'/%3E%3Cellipse cx='36' cy='24' rx='5' ry='8' transform='rotate(50 36 24)'/%3E%3Cellipse cx='20' cy='34' rx='5' ry='8' transform='rotate(-20 20 34)'/%3E%3Cellipse cx='32' cy='34' rx='5' ry='8' transform='rotate(20 32 34)'/%3E%3Ccircle cx='26' cy='26' r='3.5'/%3E%3C/g%3E%3C/svg%3E");
+  transform: rotate(18deg);
 }
 
 .layer-ambient__flora--leaf {
   display: block;
   top: 12%;
-  left: 18%;
+  left: 16%;
   width: min(64px, 8vw);
   height: min(80px, 10vw);
-  opacity: 0.07;
+  opacity: 0.1;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 80' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M32 72 C32 48 18 36 12 18 C28 22 40 34 32 72 Z'/%3E%3Cpath d='M32 72 C32 48 46 34 52 16 C38 22 32 40 32 72 Z'/%3E%3Cpath d='M32 72 V28'/%3E%3Cpath d='M32 44 C24 40 18 34 14 28 M32 52 C40 48 46 40 50 34'/%3E%3C/g%3E%3C/svg%3E");
   transform: rotate(-18deg);
+}
+
+.layer-ambient__flora--leaf-b {
+  display: block;
+  bottom: 14%;
+  right: 10%;
+  width: min(72px, 9vw);
+  height: min(56px, 7vw);
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 56' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 40 C28 36 42 24 52 10'/%3E%3Cellipse cx='52' cy='10' rx='12' ry='6' transform='rotate(-28 52 10)'/%3E%3Cpath d='M52 10 C46 18 40 26 36 36'/%3E%3Cpath d='M28 44 C44 40 58 32 70 22'/%3E%3Cellipse cx='70' cy='22' rx='10' ry='5' transform='rotate(18 70 22)'/%3E%3C/g%3E%3C/svg%3E");
+  transform: rotate(6deg);
+}
+
+.layer-ambient__flora--sprig {
+  display: block;
+  top: 48%;
+  left: 9%;
+  width: min(78px, 10vw);
+  height: min(96px, 12vw);
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 90' fill='none'%3E%3Cg stroke='%236B4226' stroke-width='1.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M35 84 V16'/%3E%3Cpath d='M35 68 C22 60 14 48 10 34 M35 54 C48 48 58 38 64 26 M35 40 C24 36 16 28 12 18'/%3E%3Cellipse cx='10' cy='34' rx='8' ry='4.5' transform='rotate(-30 10 34)'/%3E%3Cellipse cx='64' cy='26' rx='8' ry='4.5' transform='rotate(26 64 26)'/%3E%3Cellipse cx='12' cy='18' rx='6.5' ry='3.5' transform='rotate(-38 12 18)'/%3E%3Ccircle cx='35' cy='12' r='4'/%3E%3Ccircle cx='30' cy='8' r='2.8'/%3E%3Ccircle cx='40' cy='8' r='2.8'/%3E%3C/g%3E%3C/svg%3E");
+  transform: rotate(12deg);
 }
 
 /* Profile: ferns + pressed leaves (default flora) */
@@ -434,8 +587,8 @@
 .layer-ambient--character .layer-ambient__flora--bl {
   opacity: 0.11;
 }
-.layer-ambient--character .layer-ambient__flora--contour {
-  opacity: 0.06;
+.layer-ambient--character .layer-ambient__flora--scatter {
+  opacity: 0.1;
 }
 .layer-ambient--character .layer-ambient__flora--extra {
   display: block;
@@ -463,18 +616,17 @@
 .layer-ambient--cosmos .layer-ambient__flora--br {
   opacity: 0.08;
 }
-.layer-ambient--cosmos .layer-ambient__flora--contour {
-  opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 160' fill='none'%3E%3Cg stroke='%236B8FA3' stroke-width='0.9'%3E%3Cellipse cx='260' cy='80' rx='180' ry='48'/%3E%3Cellipse cx='260' cy='80' rx='120' ry='30'/%3E%3Cellipse cx='260' cy='80' rx='60' ry='14'/%3E%3Ccircle cx='100' cy='50' r='1.5'/%3E%3Ccircle cx='400' cy='45' r='1.8'/%3E%3Ccircle cx='160' cy='110' r='1.4'/%3E%3Ccircle cx='360' cy='115' r='1.6'/%3E%3C/g%3E%3C/svg%3E");
+.layer-ambient--cosmos .layer-ambient__flora--scatter {
+  opacity: 0.07;
 }
 .layer-ambient--cosmos .layer-ambient__flora--extra {
   display: block;
   top: 12%;
   right: 8%;
-  width: min(180px, 18vw);
-  height: min(180px, 22vh);
-  opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160' fill='none'%3E%3Cg stroke='%236B8FA3' stroke-width='1.2'%3E%3Ccircle cx='80' cy='80' r='28'/%3E%3Ccircle cx='80' cy='80' r='18' opacity='0.5'/%3E%3Cpath d='M80 40 V28 M80 132 V120 M40 80 H28 M132 80 H120 M52 52 L44 44 M108 108 L116 116 M108 52 L116 44 M52 108 L44 116'/%3E%3C/g%3E%3C/svg%3E");
+  width: min(140px, 16vw);
+  height: min(110px, 14vh);
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 100' fill='none'%3E%3Cg stroke='%236B8FA3' stroke-width='1.2' stroke-linecap='round'%3E%3Cpath d='M20 80 C40 60 55 42 70 24'/%3E%3Cellipse cx='70' cy='24' rx='10' ry='5' transform='rotate(-30 70 24)'/%3E%3Ccircle cx='100' cy='30' r='5'/%3E%3Ccircle cx='92' cy='24' r='3.5'/%3E%3Ccircle cx='108' cy='24' r='3.5'/%3E%3Ccircle cx='100' cy='38' r='3.5'/%3E%3Cpath d='M50 88 C70 78 90 72 115 70'/%3E%3Cellipse cx='115' cy='70' rx='9' ry='4.5' transform='rotate(12 115 70)'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Breed: pines + mountain contours */
@@ -492,8 +644,8 @@
   opacity: 0.08;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 300' fill='none'%3E%3Cg stroke='%235C3D1E' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 280 L70 140 L110 220 L160 80 L210 280'/%3E%3Cpath d='M30 280 H200'/%3E%3Cpath d='M90 280 V180 M70 280 L90 200 L110 280 M75 245 H105'/%3E%3Cpath d='M170 280 V160 M150 280 L170 180 L190 280 M155 240 H185'/%3E%3C/g%3E%3C/svg%3E");
 }
-.layer-ambient--breed .layer-ambient__flora--contour {
-  opacity: 0.06;
+.layer-ambient--breed .layer-ambient__flora--scatter {
+  opacity: 0.08;
 }
 .layer-ambient--breed .layer-ambient__flora--extra {
   display: block;
@@ -519,8 +671,8 @@
 .layer-ambient--gallery .layer-ambient__flora--br {
   opacity: 0.1;
 }
-.layer-ambient--gallery .layer-ambient__flora--contour {
-  opacity: 0.035;
+.layer-ambient--gallery .layer-ambient__flora--scatter {
+  opacity: 0.06;
 }
 .layer-ambient--gallery .layer-ambient__flora--extra {
   display: block;
@@ -547,8 +699,8 @@
 .layer-ambient--records .layer-ambient__flora--br {
   opacity: 0.09;
 }
-.layer-ambient--records .layer-ambient__flora--contour {
-  opacity: 0.07;
+.layer-ambient--records .layer-ambient__flora--scatter {
+  opacity: 0.09;
 }
 .layer-ambient--records .layer-ambient__flora--extra {
   display: block;
@@ -581,8 +733,8 @@
   background-position: right bottom;
 }
 
-.layer-ambient__flora--contour {
-  background-size: 72% auto;
+.layer-ambient__flora--scatter {
+  background-size: 78% auto;
 }
 
 .layer-ambient__flora--extra {
@@ -598,16 +750,18 @@
   .layer-ambient__flora--tr {
     width: min(110px, 28vw);
     height: min(150px, 22vh);
-    opacity: 0.06;
+    opacity: 0.08;
   }
   .layer-ambient__flora--bl,
   .layer-ambient__flora--br,
-  .layer-ambient__flora--contour,
+  .layer-ambient__flora--scatter,
   .layer-ambient__flora--extra,
-  .layer-ambient__flora--paw,
-  .layer-ambient__flora--blot,
-  .layer-ambient__flora--mark,
-  .layer-ambient__flora--leaf {
+  .layer-ambient__flora--flower-a,
+  .layer-ambient__flora--flower-b,
+  .layer-ambient__flora--flower-c,
+  .layer-ambient__flora--leaf,
+  .layer-ambient__flora--leaf-b,
+  .layer-ambient__flora--sprig {
     display: none;
   }
 }
@@ -644,11 +798,202 @@
 
 /* ── Aspirations ── */
 
-.aspirations-board {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr 0.85fr;
-  gap: 16px;
-  align-items: stretch;
+.aspiration-group {
+  overflow: visible;
+  position: relative;
+}
+
+.aspiration-group__title,
+.aspiration-group__items {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Folio tab page-turn ── */
+
+@keyframes folio-forward {
+  from {
+    opacity: 0;
+    transform: translateX(22px);
+    box-shadow: -18px 0 28px rgba(44, 26, 14, 0.12);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    box-shadow: 0 0 0 rgba(44, 26, 14, 0);
+  }
+}
+
+@keyframes folio-back {
+  from {
+    opacity: 0;
+    transform: translateX(-22px);
+    box-shadow: 18px 0 28px rgba(44, 26, 14, 0.12);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    box-shadow: 0 0 0 rgba(44, 26, 14, 0);
+  }
+}
+
+@keyframes folio-rule-draw {
+  from {
+    transform: scaleX(0.12);
+    opacity: 0.15;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 0.45;
+  }
+}
+
+.tab-panel.folio-forward {
+  animation: folio-forward 0.45s var(--ease-out-soft) both;
+}
+
+.tab-panel.folio-back {
+  animation: folio-back 0.45s var(--ease-out-soft) both;
+}
+
+.tab-panel.folio-forward hr,
+.tab-panel.folio-back hr {
+  transform-origin: left center;
+  animation: folio-rule-draw 0.48s var(--ease-out-soft) both;
+}
+
+/* ── Plate lift → lightbox settle ── */
+
+.photo-card.is-lifting {
+  transform: translateY(-12px) rotate(0deg) scale(1.03) !important;
+  box-shadow: 0 10px 24px var(--archive-shadow-lift) !important;
+  z-index: 6;
+  transition: transform 0.22s var(--ease-out-soft), box-shadow 0.22s var(--ease-out-soft) !important;
+}
+
+.lightbox-shell {
+  opacity: 0;
+  transition: opacity 0.32s var(--ease-out-soft);
+}
+
+.lightbox-shell.is-ready {
+  opacity: 1;
+}
+
+.lightbox-shell.is-ready::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(255, 214, 150, 0.42) 0%,
+    rgba(255, 214, 150, 0.12) 28%,
+    transparent 62%
+  );
+  animation: darkroom-flash 0.48s var(--ease-out-soft) both;
+}
+
+.lightbox-shell.is-ready .lightbox-figure {
+  position: relative;
+  z-index: 2;
+  animation: lightbox-figure-settle 0.38s var(--ease-out-soft) both;
+}
+
+.lightbox-shell.is-closing {
+  opacity: 0;
+  transition: opacity 0.28s var(--ease-out-soft);
+  pointer-events: none;
+}
+
+.lightbox-shell.is-closing .lightbox-figure {
+  animation: lightbox-figure-setdown 0.28s var(--ease-out-soft) both;
+}
+
+@keyframes darkroom-flash {
+  0% { opacity: 0.95; }
+  35% { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+@keyframes lightbox-figure-settle {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lightbox-figure-setdown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+}
+
+@keyframes masthead-wag {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-3deg); }
+  40% { transform: rotate(3deg); }
+  60% { transform: rotate(-2.5deg); }
+  80% { transform: rotate(2deg); }
+}
+
+.masthead-cutout.is-wagging {
+  animation: masthead-wag 0.8s var(--ease-out-soft) both;
+  transform-origin: 50% 85%;
+}
+
+/* ── Nickname shuffle ── */
+
+.nickname-many:hover,
+.nickname-many:focus-visible {
+  color: inherit;
+  border-bottom-color: var(--archive-sepia);
+  opacity: 0.85;
+}
+
+.nickname-many:focus-visible {
+  outline: 2px solid var(--archive-rule);
+  outline-offset: 3px;
+}
+
+.nickname-cycle,
+.nickname-list,
+.nickname-list em {
+  font-size: inherit;
+  font-style: italic;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.nickname-cycle {
+  display: inline-block;
+  transition: opacity 0.32s var(--ease-out-soft), transform 0.32s var(--ease-out-soft);
+}
+
+.nickname-cycle.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nickname-cycle.is-out {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+/* ── Cosmos panel (parchment-aligned) ── */
+
+.cosmos-panel {
+  position: relative;
 }
 
 .aspiration-group {
@@ -734,6 +1079,50 @@
     box-shadow var(--dur-hover) var(--ease-out-soft),
     border-color var(--dur-archive) var(--ease-archive),
     opacity var(--dur-motion) var(--ease-out-soft);
+}
+
+.photo-card__hit {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.photo-card__hit:focus {
+  outline: none;
+}
+
+.photo-card__hit:focus-visible {
+  outline: 2px solid var(--archive-rule);
+  outline-offset: 3px;
+}
+
+.birth-record.naming-card {
+  gap: 16px 20px !important;
+  padding: 16px 18px !important;
+  align-items: start;
+}
+
+.birth-record__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.birth-record__row p {
+  margin: 0;
+}
+
+.birth-record__row .field-label,
+.birth-record__row p:first-child {
+  margin-bottom: 2px !important;
 }
 
 .photo-card:nth-child(5n + 1) {
@@ -897,7 +1286,8 @@
     background: #fffdf8;
     border: 1px solid rgba(201, 169, 122, 0.55);
     box-shadow: 0 6px 22px rgba(44, 26, 14, 0.12);
-    opacity: 0.92;
+    opacity: var(--margin-breathe, 0.92);
+    will-change: transform, opacity;
   }
 
   .margin-photo img {
@@ -921,25 +1311,25 @@
   .margin-photo--1 {
     top: 18vh;
     left: max(14px, calc((100vw - 1320px) / 4 - 96px));
-    transform: rotate(-2.5deg);
+    transform: translateY(calc(var(--margin-drift, 0) * -0.55px)) rotate(-2.5deg);
   }
 
   .margin-photo--2 {
     bottom: 10vh;
     left: max(18px, calc((100vw - 1320px) / 4 - 78px));
-    transform: rotate(1.8deg);
+    transform: translateY(calc(var(--margin-drift, 0) * 0.4px)) rotate(1.8deg);
   }
 
   .margin-photo--3 {
     top: 16vh;
     right: max(16px, calc((100vw - 1320px) / 4 - 90px));
-    transform: rotate(2deg);
+    transform: translateY(calc(var(--margin-drift, 0) * 0.5px)) rotate(2deg);
   }
 
   .margin-photo--4 {
     bottom: 14vh;
     right: max(12px, calc((100vw - 1320px) / 4 - 102px));
-    transform: rotate(-1.5deg);
+    transform: translateY(calc(var(--margin-drift, 0) * -0.45px)) rotate(-1.5deg);
   }
 }
 
@@ -1008,7 +1398,10 @@
 }
 
 .aspirations-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 20px;
+  align-items: stretch;
 }
 
 /* ── Masthead portrait botanical frame ── */
@@ -1170,7 +1563,7 @@
 }
 
 .cosmos-card {
-  border-color: rgba(201, 184, 224, 0.65) !important;
+  border-color: rgba(201, 169, 122, 0.55) !important;
 }
 
 .cosmos-hero-card {
@@ -1251,23 +1644,24 @@
   margin: 0;
 }
 
-/* Map marker pulse */
+/* Map marker: one-shot drop (west→east stagger via --pin-delay); no infinite pulse */
 .leaflet-interactive {
   transition: opacity 0.25s ease-in-out;
 }
 
-@keyframes archive-marker-pulse {
-  0%,
-  100% {
-    opacity: 0.95;
+@keyframes adventure-pin-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
   }
-  50% {
-    opacity: 0.7;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 .adventure-map .adventure-pin__dot {
-  animation: archive-marker-pulse 3.2s ease-in-out infinite;
+  animation: adventure-pin-drop 0.42s var(--ease-out-soft) var(--pin-delay, 0ms) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1298,11 +1692,13 @@
 
   .adventure-map .adventure-pin__dot {
     animation: none !important;
+    opacity: 1;
+    transform: none;
   }
 
   .layer-ambient__flora,
   .layer-motion__orb,
-  .layer-motion__stamp {
+  .layer-motion__sprig {
     transition: none;
   }
 
@@ -1316,6 +1712,60 @@
   .activities-card {
     animation: none !important;
     opacity: 1 !important;
+  }
+
+  .tab-panel.folio-forward,
+  .tab-panel.folio-back {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .tab-panel.folio-forward hr,
+  .tab-panel.folio-back hr {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .photo-card.is-lifting {
+    transform: none !important;
+  }
+
+  .lightbox-shell,
+  .lightbox-shell.is-ready,
+  .lightbox-shell.is-closing {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
+  .lightbox-shell.is-ready::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .lightbox-shell.is-ready .lightbox-figure,
+  .lightbox-shell.is-closing .lightbox-figure {
+    animation: none !important;
+  }
+
+  .masthead-cutout.is-wagging {
+    animation: none !important;
+  }
+
+  .nickname-cycle,
+  .nickname-cycle.is-in,
+  .nickname-cycle.is-out {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .margin-photo--1,
+  .margin-photo--2,
+  .margin-photo--3,
+  .margin-photo--4 {
+    transform: none !important;
   }
 
   .sec-head .sec-rule,
@@ -1406,7 +1856,7 @@
   animation: cover-hero-drift 32s ease-in-out infinite alternate;
 }
 
-/* Light bottom feather only; photos stay visible behind type */
+/* Light bottom feather + stronger scrim for type contrast */
 .cover-gate__chrome {
   position: absolute;
   inset: 0;
@@ -1417,10 +1867,10 @@
   pointer-events: none;
   background: linear-gradient(
     to top,
-    rgba(26, 26, 24, 0.55) 0%,
-    rgba(26, 26, 24, 0.22) 28%,
-    rgba(26, 26, 24, 0.06) 48%,
-    transparent 68%
+    rgba(26, 26, 24, 0.72) 0%,
+    rgba(26, 26, 24, 0.42) 32%,
+    rgba(26, 26, 24, 0.14) 55%,
+    transparent 78%
   );
 }
 
@@ -1530,6 +1980,77 @@
   outline-offset: 3px;
 }
 
+.cover-gate__skip {
+  appearance: none;
+  border: none;
+  background: none;
+  color: rgba(255, 253, 248, 0.85);
+  font-family: var(--ff-body);
+  font-size: 15px;
+  font-style: italic;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 8px 0;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+}
+
+.cover-gate__skip:hover,
+.cover-gate__skip:focus-visible {
+  color: #fffdf8;
+}
+
+.cover-gate__skip:focus-visible {
+  outline: 2px solid #fffdf8;
+  outline-offset: 3px;
+}
+
+/* Cover exit: photos hold, chrome lifts, soft upward wipe */
+.cover-gate.is-exiting {
+  pointer-events: none;
+}
+
+.cover-gate.is-exiting .cover-gate__img {
+  animation: none !important;
+  transition: none !important;
+}
+
+.cover-gate.is-exiting .cover-gate__chrome {
+  animation: cover-chrome-lift 0.52s var(--ease-out-soft) forwards;
+}
+
+.cover-gate.is-exiting .cover-gate__media {
+  animation: cover-media-wipe 0.58s var(--ease-out-soft) 0.06s forwards;
+}
+
+.cover-gate.is-exiting {
+  animation: cover-gate-fade 0.58s var(--ease-out-soft) 0.06s forwards;
+}
+
+@keyframes cover-chrome-lift {
+  to {
+    opacity: 0;
+    transform: translateY(-28px);
+  }
+}
+
+@keyframes cover-media-wipe {
+  from {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+  to {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0.85;
+  }
+}
+
+@keyframes cover-gate-fade {
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes cover-hero-drift {
   from {
     transform: scale(1.02) translate3d(0, 0, 0);
@@ -1566,6 +2087,12 @@
 
   .cover-gate__img {
     transition: none !important;
+  }
+
+  .cover-gate.is-exiting,
+  .cover-gate.is-exiting .cover-gate__chrome,
+  .cover-gate.is-exiting .cover-gate__media {
+    animation: none !important;
   }
 
   .cover-gate__enter {

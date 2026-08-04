@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { GALLERY_PHOTOS, PLAY_SEQUENCE } from "./photos.js";
-import { ASPIRATION_GROUPS, SAMOYED_HISTORY, ADVENTURE_GROUPS, ADVENTURE_PINS } from "./content.js";
+import { ASPIRATION_GROUPS, SAMOYED_HISTORY, ADVENTURE_GROUPS, ADVENTURE_PINS, ZERO_MODES } from "./content.js";
 import CosmosTab from "./CosmosTab.jsx";
-import { setFootprintMode, clearFootprints } from "./footprint-system.js";
+import { setFootprintMode, clearFootprints, spawnChapterBeat } from "./footprint-system.js";
 import { TAB_FOOTPRINT_MODES } from "./footprint-modes.js";
 import LayerShell from "./cinematic/LayerShell.jsx";
 import { getTabScene } from "./tabScenes.js";
@@ -20,7 +20,8 @@ const NICKNAMES = [
   "Little Cloud", "Little Boy", "Little Bear", "Little Lamb",
   "Little Sherlock", "Little Investigative Journalist",
   "Baby Zero", "Baby Boy",
-  "Zerowski", "Mr. Zero", "Cutie Pie", "Sweetie Pie", "Chicken Wing", "Handsome boy",
+  "Mr. Zero", "Cutie Pie", "Sweetie Pie", "Chicken Wing", "Handsome boy",
+  "Little Wolf", "Zerowski",
 ];
 
 const STAR_SIGN = {
@@ -38,7 +39,7 @@ const CHINESE_ZODIAC = {
   pinyin: "lóng",
   paragraphs: [
     "Zero was born in 2024, the Year of the Wood Dragon: confident, a little theatrical, and fairly sure the room got better when he arrived. Hard to argue.",
-    "Wood Dragons are meant to bring growth and big energy. Zero brings fluff and a fixed position on the important issues: more walks, more friends, more lakes, and playtime counted as a need, not a treat. He does not guard the house so much as run it. Visitors are welcome. They should be ready to admire him.",
+    "Wood Dragons get described as bold. Zero brings fluff and a schedule: more walks, more friends, more lakes, and playtime counted as a need, not a treat. He does not guard the house so much as run it. Visitors are welcome. They should be ready to admire him.",
   ],
 };
 
@@ -88,13 +89,13 @@ const SAMOYED_FACTS = [
     label: "AKC Group",
     value: "Working",
     detail:
-      "Working Group dogs were bred to assist humans in tasks requiring strength and intelligence: pulling sleds, guarding homes, search and rescue. Blue-collar by lineage. Zero applies this ethic to the couch.",
+      "Working Group dogs were bred to assist humans in tasks requiring strength and intelligence: pulling sleds, guarding homes, search and rescue. Blue-collar by lineage. Zero's hard job is the couch.",
   },
   {
     label: "Weight",
     value: "35 to 65 lbs",
     detail:
-      "Males stand 21 to 23.5 inches at the shoulder. Powerful and tireless, perfectly beautiful and highly functional.",
+      "Males stand 21 to 23.5 inches at the shoulder. Strong, and built to work.",
   },
   {
     label: "Coat",
@@ -118,7 +119,7 @@ const SAMOYED_FACTS = [
     label: "Temperament",
     value: "Friendly. Very friendly.",
     detail:
-      "Will alarm bark, then greet the visitor with a wagging tail. An excellent watchdog and a poor guard dog. Loves everyone unconditionally.",
+      "Will alarm bark, then greet the visitor with a wagging tail. An excellent watchdog and a poor guard dog. Loves everyone.",
   },
   {
     label: "Exercise",
@@ -152,10 +153,42 @@ const TABS = [
   { id: "profile", label: "Profile" },
   { id: "character", label: "Character" },
   { id: "cosmos", label: "Cosmos" },
-  { id: "breed", label: "Breed" },
   { id: "gallery", label: "Gallery" },
   { id: "records", label: "Records" },
 ];
+
+const COVER_SESSION_KEY = "zero-entered";
+
+function readInitialRoute() {
+  let showCover = true;
+  let tab = "profile";
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.replace(/^#/, "");
+    const paramTab = params.get("tab");
+    if (paramTab && TABS.some((t) => t.id === paramTab)) tab = paramTab;
+    else if (hash && TABS.some((t) => t.id === hash)) tab = hash;
+
+    const forceEnter = params.get("enter") === "1" || params.get("cover") === "0";
+    const deepLinked = Boolean(
+      (hash && TABS.some((t) => t.id === hash)) ||
+      (paramTab && TABS.some((t) => t.id === paramTab)),
+    );
+    const seen = sessionStorage.getItem(COVER_SESSION_KEY) === "1";
+    if (forceEnter || deepLinked || seen) showCover = false;
+  } catch {
+    /* private mode / SSR */
+  }
+  return { showCover, tab };
+}
+
+function markCoverEntered() {
+  try {
+    sessionStorage.setItem(COVER_SESSION_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
 
 function getLiveAge(birthday) {
   const diff = Date.now() - birthday.getTime();
@@ -197,7 +230,7 @@ const pal = {
   masthead: "#2C1A0E",
   mastheadText: "#F5ECD7",
   mastheadMuted: "#C9A97A",
-  cream: "#F7F6F3",
+  cream: "#F2F5F7",
   parchment: "#EDE9E0",
   darkBrown: "#1A1A18",
   midBrown: "#6B4226",
@@ -214,7 +247,7 @@ const pal = {
   walkGreen: "#7A9B76",
   hikeTerracotta: "#D4956A",
   xcBlue: "#6B8FA3",
-  navy: "#22314F",
+  navy: "#6B8FA3",
 };
 
 const ff = {
@@ -258,50 +291,60 @@ const s = {
   // intro blurb
   introBlock: {
     fontFamily: ff.body, fontSize: 15, color: pal.inkMuted, lineHeight: 1.75,
-    marginBottom: 32, fontStyle: "italic",
+    marginBottom: 26, fontStyle: "italic",
   },
   introStrong: {
-    fontFamily: ff.display, fontStyle: "normal", fontWeight: 600,
-    fontSize: 16, color: pal.darkBrown,
+    fontFamily: ff.body, fontStyle: "normal", fontWeight: 600,
+    fontSize: 15, color: pal.darkBrown,
+  },
+  nicknameMany: {
+    fontFamily: "inherit", fontSize: "inherit", fontStyle: "italic", fontWeight: "inherit",
+    color: "inherit", background: "none", border: "none",
+    borderBottom: `1px solid ${pal.rule}`, padding: 0, cursor: "pointer",
+    lineHeight: "inherit",
   },
   tabBar: {
     display: "flex", gap: 0, borderBottom: `1px solid ${pal.rule}`,
-    marginBottom: 40, overflowX: "auto", WebkitOverflowScrolling: "touch",
+    marginBottom: 36, overflowX: "auto", WebkitOverflowScrolling: "touch",
   },
   tabBtn: {
     fontFamily: ff.display, fontSize: 15, letterSpacing: "0.03em", textTransform: "none",
     fontWeight: 500, color: pal.lightBrown, background: "none", border: "none",
     borderBottom: "2px solid transparent", padding: "12px 20px", cursor: "pointer",
     whiteSpace: "nowrap", flexShrink: 0, marginBottom: -1,
-    transition: "color 0.2s ease-in-out, border-color 0.2s ease-in-out, background-color 0.2s ease-in-out",
+    transition: "color 0.2s ease-in-out, border-color 0.2s ease-in-out",
   },
   tabBtnActive: {
     color: pal.darkBrown, borderBottom: `2px solid ${pal.accentLight}`, fontWeight: 600,
   },
   tabBtnCosmosActive: {
-    color: "#1A2430", borderBottom: "2px solid #6B8FA3", fontWeight: 600,
+    color: pal.darkBrown, borderBottom: "2px solid #6B8FA3", fontWeight: 600,
   },
   tabPanel: {
     minHeight: 320,
-    animation: "tab-panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
   },
-  secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 28, marginTop: 72 },
+  secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 26, marginTop: 56 },
   secHeadFirst: { marginTop: 0 },
   secTitle: { fontFamily: ff.display, fontSize: 27, fontWeight: 600, color: pal.darkBrown, margin: 0, lineHeight: 1.05 },
   secStamp: { fontFamily: ff.display, fontSize: 15, color: pal.navy, lineHeight: 1, flexShrink: 0 },
   secRule: { flex: 1, height: 1, background: pal.rule, opacity: 0.45, border: "none" },
-  profileStatsCol: { display: "flex", flexDirection: "column" },
-  profileRightCol: { display: "flex", flexDirection: "column", gap: 16, minWidth: 0 },
+  profileStatsCol: { display: "flex", flexDirection: "column", minHeight: 0, height: "100%" },
+  profileRightCol: { display: "flex", flexDirection: "column", gap: 16, minWidth: 0, height: "100%" },
   profileAsideLabel: {
     fontFamily: ff.display, fontSize: 16, fontWeight: 600, color: pal.darkBrown,
     margin: "0 0 12px", letterSpacing: "0.02em",
   },
   statCard: {
     background: pal.white, border: `1px solid ${pal.rule}`,
-    padding: "12px 14px 10px", display: "flex", flexDirection: "column",
+    padding: "12px 14px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0,
   },
-  statAsideStack: { display: "flex", flexDirection: "column", gap: 8 },
-  statBox: { background: pal.parchment, border: `1px solid ${pal.rule}`, padding: "8px 12px" },
+  statAsideStack: {
+    display: "flex", flexDirection: "column", gap: 10, flex: 1, justifyContent: "space-between",
+  },
+  statBox: {
+    background: pal.parchment, border: `1px solid ${pal.rule}`,
+    padding: "12px 14px", flex: "1 1 0", display: "flex", flexDirection: "column", justifyContent: "center",
+  },
   statBoxLink: { cursor: "pointer", transition: "border-color 0.2s ease-in-out" },
   statCutoutFlow: {
     width: "78%", maxWidth: 118, height: "auto", objectFit: "contain", objectPosition: "center",
@@ -313,12 +356,13 @@ const s = {
   statNote: { fontFamily: ff.body, fontStyle: "italic", fontSize: 13, color: pal.inkMuted, marginTop: 3, lineHeight: 1.4 },
   specimenCard: {
     background: pal.parchment, border: `1px solid ${pal.rule}`,
-    padding: "18px 22px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 24px",
+    padding: "18px 22px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px",
+    alignItems: "start",
   },
   fieldLabel: { fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: pal.lightBrown, marginBottom: 3 },
   fieldValue: { fontFamily: ff.display, fontSize: 18, color: pal.darkBrown, fontWeight: 600, margin: 0, lineHeight: 1.3 },
-  fieldSub: { fontFamily: ff.body, fontStyle: "italic", fontSize: 14, color: pal.inkMuted, lineHeight: 1.35, marginTop: 2 },
-  fieldBlock: { marginBottom: 0 },
+  fieldSub: { fontFamily: ff.body, fontStyle: "italic", fontSize: 14, color: pal.inkMuted, lineHeight: 1.35, marginTop: 2, minHeight: "1.35em" },
+  fieldBlock: { marginBottom: 0, minHeight: 72 },
   galleryPreview: {
     display: "block", width: "100%", textAlign: "left", cursor: "pointer",
     background: pal.white, border: `1px solid ${pal.rule}`, padding: "14px 16px",
@@ -417,10 +461,15 @@ const s = {
     zIndex: 1000, padding: 24, cursor: "pointer",
   },
   lightboxFigure: {
-    position: "relative", display: "flex", flexDirection: "column", alignItems: "center",
-    maxWidth: "calc(100vw - 140px)", maxHeight: "calc(100vh - 80px)", margin: 0, cursor: "default",
+    position: "relative", display: "flex", flexDirection: "column",
+    alignItems: "center", justifyContent: "center",
+    maxWidth: "calc(100vw - 140px)", maxHeight: "calc(100vh - 48px)", margin: 0, cursor: "default",
   },
-  lightboxImg: { maxWidth: "100%", maxHeight: "calc(100vh - 130px)", objectFit: "contain", border: `2px solid ${pal.rule}` },
+  lightboxImg: {
+    maxWidth: "100%", maxHeight: "calc(100vh - 100px)", width: "auto", height: "auto",
+    objectFit: "contain", objectPosition: "center", border: `2px solid ${pal.rule}`,
+    display: "block",
+  },
   lightboxCaption: {
     fontFamily: "'Caveat', 'Segoe Script', cursive", fontSize: 20,
     color: pal.mastheadMuted, marginTop: 10, textAlign: "center",
@@ -428,13 +477,14 @@ const s = {
   lightboxClose: {
     position: "absolute", top: 20, right: 24,
     fontFamily: ff.meta, fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase",
-    color: pal.mastheadMuted, background: "none", border: "none", cursor: "pointer",
+    color: "#F5ECD7", background: "none", border: "none", cursor: "pointer",
   },
   lightboxArrow: {
     position: "absolute", top: "50%", transform: "translateY(-50%)",
-    width: 52, height: 72, border: `1px solid rgba(201,169,122,0.35)`,
-    background: "rgba(44,26,14,0.3)", color: pal.mastheadMuted,
-    fontFamily: ff.display, fontSize: 42, lineHeight: 1, cursor: "pointer",
+    width: 52, height: 72, border: `1px solid rgba(201,169,122,0.45)`,
+    background: "rgba(44,26,14,0.35)", color: "#F5ECD7",
+    fontFamily: ff.display, fontSize: 36, lineHeight: 1, cursor: "pointer",
+    display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
     transition: "color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out",
   },
   mastheadLeft: { display: "flex", alignItems: "flex-end", gap: 20 },
@@ -478,8 +528,9 @@ const s = {
   },
   adventureItemDetail: { color: pal.lightBrown, fontStyle: "italic" },
   adventureCaption: {
-    fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.lightBrown,
-    textAlign: "center", lineHeight: 1.3, margin: "8px 0 0", flexShrink: 0,
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 11, color: pal.lightBrown,
+    textAlign: "center", lineHeight: 1.2, margin: "8px 0 0", flexShrink: 0,
+    whiteSpace: "nowrap",
   },
   ageGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 0 },
   ageBox: { background: pal.white, border: `1px solid ${pal.rule}`, padding: "18px 14px", textAlign: "center" },
@@ -493,18 +544,33 @@ const s = {
   proseParagraph: { margin: "0 0 16px" },
   namingCard: {
     background: pal.parchment, border: `1px solid ${pal.rule}`,
-    padding: "22px 26px", display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) minmax(100px, 140px)",
-    gap: 20, alignItems: "center",
+    padding: "14px 18px", display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(88px, 120px)",
+    gap: 14, alignItems: "center", marginBottom: 16,
   },
   namingImg: {
-    width: "100%", height: "auto", objectFit: "contain",
+    width: "100%", height: "auto", maxHeight: 120, objectFit: "contain",
     filter: "drop-shadow(0 4px 14px rgba(44,26,14,0.2))",
   },
   namingCaption: {
     fontFamily: ff.body, fontStyle: "italic", fontSize: 12, color: pal.lightBrown,
     textAlign: "center", margin: "8px 0 0",
   },
+  looksCard: {
+    background: pal.parchment, border: `1px solid ${pal.rule}`,
+    padding: "18px 20px", overflow: "hidden",
+  },
+  looksLead: {
+    fontFamily: ff.body, fontStyle: "italic", fontSize: 15.5,
+    color: pal.inkMuted, lineHeight: 1.55, margin: "0 0 16px",
+  },
+  looksCutout: {
+    float: "right", width: "42%", maxWidth: 160, height: "auto",
+    objectFit: "contain", objectPosition: "center top",
+    margin: "0 0 8px 16px",
+    filter: "drop-shadow(0 4px 12px rgba(44,26,14,0.18))",
+  },
+  looksField: { marginBottom: 14, minHeight: 0 },
   aspirationGroupLabel: {
     fontFamily: ff.display, fontSize: 15, fontWeight: 600, color: pal.midBrown,
     margin: "0 0 8px", letterSpacing: "0.02em",
@@ -526,6 +592,20 @@ const s = {
   aspirationTitle: { fontFamily: ff.display, fontSize: 17, fontWeight: 600, color: pal.darkBrown, margin: "0 0 6px" },
   aspirationDetail: { fontFamily: ff.body, fontSize: 15.5, color: pal.inkMuted, lineHeight: 1.75, margin: 0 },
   adventureMap: { height: 380, width: "100%", border: `1px solid ${pal.rule}`, marginTop: 24, zIndex: 0 },
+  adventureMapWrap: { marginTop: 24 },
+  adventureLegend: {
+    display: "flex", flexWrap: "wrap", gap: "10px 18px",
+    marginTop: 10, padding: "0 2px",
+  },
+  adventureLegendItem: {
+    display: "inline-flex", alignItems: "center", gap: 8,
+    fontFamily: ff.meta, fontSize: 11, letterSpacing: "0.08em",
+    textTransform: "uppercase", color: pal.lightBrown,
+  },
+  adventureLegendSwatch: {
+    width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+    border: `1px solid ${pal.rule}`,
+  },
   historyBlock: { marginBottom: 28 },
 };
 
@@ -576,7 +656,108 @@ function GalleryPreview({ onOpenGallery }) {
   );
 }
 
+const NICKNAME_HOLD_MS = 3800;
+const NICKNAME_FADE_MS = 320;
+
+/** Cycles one nickname; click “many names” to show the full list. */
+function NicknameShuffle() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+  const timerRef = useRef(null);
+  const fadeRef = useRef(null);
+  const busyRef = useRef(false);
+
+  function goNext() {
+    if (busyRef.current || expanded) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setIndex((i) => (i + 1) % NICKNAMES.length);
+      return;
+    }
+    busyRef.current = true;
+    setVisible(false);
+    if (fadeRef.current) clearTimeout(fadeRef.current);
+    fadeRef.current = setTimeout(() => {
+      setIndex((i) => (i + 1) % NICKNAMES.length);
+      setVisible(true);
+      busyRef.current = false;
+      fadeRef.current = null;
+    }, NICKNAME_FADE_MS);
+  }
+
+  function clearTimers() {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (fadeRef.current) {
+      clearTimeout(fadeRef.current);
+      fadeRef.current = null;
+    }
+    busyRef.current = false;
+  }
+
+  function restartTimer() {
+    clearTimers();
+    setVisible(true);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || expanded) return;
+    timerRef.current = window.setInterval(() => goNext(), NICKNAME_HOLD_MS);
+  }
+
+  useEffect(() => {
+    if (expanded) {
+      clearTimers();
+      setVisible(true);
+      return () => clearTimers();
+    }
+    restartTimer();
+    return () => clearTimers();
+  }, [expanded]);
+
+  function onManyNamesClick(event) {
+    event.preventDefault();
+    setExpanded((open) => !open);
+  }
+
+  const name = NICKNAMES[index];
+  const fullList = NICKNAMES.map((n, i) => (
+    <span key={n}>
+      <em>{n}</em>
+      {i < NICKNAMES.length - 2 ? ", " : i === NICKNAMES.length - 2 ? ", and " : ""}
+    </span>
+  ));
+
+  return (
+    <>
+      <button
+        type="button"
+        style={s.nicknameMany}
+        className="nickname-many"
+        onClick={onManyNamesClick}
+        aria-expanded={expanded}
+        aria-label={expanded ? "Hide full nickname list" : "Show all nicknames"}
+      >
+        many names
+      </button>
+      {", among them "}
+      {expanded ? (
+        <span className="nickname-list">{fullList}</span>
+      ) : (
+        <em
+          className={`nickname-cycle${visible ? " is-in" : " is-out"}`}
+          aria-live="polite"
+        >
+          {name}
+        </em>
+      )}
+    </>
+  );
+}
+
 function MarginPhotos({ tab }) {
+  const railRef = useRef(null);
   const byFile = new Map(GALLERY_PHOTOS.map((p) => [p.file, p]));
   const scene = getTabScene(tab);
   const photos = scene.photos
@@ -586,8 +767,33 @@ function MarginPhotos({ tab }) {
     })
     .filter(Boolean);
 
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return undefined;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return undefined;
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const t = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+      rail.style.setProperty("--margin-drift", `${t * 36}`);
+      rail.style.setProperty("--margin-breathe", String(0.82 + t * 0.12));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [tab]);
+
   return (
-    <aside className="margin-photo-rail" aria-hidden="true">
+    <aside ref={railRef} className="margin-photo-rail" aria-hidden="true">
       <div key={tab} className="margin-photo-set">
         {photos.map(({ file, taken, position }, index) => (
           <figure key={`${tab}-${file}`} className={`margin-photo margin-photo--${index + 1}`}>
@@ -607,41 +813,73 @@ function MarginPhotos({ tab }) {
 }
 
 function AnimatedCount({ value, suffix = "", style }) {
+  const accessibleValue = `${value}${suffix ? ` ${suffix}` : ""}`;
+  return (
+    <div style={style} aria-label={accessibleValue}>
+      <span aria-hidden="true">
+        {value}{suffix ? ` ${suffix}` : ""}
+      </span>
+    </div>
+  );
+}
+
+/** One-shot ledger ink-fill for age / weight / ticks. */
+function InkLedger({ children, className = "", style, "aria-label": ariaLabel }) {
   const ref = useRef(null);
-  const frameRef = useRef(null);
-  const hasAnimatedRef = useRef(false);
-  const [displayValue, setDisplayValue] = useState(0);
+  const [inked, setInked] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || inked) return undefined;
 
-    if (hasAnimatedRef.current) {
-      setDisplayValue(value);
-      return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setInked(true);
+      return undefined;
     }
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        setInked(true);
+      },
+      { threshold: 0.45 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [inked]);
 
-    const run = () => {
-      hasAnimatedRef.current = true;
-      if (reduced) {
-        setDisplayValue(value);
-        return;
-      }
+  return (
+    <span
+      ref={ref}
+      className={`ink-ledger${inked ? " is-inked" : ""}${className ? ` ${className}` : ""}`}
+      style={style}
+      aria-label={ariaLabel}
+    >
+      <span className="ink-ledger__glyph" aria-hidden={ariaLabel ? "true" : undefined}>
+        {children}
+      </span>
+    </span>
+  );
+}
 
-      const startedAt = performance.now();
-      const duration = 900;
+/** One-shot rubber-seal press when host enters view. */
+function SpecimenStamp({ label = "Specimen" }) {
+  const ref = useRef(null);
+  const [pressed, setPressed] = useState(false);
 
-      const tick = (now) => {
-        const progress = Math.min((now - startedAt) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setDisplayValue(Math.round(value * eased));
-        if (progress < 1) frameRef.current = requestAnimationFrame(tick);
-      };
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || pressed) return undefined;
 
-      frameRef.current = requestAnimationFrame(tick);
-    };
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const run = () => setPressed(true);
+
+    if (reduce) {
+      run();
+      return undefined;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -649,23 +887,21 @@ function AnimatedCount({ value, suffix = "", style }) {
         observer.disconnect();
         run();
       },
-      { threshold: 0.55 },
+      { threshold: 0.5 },
     );
-
     observer.observe(el);
-    return () => {
-      observer.disconnect();
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
-    };
-  }, [value]);
-
-  const accessibleValue = `${value}${suffix ? ` ${suffix}` : ""}`;
+    return () => observer.disconnect();
+  }, [pressed]);
 
   return (
-    <div ref={ref} style={style} aria-label={accessibleValue}>
-      <span aria-hidden="true">
-        {displayValue}{suffix ? ` ${suffix}` : ""}
-      </span>
+    <div
+      ref={ref}
+      className={`specimen-stamp${pressed ? " is-pressed" : ""}`}
+      aria-hidden="true"
+    >
+      <div className="specimen-stamp__ring">
+        <span className="specimen-stamp__label">{label}</span>
+      </div>
     </div>
   );
 }
@@ -676,6 +912,16 @@ function VitalStatsColumn({ onTabChange, totalTicks }) {
       <SectionHead title="Vital Statistics" first />
       <div style={s.statCard} className="stat-card">
         <div style={s.statAsideStack}>
+          <div style={s.statBox}>
+            <div style={s.statLabel}>Species</div>
+            <div style={{ ...s.fieldValue, marginTop: 4 }}>Samoyed</div>
+            <div style={s.statNote}>Canis lupus familiaris</div>
+          </div>
+          <div style={s.statBox}>
+            <div style={s.statLabel}>Birth date</div>
+            <div style={{ ...s.fieldValue, marginTop: 4 }}>September 16, 2024</div>
+            <div style={s.statNote}>Exactly 00:00:00. Of course.</div>
+          </div>
           <div
             style={{ ...s.statBox, ...s.statBoxLink }}
             className="stat-box-link"
@@ -686,7 +932,7 @@ function VitalStatsColumn({ onTabChange, totalTicks }) {
           >
             <AnimatedCount value={ALL_TRICKS.length} style={s.statNum} />
             <div style={s.statLabel}>Known tricks</div>
-            <div style={s.statNote}>Sit through Go · see Repertoire</div>
+            <div style={s.statNote}>Sit through Go · see Trick Repertoire</div>
           </div>
           <div style={s.statBox}>
             <AnimatedCount value={20} suffix="quintillion" style={{ ...s.statNum, fontSize: 17, paddingTop: 2 }} />
@@ -701,21 +947,51 @@ function VitalStatsColumn({ onTabChange, totalTicks }) {
             onClick={() => onTabChange("records")}
             onKeyDown={(e) => statKeyActivate(e, () => onTabChange("records"))}
           >
-            <AnimatedCount value={totalTicks} style={s.statNum} />
+            <InkLedger style={s.statNum} aria-label={`${totalTicks}`}>
+              {totalTicks}
+            </InkLedger>
             <div style={s.statLabel}>Ticks hosted</div>
             <div style={s.statNote}>Two hikes · see Tick Tracker</div>
           </div>
         </div>
-        <img
-          style={s.statCutoutFlow}
-          className="stat-cutout-flow"
-          src={cutoutSrc(CUTOUTS.running)}
-          alt="Zero running"
-          loading="lazy"
-          decoding="async"
-        />
       </div>
     </aside>
+  );
+}
+
+function LooksBlock() {
+  return (
+    <div style={s.looksCard} className="looks-card specimen-stamp-host">
+      <SpecimenStamp />
+      <img
+        style={s.looksCutout}
+        className="looks-cutout"
+        src={cutoutSrc(CUTOUTS.running)}
+        alt="Zero running"
+        loading="lazy"
+        decoding="async"
+      />
+      <p style={s.looksLead}>
+        The cutest little fluff ball you've ever seen. Everyone falls for him.
+      </p>
+      <div style={s.looksField}>
+        <p style={s.fieldLabel}>Coat</p>
+        <p style={s.fieldValue}>Snow-white</p>
+        <p style={s.fieldSub}>A cloud in dog form, with party pants.</p>
+      </div>
+      <div style={s.looksField}>
+        <p style={s.fieldLabel}>Weight</p>
+        <p style={s.fieldValue}>
+          <InkLedger aria-label="50 lbs">50 lbs</InkLedger>
+        </p>
+        <p style={s.fieldSub}>Approximately half is fur</p>
+      </div>
+      <div style={{ ...s.looksField, marginBottom: 0 }}>
+        <p style={s.fieldLabel}>Eyes</p>
+        <p style={s.fieldValue}>Black</p>
+        <p style={s.fieldSub}>Deep, dark, and soul-piercing.</p>
+      </div>
+    </div>
   );
 }
 
@@ -745,7 +1021,7 @@ function LiveAgeCounter() {
         ))}
       </div>
       <p style={s.ageNote}>
-        Precise elapsed time since September 16, 2024 at 00:00:00. Zero arrived on the stroke of midnight and has been on Earth for every second since.
+        Elapsed time since September 16, 2024, 00:00:00.
       </p>
     </div>
   );
@@ -782,11 +1058,28 @@ function SamoyedHistory() {
 }
 
 function AdventureMap() {
-  const mapRef = useRef(null);
+  const wrapRef = useRef(null);
   const containerRef = useRef(null);
+  const mapRef = useRef(null);
+  const [shouldInit, setShouldInit] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    const el = wrapRef.current;
+    if (!el) return undefined;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setShouldInit(true);
+        obs.disconnect();
+      },
+      { rootMargin: "220px 0px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldInit || !containerRef.current || mapRef.current) return undefined;
 
     const map = L.map(containerRef.current, { scrollWheelZoom: false }).setView([37.2, -121.8], 8);
     L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png", {
@@ -795,16 +1088,16 @@ function AdventureMap() {
       maxZoom: 19,
     }).addTo(map);
 
-    ADVENTURE_PINS.forEach((pin) => {
+    const pinsWestToEast = [...ADVENTURE_PINS].sort((a, b) => a.lng - b.lng);
+    pinsWestToEast.forEach((pin, i) => {
       const icon = L.divIcon({
         className: "adventure-pin",
-        html: `<span class="adventure-pin__dot" style="--pin-accent:${pin.accent || pal.midBrown}"></span>`,
+        html: `<span class="adventure-pin__dot" style="--pin-accent:${pin.accent || pal.midBrown};--pin-delay:${i * 55}ms"></span>`,
         iconSize: [20, 20],
         iconAnchor: [10, 10],
       });
-      const flavor = pin.flavor ? `<br><span class="adventure-popup-flavor">${pin.flavor}</span>` : "";
       L.marker([pin.lat, pin.lng], { icon })
-        .bindPopup(`<strong>${pin.name}</strong><br>${pin.detail}${flavor}`)
+        .bindPopup(`<strong>${pin.name}</strong><br>${pin.detail}`)
         .addTo(map);
     });
 
@@ -815,9 +1108,29 @@ function AdventureMap() {
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [shouldInit]);
 
-  return <div ref={containerRef} style={s.adventureMap} className="adventure-map" aria-label="Map of Zero's adventures" />;
+  return (
+    <div ref={wrapRef} style={s.adventureMapWrap} className="adventure-map-wrap">
+      <div
+        ref={containerRef}
+        style={{ ...s.adventureMap, marginTop: 0 }}
+        className="adventure-map"
+        aria-label="Map of Zero's adventures"
+      />
+      <div style={s.adventureLegend} className="adventure-map-legend" aria-label="Map legend">
+        {ADVENTURE_GROUPS.map((group) => (
+          <span key={group.type} style={s.adventureLegendItem}>
+            <span
+              style={{ ...s.adventureLegendSwatch, background: group.accent }}
+              aria-hidden="true"
+            />
+            {group.type}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function PlaySequence() {
@@ -881,13 +1194,26 @@ function RepertoireBlock() {
   );
 }
 
+function ModesOfOperation() {
+  return (
+    <div style={s.tricksGrid} className="modes-grid archive-settle">
+      {ZERO_MODES.map((mode, i) => (
+        <div key={mode.name} style={{ ...s.trickCard, background: i % 2 === 0 ? pal.white : pal.parchment }}>
+          <p style={s.trickNum}>Mode {String(i + 1).padStart(2, "0")}</p>
+          <p style={s.trickName}>{mode.name}</p>
+          <p style={s.trickNote}>{mode.blurb}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function NamingNote() {
   return (
     <div style={s.namingCard} className="naming-card">
       <div>
         <p style={{ ...s.proseParagraph, marginBottom: 0 }}>
           Zero is named after Zero Skellington, the little ghost dog from <em>The Nightmare Before Christmas</em>.
-          Same bright loyalty, same habit of lighting up a room, and the same conviction that wherever his people go, he goes too.
         </p>
       </div>
       <figure style={{ margin: 0, textAlign: "center" }}>
@@ -898,7 +1224,6 @@ function NamingNote() {
           loading="lazy"
           decoding="async"
         />
-        <figcaption style={s.namingCaption}>Zero Skellington</figcaption>
       </figure>
     </div>
   );
@@ -906,33 +1231,32 @@ function NamingNote() {
 
 function BirthRecord() {
   return (
-    <div style={{ ...s.namingCard, marginBottom: 28 }} className="naming-card birth-record">
-      <div>
-        <div style={{ ...s.fieldBlock, marginBottom: 14 }}>
+    <div style={{ ...s.namingCard, marginBottom: 20 }} className="naming-card birth-record">
+      <div className="birth-record__fields">
+        <div className="birth-record__row">
           <p style={s.fieldLabel}>Birth Time</p>
           <p style={s.fieldValue}>00:00:00</p>
         </div>
-        <div style={{ ...s.fieldBlock, marginBottom: 14 }}>
+        <div className="birth-record__row">
           <p style={s.fieldLabel}>Birth Date</p>
           <p style={s.fieldValue}>September 16, 2024</p>
         </div>
-        <div style={s.fieldBlock}>
+        <div className="birth-record__row">
           <p style={s.fieldLabel}>Given Name</p>
           <p style={s.fieldValue}>Zero*</p>
-          <p style={{ ...s.fieldSub, marginTop: 8, lineHeight: 1.55 }}>
-            * Named for Zero Skellington of <em>The Nightmare Before Christmas</em>. A ghost dog with a glowing nose, and a snow dog with a glowing personality.
+          <p style={{ ...s.fieldSub, marginTop: 4, lineHeight: 1.45, minHeight: 0 }}>
+            * Named for Zero Skellington of <em>The Nightmare Before Christmas</em>, the ghost dog with the glowing nose.
           </p>
         </div>
       </div>
       <figure style={{ margin: 0, textAlign: "center" }}>
         <img
-          style={s.namingImg}
+          style={{ ...s.namingImg, maxHeight: 240 }}
           src={cutoutSrc(CUTOUTS.skellington)}
           alt="Zero Skellington from The Nightmare Before Christmas"
           loading="lazy"
           decoding="async"
         />
-        <figcaption style={s.namingCaption}>Zero Skellington</figcaption>
       </figure>
     </div>
   );
@@ -1014,23 +1338,39 @@ function LazyGalleryPhoto({ file, taken, onOpen }) {
     return () => obs.disconnect();
   }, []);
 
+  function activate() {
+    onOpen(file, ref.current);
+  }
+
   return (
-    <figure ref={ref} style={s.photoCard} className="photo-card" onClick={() => onOpen(file)}>
-      <div style={s.photoFrame} className="photo-frame">
-        {showSrc && (
-          <img
-            style={{ ...s.photoImg, opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease" }}
-            src={photoSrc(file, "thumb")}
-            alt={`Zero, ${caption}`}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setLoaded(true)}
-          />
-        )}
-      </div>
-      <figcaption className="photo-archival-label">
-        <p style={s.photoCaption} className="photo-caption">{caption}</p>
-      </figcaption>
+    <figure
+      ref={ref}
+      style={s.photoCard}
+      className="photo-card"
+      data-photo-file={file}
+    >
+      <button
+        type="button"
+        className="photo-card__hit"
+        onClick={activate}
+        aria-label={`Open photo from ${caption}`}
+      >
+        <div style={s.photoFrame} className="photo-frame">
+          {showSrc && (
+            <img
+              style={{ ...s.photoImg, opacity: loaded ? 1 : 0, transition: "opacity 0.3s ease" }}
+              src={photoSrc(file, "thumb")}
+              alt={`Zero, ${caption}`}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setLoaded(true)}
+            />
+          )}
+        </div>
+        <figcaption className="photo-archival-label">
+          <p style={s.photoCaption} className="photo-caption">{caption}</p>
+        </figcaption>
+      </button>
     </figure>
   );
 }
@@ -1039,23 +1379,100 @@ const GALLERY_BATCH = 12;
 
 function PhotoGallery() {
   const [active, setActive] = useState(null);
+  const [lightboxReady, setLightboxReady] = useState(false);
+  const [lightboxClosing, setLightboxClosing] = useState(false);
   const [newestFirst, setNewestFirst] = useState(true);
   const [visibleCount, setVisibleCount] = useState(GALLERY_BATCH);
   const sentinelRef = useRef(null);
+  const liftTimerRef = useRef(null);
+  const closeTimerRef = useRef(null);
+  const dialogRef = useRef(null);
+  const closeBtnRef = useRef(null);
+  const returnFocusRef = useRef(null);
   const sorted = sortPhotosByTaken(newestFirst);
   const activePhoto = sorted.find((p) => p.file === active);
   const activeIndex = active ? sorted.findIndex((p) => p.file === active) : -1;
   const visible = sorted.slice(0, visibleCount);
 
   function showAdjacent(delta) {
-    if (activeIndex < 0) return;
+    if (activeIndex < 0 || lightboxClosing) return;
     const nextIndex = (activeIndex + delta + sorted.length) % sorted.length;
     setActive(sorted[nextIndex].file);
+    setLightboxReady(true);
+  }
+
+  function openPlate(file, plateEl) {
+    if (liftTimerRef.current) {
+      clearTimeout(liftTimerRef.current);
+      liftTimerRef.current = null;
+    }
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    document.querySelectorAll(".photo-card.is-lifting").forEach((el) => {
+      el.classList.remove("is-lifting");
+    });
+
+    returnFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setLightboxClosing(false);
+
+    if (reduce || !(plateEl instanceof HTMLElement)) {
+      setActive(file);
+      setLightboxReady(true);
+      return;
+    }
+
+    plateEl.classList.add("is-lifting");
+    setLightboxReady(false);
+    liftTimerRef.current = setTimeout(() => {
+      setActive(file);
+      setLightboxReady(true);
+      plateEl.classList.remove("is-lifting");
+      liftTimerRef.current = null;
+    }, 220);
+  }
+
+  function finishClose() {
+    setActive(null);
+    setLightboxReady(false);
+    setLightboxClosing(false);
+    const restore = returnFocusRef.current;
+    returnFocusRef.current = null;
+    if (restore instanceof HTMLElement) {
+      requestAnimationFrame(() => restore.focus({ preventScroll: true }));
+    }
+  }
+
+  function closeLightbox() {
+    if (!active || lightboxClosing) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      finishClose();
+      return;
+    }
+
+    setLightboxClosing(true);
+    setLightboxReady(false);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
+      finishClose();
+      closeTimerRef.current = null;
+    }, 300);
   }
 
   useEffect(() => {
     setVisibleCount(GALLERY_BATCH);
   }, [newestFirst]);
+
+  useEffect(() => () => {
+    if (liftTimerRef.current) clearTimeout(liftTimerRef.current);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+  }, []);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -1073,26 +1490,57 @@ function PhotoGallery() {
   }, [visibleCount, sorted.length]);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active || !lightboxReady || lightboxClosing) return undefined;
 
-    const onKeyDown = (event) => {
+    const dialog = dialogRef.current;
+    closeBtnRef.current?.focus({ preventScroll: true });
+
+    function onKeyDown(event) {
       if (event.key === "Escape") {
-        setActive(null);
+        event.preventDefault();
+        closeLightbox();
+        return;
+      }
+
+      if (event.key === "Tab" && dialog) {
+        const focusable = Array.from(
+          dialog.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+        ).filter((node) => node instanceof HTMLElement && !node.hasAttribute("disabled"));
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
         return;
       }
 
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
       const photos = sortPhotosByTaken(newestFirst);
       const currentIndex = photos.findIndex((p) => p.file === active);
       if (currentIndex < 0) return;
       const delta = event.key === "ArrowLeft" ? -1 : 1;
       const nextIndex = (currentIndex + delta + photos.length) % photos.length;
       setActive(photos[nextIndex].file);
-    };
+      setLightboxReady(true);
+    }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [active, newestFirst]);
+  }, [active, newestFirst, lightboxReady, lightboxClosing]);
+
+  const lightboxClass = [
+    "lightbox-shell",
+    lightboxReady && !lightboxClosing ? "is-ready" : "",
+    lightboxClosing ? "is-closing" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <>
@@ -1112,7 +1560,7 @@ function PhotoGallery() {
             key={file}
             file={file}
             taken={taken}
-            onOpen={setActive}
+            onOpen={openPlate}
           />
         ))}
         {visibleCount < sorted.length && (
@@ -1120,8 +1568,16 @@ function PhotoGallery() {
         )}
       </div>
       {active && activePhoto && (
-        <div style={s.lightbox} onClick={() => setActive(null)} role="dialog" aria-modal="true" aria-label="Photo preview">
-          <button style={s.lightboxClose} onClick={() => setActive(null)} type="button">Close</button>
+        <div
+          ref={dialogRef}
+          style={s.lightbox}
+          className={lightboxClass}
+          onClick={closeLightbox}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo preview"
+        >
+          <button ref={closeBtnRef} style={s.lightboxClose} onClick={closeLightbox} type="button">Close</button>
           <button
             type="button"
             className="lightbox-arrow"
@@ -1134,7 +1590,7 @@ function PhotoGallery() {
           >
             ‹
           </button>
-          <figure style={s.lightboxFigure} onClick={(event) => event.stopPropagation()}>
+          <figure style={s.lightboxFigure} className="lightbox-figure" onClick={(event) => event.stopPropagation()}>
             <img
               style={s.lightboxImg}
               src={photoSrc(active, "full")}
@@ -1241,47 +1697,100 @@ function TickTracker({ incidents, setIncidents }) {
 }
 
 export default function App() {
-  const [showCover, setShowCover] = useState(true);
-  const [tab, setTab] = useState("profile");
+  const initial = useRef(null);
+  if (initial.current === null) initial.current = readInitialRoute();
+  const [showCover, setShowCover] = useState(initial.current.showCover);
+  const [coverExiting, setCoverExiting] = useState(false);
+  const [tab, setTab] = useState(initial.current.tab);
+  const [folioDir, setFolioDir] = useState(1);
   const [tickIncidents, setTickIncidents] = useState(INITIAL_TICKS);
+  const [mastheadWagging, setMastheadWagging] = useState(false);
+  const wagTimerRef = useRef(null);
   const totalTicks = tickIncidents.reduce((sum, i) => sum + (parseInt(i.count, 10) || 0), 0);
   const today = new Date();
   const nextBirthday = new Date(today.getFullYear(), 8, 16);
   if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1);
   const daysUntilBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+  const folioClass = folioDir < 0 ? "folio-back" : "folio-forward";
+  const showArchive = !showCover || coverExiting;
 
   function handleTabChange(id) {
+    if (id === tab) return;
+    const from = TABS.findIndex((t) => t.id === tab);
+    const to = TABS.findIndex((t) => t.id === id);
+    setFolioDir(to >= from ? 1 : -1);
     setTab(id);
+    try {
+      window.history.replaceState(null, "", `#${id}`);
+    } catch {
+      /* ignore */
+    }
     clearFootprints();
     setFootprintMode(TAB_FOOTPRINT_MODES[id] ?? "default");
     window.scrollTo({ top: 0, behavior: "smooth" });
+    requestAnimationFrame(() => {
+      spawnChapterBeat(3);
+    });
   }
 
-  function enterArchive() {
+  function finishEnterArchive() {
+    markCoverEntered();
     setShowCover(false);
-    setTab("profile");
+    setCoverExiting(false);
+    setTab((prev) => prev || "profile");
+    setFolioDir(1);
     clearFootprints();
-    setFootprintMode(TAB_FOOTPRINT_MODES.profile ?? "default");
+    setFootprintMode(TAB_FOOTPRINT_MODES[tab] ?? TAB_FOOTPRINT_MODES.profile ?? "default");
     window.scrollTo({ top: 0, behavior: "auto" });
+    try {
+      window.history.replaceState(null, "", `#${tab || "profile"}`);
+    } catch {
+      /* ignore */
+    }
     requestAnimationFrame(() => {
+      spawnChapterBeat(3);
       const title = document.querySelector(".masthead-title");
       if (title instanceof HTMLElement) title.focus({ preventScroll: true });
     });
   }
 
+  function beginCoverExit() {
+    markCoverEntered();
+    setCoverExiting(true);
+    clearFootprints();
+    setFootprintMode(TAB_FOOTPRINT_MODES[tab] ?? TAB_FOOTPRINT_MODES.profile ?? "default");
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
   function openCover() {
     clearFootprints();
     window.scrollTo({ top: 0, behavior: "auto" });
+    setCoverExiting(false);
     setShowCover(true);
   }
 
-  useEffect(() => {
-    if (showCover) return undefined;
-    setFootprintMode(TAB_FOOTPRINT_MODES[tab] ?? "default");
-  }, [tab, showCover]);
+  function onMastheadCutoutClick(event) {
+    if (event.detail !== 3) return;
+    event.preventDefault();
+    if (wagTimerRef.current) clearTimeout(wagTimerRef.current);
+    setMastheadWagging(true);
+    wagTimerRef.current = setTimeout(() => {
+      setMastheadWagging(false);
+      wagTimerRef.current = null;
+    }, 800);
+  }
+
+  useEffect(() => () => {
+    if (wagTimerRef.current) clearTimeout(wagTimerRef.current);
+  }, []);
 
   useEffect(() => {
-    if (showCover) return undefined;
+    if (showCover && !coverExiting) return undefined;
+    setFootprintMode(TAB_FOOTPRINT_MODES[tab] ?? "default");
+  }, [tab, showCover, coverExiting]);
+
+  useEffect(() => {
+    if (!showArchive) return undefined;
     const nodes = Array.from(document.querySelectorAll(".archive-settle"));
     if (!nodes.length) return undefined;
 
@@ -1322,40 +1831,76 @@ export default function App() {
     });
 
     return () => observer.disconnect();
-  }, [tab, showCover]);
-
-  if (showCover) {
-    return <CoverGate onEnter={enterArchive} />;
-  }
+  }, [tab, showArchive]);
 
   const scene = getTabScene(tab);
 
   return (
+    <>
+      {showCover && (
+        <CoverGate onEnter={finishEnterArchive} onExitStart={beginCoverExit} />
+      )}
+      {showArchive && (
     <LayerShell mood={scene.mood}>
       <link rel="stylesheet" href={FONT_LINK} />
       <style>{`
         * { box-sizing: border-box; }
         input, select, textarea, button:not(.masthead-title) { font-size: 16px !important; }
-        @keyframes tab-panel-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes folio-forward {
+          from {
+            opacity: 0;
+            transform: translateX(22px);
+            box-shadow: -18px 0 28px rgba(44, 26, 14, 0.12);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+            box-shadow: 0 0 0 rgba(44, 26, 14, 0);
+          }
         }
-        .tab-panel,
-        [role="tabpanel"] {
-          animation: tab-panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        @keyframes folio-back {
+          from {
+            opacity: 0;
+            transform: translateX(-22px);
+            box-shadow: 18px 0 28px rgba(44, 26, 14, 0.12);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+            box-shadow: 0 0 0 rgba(44, 26, 14, 0);
+          }
         }
         .masthead-meta {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 4px;
+          max-width: 16rem;
+        }
+        .masthead-meta-primary {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
           gap: 2px;
         }
         .masthead-meta-zodiac {
-          margin-bottom: 4px;
+          margin: 6px 0 0;
+          padding: 0;
           color: ${pal.mastheadMuted};
-          transition: color 0.2s ease;
+          opacity: 0.75;
+          font-size: 11px !important;
+          letter-spacing: 0.04em;
+          transition: color 0.2s ease, opacity 0.2s ease;
         }
-        .masthead-meta-zodiac:hover { color: ${pal.accentLight}; }
+        .masthead-meta-zodiac:hover {
+          color: ${pal.accentLight};
+          opacity: 1;
+        }
+        .masthead-meta-bday {
+          opacity: 0.5;
+          font-size: 11px !important;
+          margin-top: 2px;
+        }
         .masthead-cutout:hover { transform: translateY(-3px) rotate(-2deg); }
         .masthead-title:focus { outline: none; }
         .masthead-title:focus-visible {
@@ -1368,36 +1913,16 @@ export default function App() {
           line-height: 0.94 !important;
         }
         .tab-btn:hover { color: ${pal.darkBrown}; }
-        .tab-btn-profile.is-active {
-          border-bottom-color: ${pal.navy} !important;
-          color: ${pal.navy} !important;
-          background: rgba(34, 49, 79, 0.08);
-        }
-        .tab-btn-character.is-active {
-          border-bottom-color: #C9893A !important;
-          color: #6B4226 !important;
-          background: rgba(201, 137, 58, 0.12);
-        }
-        .tab-btn-cosmos.is-active {
-          border-bottom-color: #6B8FA3 !important;
-          color: #1A2430 !important;
-          background: rgba(107, 143, 163, 0.12);
-        }
-        .tab-btn-breed.is-active {
-          border-bottom-color: #8B6B45 !important;
-          color: #5C3D1E !important;
-          background: rgba(139, 107, 69, 0.12);
-        }
-        .tab-btn-gallery.is-active {
-          border-bottom-color: ${pal.accentLight} !important;
+        .tab-btn.is-active {
+          background: none !important;
+          font-weight: 600;
           color: ${pal.darkBrown} !important;
-          background: rgba(212, 149, 106, 0.14);
         }
-        .tab-btn-records.is-active {
-          border-bottom-color: ${pal.tickRed} !important;
-          color: ${pal.tickRed} !important;
-          background: rgba(122, 26, 26, 0.08);
-        }
+        .tab-btn-profile.is-active { border-bottom-color: ${pal.navy} !important; }
+        .tab-btn-character.is-active { border-bottom-color: #C9893A !important; }
+        .tab-btn-cosmos.is-active { border-bottom-color: #6B8FA3 !important; }
+        .tab-btn-gallery.is-active { border-bottom-color: ${pal.accentLight} !important; }
+        .tab-btn-records.is-active { border-bottom-color: ${pal.tickRed} !important; }
         .stat-box-link:hover {
           border-color: ${pal.accentLight} !important;
           transform: translateY(-2px);
@@ -1411,7 +1936,14 @@ export default function App() {
             display: grid;
             grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
             gap: 28px;
-            align-items: start;
+            align-items: stretch;
+          }
+          .profile-stats-col,
+          .profile-right-col {
+            min-height: 0;
+          }
+          .profile-stats-col .stat-card {
+            flex: 1;
           }
           .facts-grid { grid-template-columns: repeat(3, 1fr) !important; }
         }
@@ -1424,27 +1956,24 @@ export default function App() {
           .masthead-inner { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; padding: 16px 20px 14px !important; }
           .masthead-meta {
             text-align: left !important;
-            display: grid !important;
-            grid-template-columns: 1fr auto !important;
-            column-gap: 16px !important;
-            row-gap: 2px !important;
-            align-items: start !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 4px !important;
             width: 100% !important;
+            max-width: none !important;
             line-height: 1.45 !important;
           }
-          .masthead-meta-born { grid-column: 1; grid-row: 1; }
-          .masthead-meta-age { grid-column: 1; grid-row: 2; }
-          .masthead-meta-bday { grid-column: 1; grid-row: 3; opacity: 0.65; }
+          .masthead-meta-primary {
+            align-items: flex-start !important;
+          }
           .masthead-meta-zodiac {
-            grid-column: 2;
-            grid-row: 1 / span 3;
-            align-self: center;
-            justify-self: end;
-            text-align: right;
-            max-width: 9.5em;
-            line-height: 1.35;
-            margin-bottom: 0 !important;
-            opacity: 0.85;
+            margin: 4px 0 0 !important;
+            text-align: left !important;
+            max-width: none !important;
+          }
+          .masthead-meta-bday {
+            opacity: 0.5 !important;
           }
           .masthead-title { font-size: 36px !important; }
           .main-content { padding: 28px 20px 60px !important; }
@@ -1463,6 +1992,7 @@ export default function App() {
           .masthead-cutout { width: 118px !important; height: 118px !important; }
           .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
           .naming-card { grid-template-columns: 1fr !important; }
+          .looks-cutout { float: none !important; display: block; width: 48% !important; max-width: 140px !important; margin: 0 auto 14px !important; }
           .pawmistry-card { grid-template-columns: 1fr !important; }
           .loves-cutout { width: 68px !important; max-height: 72% !important; }
           .tab-bar { margin-left: -4px; }
@@ -1473,6 +2003,11 @@ export default function App() {
           .tab-panel, [role="tabpanel"] { animation: none !important; }
           .masthead-cutout, .stat-box-link, .photo-card, .tab-btn { transition: none !important; }
           .masthead-cutout:hover, .stat-box-link:hover, .photo-card:hover { transform: none !important; }
+          .masthead-cutout.is-wagging { animation: none !important; }
+          .photo-card.is-lifting { transform: none !important; }
+          .lightbox-shell, .lightbox-shell.is-ready, .lightbox-shell.is-closing { opacity: 1 !important; transition: none !important; }
+          .lightbox-shell.is-ready::before { animation: none !important; opacity: 0 !important; }
+          .lightbox-shell.is-ready .lightbox-figure, .lightbox-shell.is-closing .lightbox-figure { animation: none !important; }
         }
         .leaflet-container { font-family: 'Source Serif 4', Georgia, serif; }
         .leaflet-popup-content-wrapper { border-radius: 0; border: 1px solid #C9A97A; }
@@ -1480,9 +2015,9 @@ export default function App() {
           content: "";
           position: absolute;
           inset: 0;
-          background-image: radial-gradient(circle, rgba(155, 138, 184, 0.28) 1px, transparent 1px);
+          background-image: radial-gradient(circle, rgba(201, 169, 122, 0.35) 1px, transparent 1px);
           background-size: 52px 52px;
-          opacity: 0.35;
+          opacity: 0.22;
           pointer-events: none;
         }
       `}</style>
@@ -1507,13 +2042,14 @@ export default function App() {
               <div className="masthead-portrait">
                 <img
                   style={s.mastheadCutout}
-                  className="masthead-cutout"
+                  className={`masthead-cutout${mastheadWagging ? " is-wagging" : ""}`}
                   src={cutoutSrc(CUTOUTS.happyFace)}
                   alt="Zero, happy face"
                   fetchPriority="high"
                   decoding="async"
                   width={128}
                   height={128}
+                  onClick={onMastheadCutoutClick}
                 />
               </div>
               <div>
@@ -1533,6 +2069,12 @@ export default function App() {
               </div>
             </div>
             <div style={s.mastheadMeta} className="masthead-meta">
+              <div className="masthead-meta-primary">
+                <div className="masthead-meta-born">Born September 16, 2024</div>
+                <div className="masthead-meta-age">
+                  <InkLedger aria-label={getAge(BIRTHDAY)}>{getAge(BIRTHDAY)}</InkLedger>
+                </div>
+              </div>
               <button
                 type="button"
                 className="masthead-meta-zodiac"
@@ -1541,8 +2083,6 @@ export default function App() {
               >
                 {STAR_SIGN.symbol} {STAR_SIGN.name} · {CHINESE_ZODIAC.character} {CHINESE_ZODIAC.name}
               </button>
-              <div className="masthead-meta-born">Born September 16, 2024</div>
-              <div className="masthead-meta-age">{getAge(BIRTHDAY)}</div>
               <div className="masthead-meta-bday" style={s.mastheadMetaSub}>
                 {daysUntilBirthday === 0
                   ? "Happy Birthday, Zero!"
@@ -1557,89 +2097,23 @@ export default function App() {
 
           <p style={s.introBlock}>
             <span style={s.introStrong}>Zero is the goodest little boy in the world.</span>{" "}
-            He goes by many names, among them{" "}
-            {NICKNAMES.map((n, i) => (
-              <span key={n}>
-                <em>{n}</em>
-                {i < NICKNAMES.length - 2 ? ", " : i === NICKNAMES.length - 2 ? ", and " : ""}
-              </span>
-            ))}.
+            He goes by <NicknameShuffle />.
           </p>
 
           <TabBar active={tab} onChange={handleTabChange} />
 
           {tab === "profile" && (
-            <div style={s.tabPanel} role="tabpanel" id="panel-profile" aria-labelledby="tab-profile">
+            <div style={s.tabPanel} className={`tab-panel ${folioClass}`} key={tab} role="tabpanel" id="panel-profile" aria-labelledby="tab-profile">
+              <SectionHead title="On the Name" first />
+              <NamingNote />
+
               <div className="profile-top-row">
                 <VitalStatsColumn onTabChange={handleTabChange} totalTicks={totalTicks} />
 
                 <div className="profile-right-col" style={s.profileRightCol}>
-                  <SectionHead title="Field Notes" first />
-                  <div style={s.specimenCard} className="specimen-card">
-                    <div style={s.fieldBlock}>
-                      <p style={s.fieldLabel} className="field-label">Species</p>
-                      <p style={s.fieldValue}>Samoyed</p>
-                      <p style={s.fieldSub}>Canis lupus familiaris</p>
-                    </div>
-                    <div style={s.fieldBlock}>
-                      <p style={s.fieldLabel}>Location</p>
-                      <p style={s.fieldValue}>San Francisco, CA</p>
-                      <p style={s.fieldSub}>Marina neighborhood</p>
-                    </div>
-                    <div style={s.fieldBlock}>
-                      <p style={s.fieldLabel}>Birth date</p>
-                      <p style={s.fieldValue}>September 16, 2024</p>
-                      <p style={s.fieldSub}>Exactly 00:00:00. Of course.</p>
-                    </div>
-                    <div style={s.fieldBlock}>
-                      <p style={s.fieldLabel}>Coat</p>
-                      <p style={s.fieldValue}>Snow-white</p>
-                      <p style={s.fieldSub}>A cloud in dog form, with party pants.</p>
-                    </div>
-                    <div style={s.fieldBlock}>
-                      <p style={s.fieldLabel}>Weight</p>
-                      <p style={s.fieldValue}>50 lbs</p>
-                    </div>
-                    <div style={s.fieldBlock}>
-                      <p style={s.fieldLabel}>Eyes</p>
-                      <p style={s.fieldValue}>Soulful black eyes</p>
-                      <p style={s.fieldSub}>Deep, dark, and expressive. He knows exactly what he is doing with them.</p>
-                    </div>
-                  </div>
+                  <SectionHead title="Looks" first />
+                  <LooksBlock />
                   <GalleryPreview onOpenGallery={() => handleTabChange("gallery")} />
-                </div>
-              </div>
-
-              <SectionHead title="Favorite Activities" />
-              <div style={s.activitiesGrid} className="two-col-grid">
-                <div style={{ ...s.activitiesCard, ...s.lovesCard }} className="loves-card activities-card">
-                  <p style={s.activitiesCardTitle}>Loves</p>
-                  <div style={s.lovesList} className="loves-list">
-                    {LIKES.map((item, i) => (
-                      <div key={item} style={{ ...s.activityItem, borderBottom: i === LIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
-                        <div style={s.activityDot} />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                  <img
-                    style={s.lovesCutout}
-                    className="loves-cutout"
-                    src={cutoutSrc(CUTOUTS.headMassage)}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <div style={{ ...s.activitiesCard, background: pal.white }} className="activities-card">
-                  <p style={s.activitiesCardTitle}>Would rather not</p>
-                  {DISLIKES.map((item, i) => (
-                    <div key={item} style={{ ...s.activityItem, borderBottom: i === DISLIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
-                      <div style={s.dislikeDot} />
-                      {item}
-                    </div>
-                  ))}
                 </div>
               </div>
 
@@ -1680,29 +2154,48 @@ export default function App() {
           )}
 
           {tab === "character" && (
-            <div style={s.tabPanel} role="tabpanel" id="panel-character" aria-labelledby="tab-character">
-              <SectionHead title="Repertoire" first />
+            <div style={s.tabPanel} className={`tab-panel ${folioClass}`} key={tab} role="tabpanel" id="panel-character" aria-labelledby="tab-character">
+              <SectionHead title="Trick Repertoire" first />
               <RepertoireBlock />
 
-              <SectionHead title="On the Name" />
-              <NamingNote />
+              <SectionHead title="Modes of Operation" />
+              <ModesOfOperation />
 
-              <SectionHead title="Time on Earth" />
-              <LiveAgeCounter />
+              <SectionHead title="Favorite Activities" />
+              <div style={s.activitiesGrid} className="two-col-grid">
+                <div style={{ ...s.activitiesCard, ...s.lovesCard }} className="loves-card activities-card">
+                  <p style={s.activitiesCardTitle}>Loves</p>
+                  <div style={s.lovesList} className="loves-list">
+                    {LIKES.map((item, i) => (
+                      <div key={item} style={{ ...s.activityItem, borderBottom: i === LIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
+                        <div style={s.activityDot} />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                  <img
+                    style={s.lovesCutout}
+                    className="loves-cutout"
+                    src={cutoutSrc(CUTOUTS.headMassage)}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div style={{ ...s.activitiesCard, background: pal.white }} className="activities-card">
+                  <p style={s.activitiesCardTitle}>Would rather not</p>
+                  {DISLIKES.map((item, i) => (
+                    <div key={item} style={{ ...s.activityItem, borderBottom: i === DISLIKES.length - 1 ? "none" : s.activityItem.borderBottom }}>
+                      <div style={s.dislikeDot} />
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               <SectionHead title="Aspirations" />
               <Aspirations />
-            </div>
-          )}
-
-          {tab === "cosmos" && (
-            <CosmosTab starSign={STAR_SIGN} chineseZodiac={CHINESE_ZODIAC} />
-          )}
-
-          {tab === "breed" && (
-            <div style={s.tabPanel} role="tabpanel" id="panel-breed" aria-labelledby="tab-breed">
-              <SectionHead title="Historical Record" first />
-              <SamoyedHistory />
 
               <SectionHead title="About the Samoyed" />
               <div style={s.factsGrid} className="two-col-grid">
@@ -1717,8 +2210,24 @@ export default function App() {
             </div>
           )}
 
+          {tab === "cosmos" && (
+            <div
+              className={`tab-panel ${folioClass}`}
+              key="cosmos-folio"
+              role="tabpanel"
+              id="panel-cosmos"
+              aria-labelledby="tab-cosmos"
+            >
+              <SectionHead title="Time on Earth" first />
+              <LiveAgeCounter />
+              <div style={{ marginTop: 28 }}>
+                <CosmosTab starSign={STAR_SIGN} chineseZodiac={CHINESE_ZODIAC} />
+              </div>
+            </div>
+          )}
+
           {tab === "gallery" && (
-            <div style={s.tabPanel} role="tabpanel" id="panel-gallery" aria-labelledby="tab-gallery">
+            <div style={s.tabPanel} className={`tab-panel ${folioClass}`} key={tab} role="tabpanel" id="panel-gallery" aria-labelledby="tab-gallery">
               <SectionHead title="Photographic Record" first />
               <div className="gallery-archive-shell archive-settle">
                 <PhotoGallery />
@@ -1727,12 +2236,16 @@ export default function App() {
           )}
 
           {tab === "records" && (
-            <div style={s.tabPanel} role="tabpanel" id="panel-records" aria-labelledby="tab-records">
+            <div style={s.tabPanel} className={`tab-panel ${folioClass} specimen-stamp-host`} key={tab} role="tabpanel" id="panel-records" aria-labelledby="tab-records">
+              <SpecimenStamp />
               <SectionHead title="Birth Record" first />
               <BirthRecord />
 
               <SectionHead title="Tick Tracker" />
               <TickTracker incidents={tickIncidents} setIncidents={setTickIncidents} />
+
+              <SectionHead title="Historical Record" />
+              <SamoyedHistory />
             </div>
           )}
 
@@ -1743,5 +2256,7 @@ export default function App() {
         </main>
       </div>
     </LayerShell>
+      )}
+    </>
   );
 }

@@ -1,6 +1,9 @@
 import { useSceneContext } from "./SceneContext.jsx";
 import { getMood } from "./tokens.js";
 
+/**
+ * Quiet cool fog + tiled wallpaper. No corner flora scatter.
+ */
 export default function AmbientLayer() {
   const { mood } = useSceneContext();
   const theme = mood || "default";
@@ -15,6 +18,7 @@ export default function AmbientLayer() {
         "--ambient-base": m.base,
         "--ambient-wash-opacity": m.washOpacity,
         "--ambient-texture-opacity": m.textureOpacity,
+        "--ambient-wallpaper-opacity": m.wallpaperOpacity ?? 0.03,
         "--ambient-warm": m.warm.color,
         "--ambient-warm-x": `${m.warm.x}%`,
         "--ambient-warm-y": `${m.warm.y}%`,
@@ -25,18 +29,9 @@ export default function AmbientLayer() {
     >
       <div className="layer-ambient__wash layer-ambient__wash--warm" />
       <div className="layer-ambient__wash layer-ambient__wash--cool" />
+      <div className="layer-ambient__wallpaper" />
       <div className="layer-ambient__texture" />
       <div className="layer-ambient__vignette" />
-      <div className="layer-ambient__flora layer-ambient__flora--tl" />
-      <div className="layer-ambient__flora layer-ambient__flora--tr" />
-      <div className="layer-ambient__flora layer-ambient__flora--bl" />
-      <div className="layer-ambient__flora layer-ambient__flora--br" />
-      <div className="layer-ambient__flora layer-ambient__flora--contour" />
-      <div className="layer-ambient__flora layer-ambient__flora--extra" />
-      <div className="layer-ambient__flora layer-ambient__flora--paw" />
-      <div className="layer-ambient__flora layer-ambient__flora--blot" />
-      <div className="layer-ambient__flora layer-ambient__flora--mark" />
-      <div className="layer-ambient__flora layer-ambient__flora--leaf" />
     </div>
   );
 }

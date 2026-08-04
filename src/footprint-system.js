@@ -202,6 +202,43 @@ export function clearFootprints() {
   lastDocumentY = null;
 }
 
+/**
+ * Place a short burst of prints when entering a tab ("new room" chapter beat).
+ * Uses the current mode; respects prefers-reduced-motion.
+ */
+export function spawnChapterBeat(printCount = 3) {
+  if (!layer) return;
+  if (typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const count = Math.max(2, Math.min(4, printCount));
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const progress = getScrollProgress();
+  const waveAmp = WAVE_AMP_BASE + progress * (WAVE_AMP_MAX - WAVE_AMP_BASE);
+  const baseX = vw * BASE_X_RATIO;
+
+  for (let i = 0; i < count; i++) {
+    spawnIndex += 1;
+    const phase = spawnIndex * WAVE_FREQ;
+    const waveX = Math.sin(phase) * waveAmp * 0.55;
+    const documentY = scrollY + vh * (0.32 + i * 0.1);
+    const documentX = baseX + waveX + (i % 2 === 0 ? FOOT_SPREAD * 0.35 : -FOOT_SPREAD * 0.35);
+    const rotation = movementRotation(Math.cos(phase) * WAVE_LEAN, vh * 0.08);
+    const scale = 0.7 + Math.random() * 0.1;
+    placeFootprint(documentX, documentY, rotation, scale);
+  }
+
+  const cap = getMaxFootprints();
+  while (footprints.length > cap) {
+    const oldest = footprints.shift();
+    oldest.el.remove();
+  }
+}
+
 export function getFootprintMode() {
   return mode;
 }

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { getMoonPhaseInfo } from "./moon.js";
 import { getDailyForecast, formatForecastDate } from "./forecasts.js";
 import { getDailySkyNote } from "./sky.js";
@@ -6,17 +7,17 @@ import { PAW_LINES } from "./cosmos.js";
 const BIRTHDAY = new Date("2024-09-16T00:00:00");
 
 const cosmosPal = {
-  ink: "#1A2430",
-  inkMuted: "#4A5C6A",
-  silver: "#6B8FA3",
+  ink: "#2C1A0E",
+  inkMuted: "#5C3D1E",
+  silver: "#8A6B4A",
   gold: "#C9A97A",
-  lavender: "#E4EAF0",
-  lavenderMid: "#ECF0F4",
-  lavenderLight: "#F3F5F7",
-  border: "#B8C6D4",
-  borderSoft: "rgba(107, 143, 163, 0.45)",
-  glow: "rgba(107, 143, 163, 0.14)",
-  night: "#223040",
+  lavender: "#EDE4D4",
+  lavenderMid: "#F3EBDC",
+  lavenderLight: "#FAF6ED",
+  border: "#C9A97A",
+  borderSoft: "rgba(201, 169, 122, 0.5)",
+  glow: "rgba(166, 124, 82, 0.12)",
+  night: "#2C1A0E",
   moonLit: "#F5ECD7",
 };
 
@@ -31,39 +32,39 @@ const cs = {
     position: "relative",
     background: `linear-gradient(180deg, ${cosmosPal.lavenderLight} 0%, ${cosmosPal.lavenderMid} 55%, ${cosmosPal.lavender} 100%)`,
     border: `1px solid ${cosmosPal.border}`,
-    padding: "28px 32px 36px",
+    padding: "20px 24px 26px",
     overflow: "hidden",
   },
   inner: { position: "relative", zIndex: 1 },
-  secHead: { display: "flex", alignItems: "baseline", gap: 16, marginBottom: 22, marginTop: 48 },
+  secHead: { display: "flex", alignItems: "baseline", gap: 14, marginBottom: 14, marginTop: 28 },
   secHeadFirst: { marginTop: 0 },
   secStamp: { fontFamily: ff.display, fontSize: 15, color: cosmosPal.gold, lineHeight: 1, flexShrink: 0 },
   secTitle: { fontFamily: ff.display, fontSize: 22, fontWeight: 600, color: cosmosPal.ink, margin: 0, lineHeight: 1 },
   secRule: { flex: 1, height: 1, background: cosmosPal.border, opacity: 0.5, border: "none" },
   heroCard: {
-    background: `linear-gradient(145deg, ${cosmosPal.lavenderLight} 0%, #F0EBFA 100%)`,
+    background: `linear-gradient(145deg, #FFFDF8 0%, ${cosmosPal.lavenderMid} 100%)`,
     border: `1px solid ${cosmosPal.borderSoft}`,
     borderLeft: `3px solid ${cosmosPal.gold}`,
-    padding: "26px 30px",
-    boxShadow: `0 8px 28px ${cosmosPal.glow}`,
+    padding: "20px 22px",
+    boxShadow: `0 4px 16px ${cosmosPal.glow}`,
   },
   heroDate: {
     fontFamily: ff.meta, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase",
-    color: cosmosPal.silver, marginBottom: 12,
+    color: cosmosPal.silver, marginBottom: 10,
   },
   heroText: {
     fontFamily: ff.display, fontSize: 21, color: cosmosPal.ink, lineHeight: 1.55,
     margin: 0, fontStyle: "italic",
   },
   heroNote: {
-    fontFamily: ff.body, fontSize: 13.5, color: cosmosPal.inkMuted, marginTop: 16,
+    fontFamily: ff.body, fontSize: 13.5, color: cosmosPal.inkMuted, marginTop: 12,
     lineHeight: 1.65, fontStyle: "italic",
   },
-  zodiacGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
+  zodiacGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 },
   zodiacCard: {
     background: `linear-gradient(180deg, #FFFDF8 0%, ${cosmosPal.lavender} 100%)`,
     border: `1px solid ${cosmosPal.borderSoft}`,
-    padding: "24px 28px",
+    padding: "18px 20px",
     position: "relative",
   },
   cardOrnament: {
@@ -74,11 +75,11 @@ const cs = {
   zodiacName: { fontFamily: ff.display, fontSize: 20, fontWeight: 700, color: cosmosPal.ink, margin: "0 0 10px" },
   zodiacBlurb: { fontFamily: ff.body, fontSize: 14.5, color: cosmosPal.inkMuted, lineHeight: 1.8, margin: "0 0 14px" },
   zodiacBlurbLast: { fontFamily: ff.body, fontSize: 14.5, color: cosmosPal.inkMuted, lineHeight: 1.8, margin: 0 },
-  moonGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
+  moonGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 },
   moonCard: {
-    background: `linear-gradient(180deg, #FFFDF8 0%, #EEF0F8 100%)`,
+    background: `linear-gradient(180deg, #FFFDF8 0%, ${cosmosPal.lavenderMid} 100%)`,
     border: `1px solid ${cosmosPal.borderSoft}`,
-    padding: "24px 28px",
+    padding: "18px 20px",
   },
   moonTop: { display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 12 },
   fieldLabel: {
@@ -116,7 +117,7 @@ const cs = {
   pawFigure: { margin: 0, textAlign: "center", alignSelf: "center" },
   pawImg: {
     width: "100%", maxWidth: 150, height: "auto", objectFit: "contain",
-    filter: "drop-shadow(0 4px 12px rgba(26, 20, 40, 0.18))",
+    filter: "drop-shadow(0 4px 12px rgba(44, 26, 14, 0.16))",
   },
   pawCaption: {
     fontFamily: ff.body, fontStyle: "italic", fontSize: 10, color: cosmosPal.silver,
@@ -139,6 +140,7 @@ function MoonPhaseDisc({ illumination }) {
   return (
     <div
       aria-hidden="true"
+      className="cosmos-moon-disc"
       style={{
         width: 52,
         height: 52,
@@ -206,6 +208,62 @@ function CosmosLunarRecord() {
   );
 }
 
+function TypewriterText({ text, as: Tag = "p", style, className }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState("");
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    startedRef.current = false;
+    setShown("");
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setShown(text);
+      return undefined;
+    }
+
+    const el = ref.current;
+    if (!el) return undefined;
+
+    let intervalId = null;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || startedRef.current) return;
+        startedRef.current = true;
+        obs.disconnect();
+
+        const tokens = text.split(/(\s+)/);
+        let i = 0;
+        let acc = "";
+        intervalId = window.setInterval(() => {
+          if (i >= tokens.length) {
+            window.clearInterval(intervalId);
+            intervalId = null;
+            return;
+          }
+          acc += tokens[i];
+          i += 1;
+          setShown(acc);
+        }, 42);
+      },
+      { threshold: 0.35 },
+    );
+    obs.observe(el);
+
+    return () => {
+      obs.disconnect();
+      if (intervalId) window.clearInterval(intervalId);
+    };
+  }, [text]);
+
+  return (
+    <Tag ref={ref} style={style} className={className} aria-label={text}>
+      {shown || "\u00a0"}
+    </Tag>
+  );
+}
+
 function CosmosDailyDispatch() {
   const today = new Date();
   const forecast = getDailyForecast(today);
@@ -214,7 +272,7 @@ function CosmosDailyDispatch() {
   return (
     <div style={cs.heroCard} className="cosmos-card cosmos-hero-card">
       <p style={cs.heroDate}>Today Zero might… · {formatForecastDate(today)}</p>
-      <p style={cs.heroText}>{forecast}</p>
+      <TypewriterText text={forecast} style={cs.heroText} />
       <p style={cs.heroNote}>
         Today's moon: {moon.name} ({moon.symbol}). {moon.what} {moon.why} Zero might favor: {moon.favors}
       </p>
@@ -264,7 +322,7 @@ function Pawmistry() {
 
 export default function CosmosTab({ starSign, chineseZodiac }) {
   return (
-    <div style={cs.panel} className="cosmos-panel" role="tabpanel" id="panel-cosmos" aria-labelledby="tab-cosmos">
+    <div style={cs.panel} className="cosmos-panel">
       <div style={cs.inner}>
         <CosmosSectionHead title="Today's Dispatch" stamp="☽" first />
         <CosmosDailyDispatch />

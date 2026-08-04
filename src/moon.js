@@ -60,9 +60,21 @@ export const MOON_PHASES = [
   },
 ];
 
+/** Phase by lit fraction (not equal time buckets), so Full and Gibbous stay distinct. */
 export function getMoonPhaseInfo(date) {
   const days = (date.getTime() - NEW_MOON.getTime()) / 86_400_000;
-  const phase = ((days % SYNODIC) + SYNODIC) % SYNODIC;
-  const idx = Math.min(7, Math.floor((phase / SYNODIC) * 8));
-  return { ...MOON_PHASES[idx], illumination: Math.round((1 - Math.cos((phase / SYNODIC) * 2 * Math.PI)) * 50) };
+  const age = ((days % SYNODIC) + SYNODIC) % SYNODIC;
+  const t = age / SYNODIC;
+  const lit = (1 - Math.cos(t * 2 * Math.PI)) / 2;
+  const illumination = Math.round(lit * 100);
+  const waxing = t < 0.5;
+
+  let idx;
+  if (lit < 0.02) idx = 0; // New
+  else if (lit < 0.40) idx = waxing ? 1 : 7; // Crescent
+  else if (lit < 0.60) idx = waxing ? 2 : 6; // Quarter
+  else if (lit < 0.985) idx = waxing ? 3 : 5; // Gibbous (caps below Full)
+  else idx = 4; // Full (~99%+)
+
+  return { ...MOON_PHASES[idx], illumination };
 }
