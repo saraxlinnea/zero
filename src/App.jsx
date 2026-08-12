@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { GALLERY_PHOTOS, PLAY_SEQUENCE } from "./photos.js";
 import { ASPIRATION_GROUPS, SAMOYED_HISTORY, ADVENTURE_GROUPS, ADVENTURE_PINS, ZERO_MODES } from "./content.js";
 import CosmosTab from "./CosmosTab.jsx";
+import AlbedoTab from "./AlbedoTab.jsx";
 import { setFootprintMode, clearFootprints, spawnChapterBeat } from "./footprint-system.js";
 import { TAB_FOOTPRINT_MODES } from "./footprint-modes.js";
 import LayerShell from "./cinematic/LayerShell.jsx";
@@ -61,7 +62,7 @@ const LIKES = [
 ];
 
 const CUTOUTS = {
-  happyFace: "zero-happy-face.png",
+  happyFace: "happy-dog.png",
   running: "zero-running.png",
   headMassage: "zero-head-massage.png",
   dirty: "dirty-zero.png",
@@ -153,6 +154,7 @@ const TABS = [
   { id: "profile", label: "Profile" },
   { id: "character", label: "Character" },
   { id: "cosmos", label: "Cosmos" },
+  { id: "albedo", label: "Climate" },
   { id: "gallery", label: "Gallery" },
   { id: "records", label: "Records" },
 ];
@@ -489,10 +491,62 @@ const s = {
   },
   mastheadLeft: { display: "flex", alignItems: "flex-end", gap: 20 },
   mastheadCutout: {
-    width: 128, height: 128, objectFit: "contain", objectPosition: "bottom",
+    width: 118, height: 148, objectFit: "contain", objectPosition: "bottom",
     filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.35))",
     flexShrink: 0,
     transition: "transform 0.35s ease",
+  },
+  modesPanel: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(200px, 34%)",
+    gap: 20,
+    alignItems: "stretch",
+  },
+  modesGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 12,
+    alignContent: "start",
+  },
+  modeCardBtn: {
+    textAlign: "left",
+    cursor: "pointer",
+    width: "100%",
+    appearance: "none",
+    WebkitAppearance: "none",
+    border: `1px solid ${pal.rule}`,
+    transition: "border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease",
+  },
+  modesFigure: {
+    margin: 0,
+    background: pal.parchment,
+    border: `1px solid ${pal.rule}`,
+    padding: "18px 14px 12px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    minHeight: 280,
+    overflow: "visible",
+    position: "relative",
+  },
+  modesCutout: {
+    width: "100%",
+    maxWidth: 260,
+    maxHeight: 250,
+    objectFit: "contain",
+    objectPosition: "bottom center",
+    filter: "drop-shadow(0 4px 14px rgba(44,26,14,0.18))",
+    display: "block",
+  },
+  modesCaption: {
+    fontFamily: ff.body,
+    fontSize: 13,
+    color: pal.lightBrown,
+    fontStyle: "italic",
+    margin: "10px 0 0",
+    textAlign: "center",
+    lineHeight: 1.45,
   },
   lovesCard: { position: "relative", background: pal.parchment, overflow: "hidden" },
   lovesList: { position: "relative" },
@@ -1195,15 +1249,52 @@ function RepertoireBlock() {
 }
 
 function ModesOfOperation() {
+  const [active, setActive] = useState(0);
+  const mode = ZERO_MODES[active] ?? ZERO_MODES[0];
+
   return (
-    <div style={s.tricksGrid} className="modes-grid archive-settle">
-      {ZERO_MODES.map((mode, i) => (
-        <div key={mode.name} style={{ ...s.trickCard, background: i % 2 === 0 ? pal.white : pal.parchment }}>
-          <p style={s.trickNum}>Mode {String(i + 1).padStart(2, "0")}</p>
-          <p style={s.trickName}>{mode.name}</p>
-          <p style={s.trickNote}>{mode.blurb}</p>
-        </div>
-      ))}
+    <div style={s.modesPanel} className="modes-panel archive-settle">
+      <div
+        style={s.modesGrid}
+        className="modes-grid"
+        role="listbox"
+        aria-label="Modes of operation"
+      >
+        {ZERO_MODES.map((item, i) => {
+          const isActive = i === active;
+          return (
+            <button
+              key={item.name}
+              type="button"
+              role="option"
+              aria-selected={isActive}
+              className={`mode-card${isActive ? " is-active" : ""}`}
+              style={{
+                ...s.trickCard,
+                ...s.modeCardBtn,
+                background: isActive ? pal.white : (i % 2 === 0 ? pal.white : pal.parchment),
+              }}
+              onClick={() => setActive(i)}
+            >
+              <p style={s.trickNum}>Mode {String(i + 1).padStart(2, "0")}</p>
+              <p style={s.trickName}>{item.name}</p>
+              <p style={s.trickNote}>{item.blurb}</p>
+            </button>
+          );
+        })}
+      </div>
+      <figure style={s.modesFigure} className="modes-figure">
+        <img
+          key={mode.cutout}
+          style={s.modesCutout}
+          className="modes-cutout"
+          src={cutoutSrc(mode.cutout)}
+          alt={`Zero, ${mode.name}`}
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption style={s.modesCaption}>{mode.caption}</figcaption>
+      </figure>
     </div>
   );
 }
@@ -1989,21 +2080,26 @@ export default function App() {
           .play-sequence { max-width: 100%; width: 100%; margin: 0 auto; height: auto !important; }
           .play-sequence-frame { max-width: min(100%, 360px) !important; width: min(100%, 360px) !important; height: auto !important; aspect-ratio: 1 / 1 !important; }
           .masthead-left { align-items: center !important; gap: 14px !important; }
-          .masthead-cutout { width: 118px !important; height: 118px !important; }
+          .masthead-cutout { width: 110px !important; height: 138px !important; }
           .adventure-card { grid-template-columns: 1fr minmax(110px, 140px) !important; gap: 14px !important; padding: 14px 16px !important; }
           .naming-card { grid-template-columns: 1fr !important; }
           .looks-cutout { float: none !important; display: block; width: 48% !important; max-width: 140px !important; margin: 0 auto 14px !important; }
           .pawmistry-card { grid-template-columns: 1fr !important; }
           .loves-cutout { width: 68px !important; max-height: 72% !important; }
+          .modes-panel { grid-template-columns: 1fr !important; }
+          .modes-grid { grid-template-columns: 1fr !important; }
+          .modes-figure { min-height: 220px !important; order: -1; }
+          .modes-cutout { max-height: 200px !important; }
           .tab-bar { margin-left: -4px; }
           .age-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .adventure-map { height: 260px !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .tab-panel, [role="tabpanel"] { animation: none !important; }
-          .masthead-cutout, .stat-box-link, .photo-card, .tab-btn { transition: none !important; }
+          .masthead-cutout, .stat-box-link, .photo-card, .tab-btn, .mode-card { transition: none !important; }
           .masthead-cutout:hover, .stat-box-link:hover, .photo-card:hover { transform: none !important; }
           .masthead-cutout.is-wagging { animation: none !important; }
+          .modes-cutout { animation: none !important; }
           .photo-card.is-lifting { transform: none !important; }
           .lightbox-shell, .lightbox-shell.is-ready, .lightbox-shell.is-closing { opacity: 1 !important; transition: none !important; }
           .lightbox-shell.is-ready::before { animation: none !important; opacity: 0 !important; }
@@ -2047,8 +2143,8 @@ export default function App() {
                   alt="Zero, happy face"
                   fetchPriority="high"
                   decoding="async"
-                  width={128}
-                  height={128}
+                  width={118}
+                  height={148}
                   onClick={onMastheadCutoutClick}
                 />
               </div>
@@ -2223,6 +2319,18 @@ export default function App() {
               <div style={{ marginTop: 28 }}>
                 <CosmosTab starSign={STAR_SIGN} chineseZodiac={CHINESE_ZODIAC} />
               </div>
+            </div>
+          )}
+
+          {tab === "albedo" && (
+            <div
+              className={`tab-panel ${folioClass}`}
+              key="albedo-folio"
+              role="tabpanel"
+              id="panel-albedo"
+              aria-labelledby="tab-albedo"
+            >
+              <AlbedoTab />
             </div>
           )}
 

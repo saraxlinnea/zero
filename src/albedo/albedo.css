@@ -1,0 +1,489 @@
+/* Climate-viz panel for the albedo / Samoyed experiment. */
+
+.albedo-tab {
+  --alb-ink: #1a1a18;
+  --alb-muted: #5c3d1e;
+  --alb-silver: #8a6b4a;
+  --alb-rule: #c9a97a;
+  --alb-paper: #fffdf8;
+  --alb-panel: #f7f4ec;
+  --alb-ocean: #6b8fa3;
+  font-family: var(--ff-body, "Source Serif 4", Georgia, serif);
+  color: var(--alb-ink);
+}
+
+.albedo-field-label {
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--alb-silver);
+  margin: 0 0 10px;
+}
+
+.albedo-hero-compact {
+  margin-bottom: 16px;
+}
+
+.albedo-hero-compact h1 {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 0 0 8px;
+}
+
+.albedo-hero-compact .albedo-sub {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(16px, 2.2vw, 20px);
+  font-style: italic;
+  color: var(--alb-muted);
+  margin: 0 0 10px;
+  line-height: 1.35;
+}
+
+.albedo-hero-compact .albedo-intro {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--alb-muted);
+  margin: 0;
+  max-width: 40em;
+}
+
+.albedo-stage {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.6fr);
+  gap: 0;
+  border: 1px solid var(--alb-rule);
+  background: var(--alb-paper);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+.albedo-controls {
+  padding: 22px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid rgba(201, 169, 122, 0.55);
+  background: linear-gradient(180deg, #fffdf8 0%, #f3ebdc 100%);
+}
+
+.albedo-count {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(36px, 5.5vw, 56px);
+  font-weight: 700;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+  margin: 0 0 6px;
+}
+
+.albedo-count-meta {
+  font-size: 12.5px;
+  color: var(--alb-silver);
+  font-style: italic;
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+
+.albedo-landmark {
+  font-size: 13px;
+  color: var(--alb-muted);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
+.albedo-progress {
+  margin: 0;
+}
+
+.albedo-stage-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+
+.albedo-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.albedo-progress-label {
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--alb-silver);
+  margin: 0;
+}
+
+.albedo-progress-value {
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--alb-muted);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.albedo-progress-track {
+  height: 5px;
+  background: rgba(201, 169, 122, 0.35);
+  overflow: hidden;
+}
+
+.albedo-progress-fill {
+  height: 100%;
+  background: var(--alb-ink);
+  width: 0%;
+  transition: width 420ms var(--ease-out-soft, ease);
+}
+
+.albedo-progress-fill--benefit {
+  background: var(--alb-ocean, #6b8fa3);
+}
+
+.albedo-progress.is-done .albedo-progress-value {
+  color: var(--alb-ink);
+}
+
+.albedo-progress-sub {
+  margin: 5px 0 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--alb-silver);
+  font-style: italic;
+}
+
+.albedo-stage-msg {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(17px, 2.2vw, 22px);
+  font-style: italic;
+  color: var(--alb-ink);
+  margin: 0 0 16px;
+  line-height: 1.3;
+  min-height: 1.3em;
+}
+
+.albedo-btn {
+  appearance: none;
+  border: 1px solid var(--alb-ink);
+  background: var(--alb-ink);
+  color: var(--alb-paper);
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.albedo-btn:hover,
+.albedo-btn:focus-visible {
+  background: transparent;
+  color: var(--alb-ink);
+  outline: none;
+}
+
+.albedo-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.albedo-map-wrap {
+  position: relative;
+  background: var(--alb-panel);
+  min-height: 280px;
+  aspect-ratio: 2 / 1;
+  transition: opacity 280ms ease;
+}
+
+.albedo-map-wrap.is-stepping {
+  opacity: 0.88;
+}
+
+.albedo-map-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.albedo-map-note {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  right: 10px;
+  font-size: 11px;
+  color: rgba(26, 26, 24, 0.72);
+  background: rgba(255, 253, 248, 0.82);
+  padding: 4px 8px;
+  pointer-events: none;
+  font-style: italic;
+}
+
+.albedo-map-label {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 24, 0.55);
+  pointer-events: none;
+}
+
+.albedo-climax {
+  background: linear-gradient(180deg, #fffdf8 0%, #ede4d4 100%);
+  border: 1px solid var(--alb-rule);
+  padding: 24px 22px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.albedo-climax h2 {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(24px, 3.6vw, 32px);
+  margin: 0 0 10px;
+}
+
+.albedo-climax .albedo-dog-line {
+  font-size: 16px;
+  line-height: 1.55;
+  margin: 0 0 8px;
+  color: var(--alb-muted);
+}
+
+.albedo-climax .albedo-problems-lead {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: 18px;
+  font-style: italic;
+  margin: 14px 0 10px;
+}
+
+.albedo-problems {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 16px;
+  max-width: 28em;
+  text-align: left;
+}
+
+.albedo-problems li {
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(201, 169, 122, 0.45);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 400ms var(--ease-out-soft, ease), transform 400ms var(--ease-out-soft, ease);
+}
+
+.albedo-problems li.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.albedo-math {
+  background: var(--alb-paper);
+  border: 1px solid rgba(201, 169, 122, 0.55);
+  padding: 22px 22px 18px;
+  margin-bottom: 28px;
+}
+
+.albedo-math h2 {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+
+.albedo-math .albedo-math-note {
+  font-size: 13.5px;
+  color: var(--alb-silver);
+  font-style: italic;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.albedo-math-section-label {
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--alb-silver);
+  margin: 0 0 10px;
+}
+
+.albedo-math-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 18px;
+  margin-bottom: 16px;
+}
+
+.albedo-math-live {
+  border-top: 1px solid rgba(201, 169, 122, 0.4);
+  padding-top: 14px;
+  margin-bottom: 14px;
+}
+
+.albedo-stat dt {
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--alb-silver);
+  margin: 0 0 3px;
+}
+
+.albedo-stat dd {
+  font-size: 15px;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.albedo-stat--live dd {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.albedo-assumptions {
+  border-top: 1px solid rgba(201, 169, 122, 0.45);
+  padding-top: 12px;
+}
+
+.albedo-assumptions summary {
+  cursor: pointer;
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--alb-muted);
+  list-style: none;
+}
+
+.albedo-assumptions summary::-webkit-details-marker {
+  display: none;
+}
+
+.albedo-assumptions summary::before {
+  content: "+ ";
+  color: var(--alb-rule);
+}
+
+.albedo-assumptions[open] summary::before {
+  content: "− ";
+}
+
+.albedo-assumptions .albedo-assumptions-body {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--alb-muted);
+}
+
+.albedo-assumptions ul {
+  margin: 10px 0 0;
+  padding-left: 1.2em;
+}
+
+.albedo-secondary {
+  margin-bottom: 8px;
+}
+
+.albedo-secondary h2 {
+  font-family: var(--ff-display, "Cormorant Garamond", Georgia, serif);
+  font-size: 20px;
+  margin: 0 0 12px;
+}
+
+.albedo-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.albedo-card {
+  background: var(--alb-paper);
+  border: 1px solid rgba(201, 169, 122, 0.5);
+  padding: 14px 14px 12px;
+}
+
+.albedo-card h3 {
+  font-family: var(--ff-meta, "Source Serif 4", Georgia, serif);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+  color: var(--alb-silver);
+}
+
+.albedo-card p {
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0 0 8px;
+  color: var(--alb-muted);
+}
+
+.albedo-card p:last-child {
+  margin-bottom: 0;
+  font-style: italic;
+  color: var(--alb-ink);
+}
+
+.albedo-controls-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
+
+@media (max-width: 860px) {
+  .albedo-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .albedo-controls {
+    border-right: none;
+    border-bottom: 1px solid rgba(201, 169, 122, 0.55);
+    padding-bottom: 16px;
+  }
+
+  .albedo-map-wrap {
+    aspect-ratio: 1.4 / 1;
+    min-height: 240px;
+  }
+
+  .albedo-controls-sticky {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255, 253, 248, 0.92) 0%, #fffdf8 40%);
+    padding-top: 8px;
+    margin: 0 -4px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .albedo-progress-fill,
+  .albedo-map-wrap,
+  .albedo-problems li {
+    transition: none;
+  }
+
+  .albedo-problems li {
+    opacity: 1;
+    transform: none;
+  }
+
+  .albedo-map-wrap.is-stepping {
+    opacity: 1;
+  }
+}

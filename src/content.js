@@ -30,21 +30,29 @@ export const ASPIRATIONS = ASPIRATION_GROUPS.flatMap((g) => g.items);
 export const ZERO_MODES = [
   {
     name: "At Play",
+    cutout: "zero-mode-play.png",
+    caption: "Field mode: engaged.",
     blurb:
       "Running with friends, scampering around on hikes, tugging toys, spinning around the furniture. Favorite mode. Once this starts, he is hard to interrupt.",
   },
   {
     name: "Investigative Journalist",
+    cutout: "zero-mode-investigate.png",
+    caption: "Case open. Boops pending.",
     blurb:
       "Aka. Little Sherlock. Investigating everything whether at home or on walks. Will smell and boop all things especially if they're expensive. Does the rounds at home of rooms, doors, and windows to ensure we are safe and secure.",
   },
   {
     name: "Sleepy Eepy & Cuddly",
+    cutout: "zero-mode-sleepy.png",
+    caption: "Rest logged.",
     blurb:
       "Zero knows how to rest and relax. He loves a good nap and appreciates a good back massage and ear scratch. This is usually when he is most cuddly and will lay with you as long as he doesn't get too hot.",
   },
   {
     name: "Show-and-Tell",
+    cutout: "zero-mode-show.png",
+    caption: "Please observe properly.",
     blurb:
       "He brings you things. A toy, a stick, the good spot on the couch. He wants you to look properly and probably play with him.",
   },

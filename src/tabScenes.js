@@ -28,6 +28,15 @@ export const TAB_SCENES = {
       { file: "IMG_9048.jpg", position: "center 14%" },
     ],
   },
+  albedo: {
+    mood: "albedo",
+    photos: [
+      { file: "IMG_4173.jpg", position: "center 18%" },
+      { file: "IMG_4157.jpg", position: "center 22%" },
+      { file: "IMG_9808.jpg", position: "center 36%" },
+      { file: "IMG_0570.jpg", position: "center 18%" },
+    ],
+  },
   breed: {
     mood: "breed",
     photos: [

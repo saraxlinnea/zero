@@ -787,6 +787,35 @@
   bottom: -6px !important;
 }
 
+.modes-figure {
+  overflow: visible;
+}
+
+.modes-cutout {
+  animation: modes-cutout-settle 0.55s var(--ease-out-soft) both;
+}
+
+@keyframes modes-cutout-settle {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mode-card.is-active {
+  border-color: var(--ink-soft, #8a6a45) !important;
+  box-shadow: inset 0 0 0 1px rgba(138, 106, 69, 0.35);
+}
+
+.mode-card:focus-visible {
+  outline: 2px solid rgba(138, 106, 69, 0.55);
+  outline-offset: 2px;
+}
+
 .adventure-figure-img {
   transform: scale(1.22) rotate(-1.5deg) !important;
 }
@@ -1672,8 +1701,10 @@
   .adventure-figure-img,
   .naming-card img,
   .birth-record img,
+  .modes-cutout,
   .gallery-preview .gallery-preview-grid > div {
     transform: none !important;
+    animation: none !important;
   }
 
   .photo-card:hover,
