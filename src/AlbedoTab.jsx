@@ -100,7 +100,7 @@ const SECONDARY = [
   },
   {
     title: "Hurricane herding",
-    ask: "Could Border Collies herd a hurricane?",
+    ask: "Could Samoyeds herd a hurricane?",
     answer:
       "Send the dogs the other way and have them run hard enough to cancel the wind. Peer review status: not invited.",
   },

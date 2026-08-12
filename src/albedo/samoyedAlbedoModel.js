@@ -296,9 +296,11 @@ export function getStageMessage(dogCount) {
 }
 
 export function getAddZeroLabel(stepIndex) {
-  if (stepIndex >= 7) return "This may have gone too far";
-  if (stepIndex >= 3) return "Add more zeros";
-  return "Add Zero";
+  if (stepIndex >= 6) return "EVEN MORE ZEROS!";
+  if (stepIndex >= 5) return "yes yes more zeros!";
+  if (stepIndex >= 4) return "yes, even more zeros";
+  if (stepIndex >= 2) return "even more zeros";
+  return "Add more zeros";
 }
 
 export function earthDogLine(modelOrFraction) {
